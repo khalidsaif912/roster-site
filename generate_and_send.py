@@ -2,6 +2,7 @@ import os
 import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from io import BytesIO
 import requests
 from openpyxl import load_workbook
 import smtplib
@@ -19,11 +20,11 @@ SMTP_PASS = os.environ.get("SMTP_PASS", "").strip()
 MAIL_FROM = os.environ.get("MAIL_FROM", "").strip()
 MAIL_TO = os.environ.get("MAIL_TO", "").strip()
 
-PAGES_BASE_URL = os.environ.get("PAGES_BASE_URL", "").strip()  # optional, we’ll infer if empty
+PAGES_BASE_URL = os.environ.get("PAGES_BASE_URL", "").strip()
 
 TZ = ZoneInfo("Asia/Muscat")
 
-# Excel sheets (مثل n8n)
+# Excel sheets
 DEPARTMENTS = [
     ("Officers", "Officers"),
     ("Supervisors", "Supervisors"),
@@ -49,25 +50,34 @@ GROUP_ORDER = ["صباح", "ظهر", "ليل", "مناوبات", "راحة", "إ
 
 
 # =========================
-# Helpers (منطق قريب من n8n)
+# Helpers
 # =========================
 def clean(v) -> str:
+    """تنظيف النص من المسافات الزائدة"""
     if v is None:
         return ""
     return re.sub(r"\s+", " ", str(v).replace("\u00A0", " ")).strip()
 
+
 def to_western_digits(s: str) -> str:
+    """تحويل الأرقام العربية والفارسية إلى غربية"""
     if not s:
         return s
-    arabic = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'}
-    farsi  = {'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'}
+    arabic = {'٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'}
+    farsi = {'۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'}
     mp = {**arabic, **farsi}
     return "".join(mp.get(ch, ch) for ch in str(s))
 
+
 def norm(s: str) -> str:
+    """تنظيف وتحويل الأرقام"""
     return clean(to_western_digits(s))
 
+
 def looks_like_time(s: str) -> bool:
+    """التحقق إذا كان النص يشبه وقت"""
+    if not s:
+        return False
     up = norm(s).upper()
     return bool(
         re.match(r"^\d{3,4}\s*H?\s*-\s*\d{3,4}\s*H?$", up)
@@ -75,7 +85,9 @@ def looks_like_time(s: str) -> bool:
         or re.match(r"^\d{3,4}$", up)
     )
 
+
 def looks_like_employee_name(s: str) -> bool:
+    """التحقق إذا كان النص يشبه اسم موظف"""
     v = norm(s)
     if not v:
         return False
@@ -84,14 +96,16 @@ def looks_like_employee_name(s: str) -> bool:
         return False
     if re.search(r"(ANNUAL\s*LEAVE|SICK\s*LEAVE|REST\/OFF\s*DAY|REST|OFF\s*DAY|TRAINING|STANDBY)", up):
         return False
-    # قوي: اسم - رقم
+    # اسم - رقم
     if re.search(r"-\s*\d{3,}", v) and re.search(r"[A-Za-z\u0600-\u06FF]", v):
         return True
-    # بديل: كلمتين أو أكثر
-    parts = [p for p in v.split(" ") if p]
+    # كلمتين أو أكثر
+    parts = [p for p in v.split() if p]
     return bool(re.search(r"[A-Za-z\u0600-\u06FF]", v) and len(parts) >= 2)
 
+
 def looks_like_shift_code(s: str) -> bool:
+    """التحقق إذا كان النص يشبه كود شفت"""
     v = norm(s).upper()
     if not v:
         return False
@@ -105,13 +119,15 @@ def looks_like_shift_code(s: str) -> bool:
         return True
     return False
 
+
 def map_shift(code: str):
+    """تحويل كود الشفت إلى عنوان ومجموعة"""
     c0 = norm(code)
     c = c0.upper()
     if not c or c == "0":
         return ("-", "أخرى")
 
-    # special cases
+    # حالات خاصة
     if c == "AL" or "ANNUAL LEAVE" in c:
         return ("🏖️ إجازة سنوية", "إجازات")
     if c == "SL" or "SICK LEAVE" in c:
@@ -130,8 +146,9 @@ def map_shift(code: str):
 
     return (c0, "أخرى")
 
+
 def current_shift_key(now: datetime) -> str:
-    # نفس منطق n8n (وقت مسقط): 21:00–04:59 ليل، 14:00–20:59 عصر، غير كذا صباح :contentReference[oaicite:1]{index=1}
+    """تحديد الشفت الحالي بناء على الوقت"""
     t = now.hour * 60 + now.minute
     if t >= 21 * 60 or t < 5 * 60:
         return "ليل"
@@ -139,71 +156,76 @@ def current_shift_key(now: datetime) -> str:
         return "ظهر"
     return "صباح"
 
-def slugify(name: str) -> str:
-    s = re.sub(r"[^a-zA-Z0-9]+", "-", name.strip().lower()).strip("-")
-    return s or "dept"
 
 def download_excel(url: str) -> bytes:
+    """تحميل ملف Excel من URL"""
     r = requests.get(url, timeout=60)
     r.raise_for_status()
     return r.content
 
+
 def find_header_and_day_col(ws, today_dow: int):
-    """
-    نبحث عن صف رأس فيه (EMPLOYEE/STAFF/NAME/الموظف) ثم نحدد عمود اليوم حسب SUN..SAT
-    """
+    """البحث عن صف الرأس وعمود اليوم"""
     header_row_idx = None
     header_values = None
 
     for i, row in enumerate(ws.iter_rows(values_only=True), start=1):
-        first = norm(row[0] if row else "")
+        if not row or not row[0]:
+            continue
+        first = norm(row[0])
         up = first.upper()
         if "EMPLOYEE" in up or "STAFF" in up or "NAME" in up or "الموظف" in first:
             header_row_idx = i
-            header_values = [norm(x) for x in row]
+            header_values = [norm(x) if x else "" for x in row]
             break
 
     if header_row_idx is None:
         return None, None, None
 
-    # day col
+    # البحث عن عمود اليوم
     day_col_idx = None
+    target_day = DAYS[today_dow]
+    
     for idx, val in enumerate(header_values):
+        if not val:
+            continue
         up = val.upper()
-        for dn, key in enumerate(DAYS):
-            if key in up and dn == today_dow:
-                day_col_idx = idx + 1
-                break
-        if day_col_idx:
+        if target_day in up:
+            day_col_idx = idx + 1
             break
 
     return header_row_idx, header_values, day_col_idx
 
+
 def find_employee_col(ws, start_row: int, max_scan_rows: int = 120):
-    """
-    نحسب "نقاط" لكل عمود: كم خلية تشبه اسم موظف.
-    """
+    """تحديد عمود الموظفين بناء على النقاط"""
     scores = {}
     r_end = min(ws.max_row, start_row + max_scan_rows)
+    
     for r in range(start_row, r_end + 1):
-        for c in range(1, ws.max_column + 1):
-            v = ws.cell(row=r, column=c).value
-            if looks_like_employee_name(v):
+        for c in range(1, min(ws.max_column + 1, 20)):  # تحديد البحث في أول 20 عمود
+            cell_value = ws.cell(row=r, column=c).value
+            if cell_value and looks_like_employee_name(str(cell_value)):
                 scores[c] = scores.get(c, 0) + 1
+    
     if not scores:
         return None
     return max(scores.items(), key=lambda kv: kv[1])[0]
 
+
 def build_group_table(title: str, rows):
-    # rows: list[{"name","shift"}]
+    """بناء جدول HTML لمجموعة"""
     trs = []
     for x in rows:
+        name = x["name"].replace("<", "&lt;").replace(">", "&gt;")
+        shift = x["shift"].replace("<", "&lt;").replace(">", "&gt;")
         trs.append(f"""
           <tr>
-            <td style="text-align:right;padding:9px 10px;border-bottom:1px solid #eee;">{x["name"]}</td>
-            <td style="text-align:center;padding:9px 10px;border-bottom:1px solid #eee;white-space:nowrap;">{x["shift"]}</td>
+            <td style="text-align:right;padding:9px 10px;border-bottom:1px solid #eee;">{name}</td>
+            <td style="text-align:center;padding:9px 10px;border-bottom:1px solid #eee;white-space:nowrap;">{shift}</td>
           </tr>
         """)
+    
     body = "\n".join(trs) if trs else '<tr><td colspan="2" style="padding:10px;text-align:center;">—</td></tr>'
 
     return f"""
@@ -227,7 +249,9 @@ def build_group_table(title: str, rows):
       </div>
     """
 
+
 def build_dept_section(dept_name: str, buckets):
+    """بناء قسم القسم الإداري"""
     section = f"""
       <div style="text-align:center;font-size:22px;font-weight:800;margin:6px 0 12px 0;">
         {dept_name}
@@ -235,6 +259,7 @@ def build_dept_section(dept_name: str, buckets):
     """
     total = 0
     has_any = False
+    
     for g in GROUP_ORDER:
         arr = buckets.get(g, [])
         if not arr:
@@ -251,9 +276,12 @@ def build_dept_section(dept_name: str, buckets):
         """
     return section, total
 
+
 def page_shell(title: str, body_html: str, now: datetime, extra_top_html: str = ""):
+    """قالب صفحة HTML"""
     greg = now.strftime("%d %B %Y")
     t = now.strftime("%H:%M")
+    
     return f"""<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -278,8 +306,8 @@ def page_shell(title: str, body_html: str, now: datetime, extra_top_html: str = 
       <div class="date">📅 {greg} — ⏱️ {t} (مسقط)</div>
       {extra_top_html}
       <div class="nav">
-        <a href="./">الصفحة الرئيسية</a>
-        <a href="./now/">المناوب الآن</a>
+        <a href="../">الصفحة الرئيسية</a>
+        <a href="../now/">المناوب الآن</a>
       </div>
     </div>
 
@@ -295,36 +323,49 @@ def page_shell(title: str, body_html: str, now: datetime, extra_top_html: str = 
 </html>
 """
 
-def send_email(subject: str, html: str):
-    msg = MIMEText(html, "html", "utf-8")
-    msg["Subject"] = subject
-    msg["From"] = MAIL_FROM
-    msg["To"] = MAIL_TO
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
-        s.starttls()
-        s.login(SMTP_USER, SMTP_PASS)
-        s.sendmail(MAIL_FROM, [x.strip() for x in MAIL_TO.split(",") if x.strip()], msg.as_string())
+def send_email(subject: str, html: str):
+    """إرسال بريد إلكتروني"""
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS, MAIL_FROM, MAIL_TO]):
+        print("تحذير: إعدادات البريد الإلكتروني غير مكتملة، تخطي الإرسال")
+        return
+    
+    try:
+        msg = MIMEText(html, "html", "utf-8")
+        msg["Subject"] = subject
+        msg["From"] = MAIL_FROM
+        msg["To"] = MAIL_TO
+
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
+            s.starttls()
+            s.login(SMTP_USER, SMTP_PASS)
+            s.sendmail(MAIL_FROM, [x.strip() for x in MAIL_TO.split(",") if x.strip()], msg.as_string())
+        
+        print(f"✅ تم إرسال البريد الإلكتروني بنجاح: {subject}")
+    except Exception as e:
+        print(f"❌ خطأ في إرسال البريد الإلكتروني: {e}")
+
 
 def infer_pages_base_url():
-    # لو ما حطيت secret، نستنتجه من repo name في EXCEL_URL؟ الأفضل تضعه صراحة، لكن نخليه بسيط:
-    # لروابطك الحالية:
+    """استنتاج رابط GitHub Pages"""
     return "https://khalidsaif912.github.io/roster-site"
 
+
 def main():
+    """الدالة الرئيسية"""
     if not EXCEL_URL:
-        raise RuntimeError("EXCEL_URL missing")
+        raise RuntimeError("EXCEL_URL مفقود في المتغيرات البيئية")
 
     now = datetime.now(TZ)
     dow = now.weekday()  # Mon=0 ... Sun=6
-    # n8n uses getDay where Sun=0. Convert:
-    today_dow = (dow + 1) % 7  # Sun=0
+    today_dow = (dow + 1) % 7  # تحويل لـ Sun=0
 
-    active_group = current_shift_key(now)  # صباح/ظهر/ليل
+    active_group = current_shift_key(now)
 
     pages_base = PAGES_BASE_URL or infer_pages_base_url()
 
-    # Load Excel
+    # تحميل Excel
+    print(f"📥 جاري تحميل الملف من: {EXCEL_URL}")
     data = download_excel(EXCEL_URL)
     wb = load_workbook(BytesIO(data), data_only=True)
 
@@ -333,41 +374,50 @@ def main():
     total_all = 0
     total_now = 0
 
-    # Build per dept
+    # معالجة كل قسم
     for sheet_name, dept_name in DEPARTMENTS:
         if sheet_name not in wb.sheetnames:
+            print(f"⚠️ الشيت '{sheet_name}' غير موجود، تخطي...")
             continue
+        
+        print(f"🔍 معالجة شيت: {sheet_name}")
         ws = wb[sheet_name]
 
         header_row_idx, _, day_col = find_header_and_day_col(ws, today_dow)
         if not header_row_idx or not day_col:
-            # إذا ما قدر يحدد اليوم، نعرض رسالة
             dept_html = f"<div style='text-align:center;color:#b00020;font-weight:800;'>⚠️ لم أستطع تحديد عمود اليوم في شيت {dept_name}</div>"
             all_sections_html += dept_html + "<hr style='border:none;border-top:1px solid #eee;margin:18px 0;'>"
+            print(f"  ⚠️ لم يتم العثور على الرأس أو عمود اليوم")
             continue
 
         emp_col = find_employee_col(ws, header_row_idx + 1)
         if not emp_col:
             dept_html = f"<div style='text-align:center;color:#b00020;font-weight:800;'>⚠️ لم أستطع تحديد عمود الموظفين في شيت {dept_name}</div>"
             all_sections_html += dept_html + "<hr style='border:none;border-top:1px solid #eee;margin:18px 0;'>"
+            print(f"  ⚠️ لم يتم العثور على عمود الموظفين")
             continue
 
         buckets = {k: [] for k in GROUP_ORDER}
         buckets_now = {k: [] for k in GROUP_ORDER}
 
         for r in range(header_row_idx + 1, ws.max_row + 1):
-            name = norm(ws.cell(row=r, column=emp_col).value)
+            name_cell = ws.cell(row=r, column=emp_col).value
+            if not name_cell:
+                continue
+            name = norm(name_cell)
             if not looks_like_employee_name(name):
                 continue
 
-            raw = norm(ws.cell(row=r, column=day_col).value)
+            shift_cell = ws.cell(row=r, column=day_col).value
+            if not shift_cell:
+                continue
+            raw = norm(shift_cell)
             if not looks_like_shift_code(raw):
                 continue
 
             label, grp = map_shift(raw)
             buckets.setdefault(grp, []).append({"name": name, "shift": label})
 
-            # فلترة المناوب الآن: فقط "صباح" أو "ظهر" أو "ليل"
             if grp == active_group:
                 buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
 
@@ -376,7 +426,6 @@ def main():
         total_all += dept_count
 
         dept_section_now, dept_count_now = build_dept_section(dept_name, buckets_now)
-        # إذا ما في أحد في الشفت الحالي نكتب رسالة لطيفة بدل الفراغ
         if dept_count_now == 0:
             dept_section_now = f"""
               <div style="text-align:center;font-size:22px;font-weight:800;margin:6px 0 12px 0;">{dept_name}</div>
@@ -386,8 +435,10 @@ def main():
             """
         now_sections_html += dept_section_now + "<hr style='border:none;border-top:1px solid #eee;margin:18px 0;'>"
         total_now += dept_count_now
+        
+        print(f"  ✅ تمت المعالجة: {dept_count} موظف إجمالي، {dept_count_now} مناوب الآن")
 
-    # Build pages
+    # إنشاء الصفحات
     os.makedirs("docs", exist_ok=True)
     os.makedirs("docs/now", exist_ok=True)
 
@@ -407,11 +458,13 @@ def main():
 
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(full_page)
+    print("✅ تم إنشاء: docs/index.html")
 
     with open("docs/now/index.html", "w", encoding="utf-8") as f:
         f.write(now_page)
+    print("✅ تم إنشاء: docs/now/index.html")
 
-    # Email: نفس فكرة n8n (يرسل المناوب الآن + زر يفتح الصفحة الكاملة) :contentReference[oaicite:2]{index=2}
+    # إرسال البريد الإلكتروني
     subject = f"Duty Roster — {active_group} — {now.strftime('%Y-%m-%d')}"
     email_html = f"""
     <div style="font-family:Arial;direction:rtl;background:#eef1f7;padding:16px">
@@ -428,6 +481,9 @@ def main():
     </div>
     """
     send_email(subject, email_html)
+    
+    print(f"\n✅ تم الانتهاء بنجاح! الإجمالي: {total_all}، المناوب الآن ({active_group}): {total_now}")
+
 
 if __name__ == "__main__":
     main()
