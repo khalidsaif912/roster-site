@@ -54,10 +54,19 @@ SHIFT_MAP = {
 }
 
 GROUP_ORDER = ["صباح", "ظهر", "ليل", "مناوبات", "راحة", "إجازات", "تدريب", "أخرى"]
-
-
-
 DEPT_COLORS = ["#2563eb", "#7c3aed", "#0891b2", "#059669", "#dc2626", "#ea580c"]
+
+# أضف هذا في بداية الملف مع المتغيرات الثابتة الأخرى
+DEPT_EMAIL_COLORS = {
+    "Emergency": "#dc2626",      # أحمر
+    "ICU": "#7c3aed",           # بنفسجي
+    "Surgery": "#2563eb",        # أزرق
+    "Pediatrics": "#16a34a",     # أخضر
+    "Radiology": "#ea580c",      # برتقالي
+    # أضف بقية الأقسام...
+}
+
+
 
 def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list, pages_base: str) -> str:
     """
