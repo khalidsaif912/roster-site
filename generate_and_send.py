@@ -254,8 +254,6 @@ def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list
     </table>
   </body>
 </html>"""
-    
-    return html
 
 
 
@@ -735,7 +733,7 @@ def dept_card_html(dept_name: str, dept_color: str, buckets: dict, open_group: s
     """
 
 def page_shell_html(date_label: str, employees_total: int, departments_total: int, dept_cards_html: str, cta_url: str, sent_time: str):
-    return f"""<!doctype html>
+    html = f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -812,6 +810,24 @@ def page_shell_html(date_label: str, employees_total: int, departments_total: in
 </div>
 </body>
 </html>"""
+
+# Replace subscribe placeholders (must be absolute URL so POST doesn't go to GitHub Pages)
+subscribe_url = os.environ.get("SUBSCRIBE_URL", "").strip()
+subscribe_token = os.environ.get("SUBSCRIBE_TOKEN", "").strip()
+
+if subscribe_url:
+    html = html.replace("__SUBSCRIBE_URL__", subscribe_url)
+else:
+    # If not configured, disable the form action
+    html = html.replace("__SUBSCRIBE_URL__", "#")
+
+if subscribe_token:
+    html = html.replace("__SUBSCRIBE_TOKEN__", subscribe_token)
+else:
+    html = html.replace("__SUBSCRIBE_TOKEN__", "")
+
+return html
+
 
 
 # =========================
@@ -924,7 +940,9 @@ def build_rows_for_email(wb, target_date: datetime, active_group: str):
         if not rows:
             continue
 
-        rows_by_dept.append({"dept": dept_name, "rows": rows})
+        dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
+        base_color = dept_color.get("base") if isinstance(dept_color, dict) else str(dept_color)
+        rows_by_dept.append({"dept": dept_name, "color": base_color or "#2563eb", "rows": rows})
 
     return rows_by_dept
 
@@ -1032,28 +1050,6 @@ def page_shell_html_full_with_picker(month_iso: str, employees_total: int, depar
 </body>
 </html>"""
 
-def send_email(subject: str, html_body: str, recipients: str):
-    """Send email via SMTP with HTML content"""
-    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS, MAIL_FROM, recipients]):
-        print("❌ Email not sent: Missing SMTP configuration or recipients")
-        return
-    
-    try:
-        msg = MIMEText(html_body, "html", "utf-8")
-        msg["Subject"] = subject
-        msg["From"] = MAIL_FROM
-        msg["To"] = recipients
-        
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
-        
-        print(f"✅ Email sent successfully to {len(recipients.split(','))} recipient(s)")
-    except Exception as e:
-        print(f"❌ Failed to send email: {e}")
-
-
 def load_subscribers() -> list[str]:
     """Load subscriber emails from Google Apps Script (Google Sheet) via GET ?token=...
 
@@ -1079,38 +1075,9 @@ def load_subscribers() -> list[str]:
                     seen.add(e)
                     out.append(e)
             return out
-    except Exception as e:
-        print(f"⚠️ Failed to load subscribers: {e}")
+    except Exception:
         return []
     return []
-
-
-def add_subscriber(email: str) -> bool:
-    """Add a new subscriber email to Google Sheet via POST
-    
-    Expected endpoint to accept: POST ?token=TOKEN with JSON body {"email": "..."}
-    Expected response: {"ok": true} or {"ok": false, "error": "..."}
-    """
-    if not SUBSCRIBE_URL or not SUBSCRIBE_TOKEN:
-        return False
-    
-    email = email.strip().lower()
-    if not email or "@" not in email:
-        return False
-    
-    try:
-        r = requests.post(
-            SUBSCRIBE_URL,
-            params={"token": SUBSCRIBE_TOKEN},
-            json={"email": email},
-            timeout=30
-        )
-        r.raise_for_status()
-        j = r.json()
-        return j.get("ok", False)
-    except Exception as e:
-        print(f"⚠️ Failed to add subscriber {email}: {e}")
-        return False
 
 
 
