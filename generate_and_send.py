@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from io import BytesIO
 
@@ -21,7 +21,6 @@ SMTP_USER = os.environ.get("SMTP_USER", "").strip()
 SMTP_PASS = os.environ.get("SMTP_PASS", "").strip()
 MAIL_FROM = os.environ.get("MAIL_FROM", "").strip()
 MAIL_TO = os.environ.get("MAIL_TO", "").strip()
-
 SUBSCRIBE_URL = os.environ.get("SUBSCRIBE_URL", "").strip()
 SUBSCRIBE_TOKEN = os.environ.get("SUBSCRIBE_TOKEN", "").strip()
 
@@ -569,13 +568,121 @@ def page_shell_html(date_label: str, employees_total: int, departments_total: in
 # =========================
 # Email
 # =========================
+def load_subscribers() -> list[str]:
+    """Load subscriber emails from Google Apps Script via GET (SUBSCRIBE_URL?token=SUBSCRIBE_TOKEN).
+
+    Expected JSON: {"ok": true, "emails": ["a@b.com", ...]}
+    """
+    if not SUBSCRIBE_URL or not SUBSCRIBE_TOKEN:
+        return []
+    try:
+        r = requests.get(SUBSCRIBE_URL, params={"token": SUBSCRIBE_TOKEN}, timeout=30)
+        r.raise_for_status()
+        j = r.json()
+        if not j.get("ok"):
+            return []
+        emails = []
+        for e in (j.get("emails") or []):
+            e = str(e).strip().lower()
+            if e and "@" in e:
+                emails.append(e)
+        # de-dup keeping order
+        seen=set()
+        out=[]
+        for e in emails:
+            if e not in seen:
+                seen.add(e); out.append(e)
+        return out
+    except Exception:
+        return []
+
+def build_email_html(date_label: str, sent_time: str, active_group: str, rows_by_dept: list[dict], full_url: str) -> str:
+    """Email-safe HTML (tables + inline styles)."""
+    shift_style = {
+        "صباح": ("#fef3c7", "#92400e", "☀️ Morning"),
+        "ظهر":  ("#ffedd5", "#9a3412", "🌤️ Afternoon"),
+        "ليل":  ("#ede9fe", "#5b21b6", "🌙 Night"),
+    }
+    bg, textc, shift_title = shift_style.get(active_group, ("#e0e7ff", "#3730a3", active_group))
+
+    dept_blocks=[]
+    total_now=0
+    depts_now=0
+
+    for item in rows_by_dept:
+        dept=item.get("dept","")
+        color=item.get("color","#2563eb")
+        rows=item.get("rows",[]) or []
+        if not rows:
+            continue
+        depts_now += 1
+        total_now += len(rows)
+
+        trs=[]
+        for i,r in enumerate(rows):
+            alt_bg = "#f8fafc" if i%2==1 else "#ffffff"
+            trs.append(f"""
+              <tr>
+                <td style="padding:10px 12px;border-top:1px solid #eef2f7;background:{alt_bg};font-weight:700;color:#0f172a;">{r["name"]}</td>
+                <td style="padding:10px 12px;border-top:1px solid #eef2f7;background:{alt_bg};white-space:nowrap;font-weight:700;color:{textc};">{r["shift"]}</td>
+              </tr>
+            """)
+
+        dept_blocks.append(f"""
+          <div style="margin:14px 0 0 0;">
+            <div style="height:4px;background:{color};border-radius:10px 10px 0 0;"></div>
+            <div style="padding:10px 12px;border:1px solid rgba(15,23,42,.10);border-top:none;border-radius:0 0 14px 14px;background:#fff;">
+              <div style="font-size:16px;font-weight:900;color:#0f172a;margin:0 0 8px 0;">{dept}</div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                     style="border:1px solid rgba(15,23,42,.10);border-radius:14px;overflow:hidden;border-collapse:separate;border-spacing:0;background:#fff;">
+                <tr style="background:#f6f7f9;">
+                  <th align="left" style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#334155;font-size:12px;letter-spacing:.4px;text-transform:uppercase;">Employee</th>
+                  <th align="left" style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#334155;font-size:12px;letter-spacing:.4px;text-transform:uppercase;">Status</th>
+                </tr>
+                {''.join(trs)}
+              </table>
+            </div>
+          </div>
+        """)
+
+    blocks_html = "".join(dept_blocks) if dept_blocks else '<div style="padding:12px;border:1px solid #eef2f7;border-radius:14px;background:#fff;text-align:center;color:#64748b;font-weight:800;">No employees for this shift</div>'
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Duty Roster</title>
+</head>
+<body style="margin:0;padding:0;background:#eef1f7;font-family:Segoe UI,system-ui,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;">
+  <div style="max-width:680px;margin:0 auto;padding:16px 14px 24px;">
+    <div style="background:linear-gradient(135deg,#1e40af 0%,#1976d2 50%,#0ea5e9 100%);color:#fff;padding:24px 18px;border-radius:20px;text-align:center;box-shadow:0 8px 28px rgba(30,64,175,.25);">
+      <div style="font-size:22px;font-weight:900;">📋 Duty Roster</div>
+      <div style="display:inline-block;margin-top:10px;background:rgba(255,255,255,.18);padding:6px 16px;border-radius:999px;font-size:13px;font-weight:700;">📅 {date_label} · Sent {sent_time}</div>
+      <div style="margin-top:12px;padding:10px 12px;border-radius:16px;background:{bg};color:{textc};font-weight:900;">{shift_title} · Total: {total_now} · Departments: {depts_now}</div>
+    </div>
+
+    <div style="margin-top:16px;">{blocks_html}</div>
+
+    <div style="text-align:center;margin-top:18px;">
+      <a href="{full_url}" style="display:inline-block;padding:13px 26px;border-radius:16px;background:linear-gradient(135deg,#1e40af,#1976d2);color:#fff;text-decoration:none;font-weight:900;">📋 Open Full Roster</a>
+    </div>
+
+    <div style="margin-top:14px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.8;">Automated via GitHub Actions</div>
+  </div>
+</body>
+</html>"""
 
 def send_email(subject: str, html: str, mail_to: str):
     """Send HTML email to one or more recipients (comma-separated)."""
+    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and MAIL_FROM):
+        return
+
     mail_to = (mail_to or "").strip()
     recipients = [x.strip() for x in mail_to.split(",") if x.strip()]
     if not recipients:
-        raise RuntimeError("MAIL_TO is empty (no recipients). Add MAIL_TO secret and/or subscribers.")
+        return
 
     msg = MIMEText(html, "html", "utf-8")
     msg["Subject"] = subject
@@ -587,53 +694,29 @@ def send_email(subject: str, html: str, mail_to: str):
         s.login(SMTP_USER, SMTP_PASS)
         s.sendmail(MAIL_FROM, recipients, msg.as_string())
 
-
-def load_subscribers() -> list[str]:
-    """Load subscriber emails from Google Apps Script (Sheet) via GET ?token=...
-
-    Expected JSON: {"ok": true, "emails": ["a@b.com", ...]}
-    """
-    if not SUBSCRIBE_URL or not SUBSCRIBE_TOKEN:
-        return []
-    try:
-        r = requests.get(SUBSCRIBE_URL, params={"token": SUBSCRIBE_TOKEN}, timeout=30)
-        r.raise_for_status()
-        j = r.json()
-        if j.get("ok"):
-            emails = []
-            for e in j.get("emails", []) or []:
-                e = str(e).strip().lower()
-                if e and "@" in e:
-                    emails.append(e)
-            # remove duplicates preserving order
-            seen = set()
-            out = []
-            for e in emails:
-                if e not in seen:
-                    seen.add(e)
-                    out.append(e)
-            return out
-    except Exception:
-        return []
-    return []
-
-
+# =========================
+# Main
+# =========================
 def main():
     if not EXCEL_URL:
         raise RuntimeError("EXCEL_URL missing")
 
     now = datetime.now(TZ)
-    # Sun=0..Sat=6
-    today_dow = (now.weekday() + 1) % 7
-    today_day = now.day
 
-    active_group = current_shift_key(now)  # "صباح" / "ظهر" / "ليل"
+    # Night shift rule: between 00:00–05:59 (Muscat), treat roster date as previous day
+    active_group = current_shift_key(now)
+    effective_now = now - timedelta(days=1) if (active_group == "ليل" and now.hour < 6) else now
+    # Sun=0..Sat=6 (based on effective roster date)
+    today_dow = (effective_now.weekday() + 1) % 7
+    today_day = effective_now.day
+
     pages_base = (PAGES_BASE_URL or infer_pages_base_url()).rstrip("/")
 
     data = download_excel(EXCEL_URL)
     wb = load_workbook(BytesIO(data), data_only=True)
 
     dept_cards_all = []
+    rows_by_dept_now = []  # for email (active shift only)
     dept_cards_now = []
     employees_total_all = 0
     employees_total_now = 0
@@ -676,9 +759,12 @@ def main():
 
         dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
 
-        open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
-        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
+# Collect rows for EMAIL (active shift only)
+rows_now = buckets_now.get(active_group, []) or []
+base_color = dept_color.get("base") if isinstance(dept_color, dict) else dept_color
+rows_by_dept_now.append({"dept": dept_name, "color": base_color or "#2563eb", "rows": rows_now})
 
+        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=None)
         dept_cards_all.append(card_all)
 
         # For NOW page: open the active shift group by default
@@ -729,16 +815,25 @@ def main():
     with open("docs/now/index.html", "w", encoding="utf-8") as f:
         f.write(html_now)
 
-    # Email: send NOW page design (same exact template)
-    subject = f"Duty Roster — {active_group} — {now.strftime('%Y-%m-%d')}"
 
-    # ✅ Merge manual recipients (MAIL_TO) + subscribers from Google Sheet
-    manual = [x.strip().lower() for x in MAIL_TO.split(",") if x.strip()]
-    subs = load_subscribers()
-    all_recipients = sorted(set(manual + subs))
-    MAIL_TO_FINAL = ",".join(all_recipients)
+# Email (email-safe)
+subject = f"Duty Roster — {active_group} — {effective_now.strftime('%Y-%m-%d')}"
+email_html = build_email_html(
+    date_label=date_label,
+    sent_time=sent_time,
+    active_group=active_group,
+    rows_by_dept=rows_by_dept_now,
+    full_url=full_url,
+)
 
-    send_email(subject, html_now, MAIL_TO_FINAL)
+# Merge manual recipients (MAIL_TO) + subscribers from Google Sheet
+manual = [x.strip().lower() for x in MAIL_TO.split(",") if x.strip()]
+subs = load_subscribers()
+all_recipients = sorted(set(manual + subs))
+mail_to_final = ",".join(all_recipients)
+
+send_email(subject, email_html, mail_to_final)
+
 
 if __name__ == "__main__":
     main()
