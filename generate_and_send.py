@@ -566,6 +566,157 @@ def page_shell_html(date_label: str, employees_total: int, departments_total: in
 # =========================
 # Email
 # =========================
+
+def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list, pages_base: str) -> str:
+    """
+    Email-safe HTML (inline + tables) قريب من تصميم الصفحة.
+    rows_by_dept = [{"dept":"Officers","rows":[{"name":"..","shift":".."}, ...]}, ...]
+    """
+    date_label = now.strftime("%d %B %Y")
+    sent_time = now.strftime("%H:%M")
+
+    def shift_theme(g: str):
+        # (bg, border, text, chipBg)
+        if g == "صباح":
+            return ("#fef3c7", "#f59e0b55", "#92400e", "#f59e0b22")
+        if g == "ظهر":
+            return ("#ffedd5", "#f9731655", "#9a3412", "#f9731622")
+        if g == "ليل":
+            return ("#ede9fe", "#8b5cf655", "#5b21b6", "#8b5cf622")
+        return ("#e0e7ff", "#6366f155", "#3730a3", "#6366f122")
+
+    bg, border, textc, chip = shift_theme(active_group)
+
+    dept_blocks = []
+    total_now = 0
+    depts_now = 0
+
+    for item in rows_by_dept:
+        dept = item.get("dept", "")
+        rows = item.get("rows", []) or []
+        if not rows:
+            continue
+
+        depts_now += 1
+        total_now += len(rows)
+
+        trs = []
+        for i, r in enumerate(rows):
+            alt_bg = "#f8fafc" if i % 2 == 1 else "#ffffff"
+            trs.append(f"""
+              <tr>
+                <td style="padding:10px 12px;border-top:1px solid #eef2f7;background:{alt_bg};font-weight:700;color:#0f172a;">
+                  {r["name"]}
+                </td>
+                <td style="padding:10px 12px;border-top:1px solid #eef2f7;background:{alt_bg};white-space:nowrap;font-weight:700;color:{textc};">
+                  {r["shift"]}
+                </td>
+              </tr>
+            """)
+
+        dept_blocks.append(f"""
+          <div style="margin:14px 0 0 0;">
+            <div style="font-size:16px;font-weight:900;color:#0f172a;margin:0 0 8px 0;">{dept}</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                   style="border:1px solid rgba(15,23,42,.10);border-radius:14px;overflow:hidden;border-collapse:separate;border-spacing:0;background:#fff;">
+              <tr style="background:#f6f7f9;">
+                <th align="left" style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#334155;font-size:12px;letter-spacing:.4px;text-transform:uppercase;">
+                  Employee
+                </th>
+                <th align="left" style="padding:10px 12px;border-bottom:1px solid #eef2f7;color:#334155;font-size:12px;letter-spacing:.4px;text-transform:uppercase;">
+                  Status
+                </th>
+              </tr>
+              {''.join(trs)}
+            </table>
+          </div>
+        """)
+
+    if not dept_blocks:
+        dept_html = """
+          <div style="margin-top:12px;padding:14px;border-radius:14px;border:1px dashed rgba(15,23,42,.18);background:#ffffff;">
+            <div style="font-weight:900;color:#334155;">No staff for current shift.</div>
+            <div style="margin-top:6px;color:#64748b;font-size:13px;">Open the website for full details.</div>
+          </div>
+        """
+    else:
+        dept_html = "\n".join(dept_blocks)
+
+    pages_base = (pages_base or "").rstrip("/")
+
+    return f"""<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#eef1f7;font-family:Segoe UI,Arial,Helvetica,sans-serif;color:#0f172a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f7;">
+      <tr>
+        <td align="center" style="padding:16px 10px;">
+          <table role="presentation" width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;">
+            <tr>
+              <td style="border-radius:20px;overflow:hidden;box-shadow:0 8px 28px rgba(30,64,175,.18);">
+
+                <!-- HEADER -->
+                <div style="background:linear-gradient(135deg,#1e40af 0%,#1976d2 50%,#0ea5e9 100%);padding:22px 18px;color:#fff;text-align:center;">
+                  <div style="font-size:22px;font-weight:900;letter-spacing:-.2px;">📋 Duty Roster</div>
+                  <div style="margin-top:8px;display:inline-block;background:rgba(255,255,255,.18);padding:6px 16px;border-radius:30px;font-size:13px;font-weight:700;">
+                    📅 {date_label}
+                  </div>
+                </div>
+
+                <!-- CONTENT -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+                  <tr>
+                    <td style="padding:16px 16px 8px 16px;">
+
+                      <div style="margin:0 auto 12px auto;display:inline-block;padding:10px 14px;border-radius:14px;background:{bg};border:1px solid {border};color:{textc};font-weight:900;">
+                        Current shift: {active_group}
+                      </div>
+
+                      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin-top:6px;">
+                        <tr>
+                          <td style="width:50%;padding-right:6px;">
+                            <div style="border:1px solid rgba(15,23,42,.10);border-radius:14px;padding:10px 12px;text-align:center;background:#fff;">
+                              <div style="font-size:22px;font-weight:900;color:#1e40af;">{total_now}</div>
+                              <div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:.5px;text-transform:uppercase;">Now</div>
+                            </div>
+                          </td>
+                          <td style="width:50%;padding-left:6px;">
+                            <div style="border:1px solid rgba(15,23,42,.10);border-radius:14px;padding:10px 12px;text-align:center;background:#fff;">
+                              <div style="font-size:22px;font-weight:900;color:#059669;">{depts_now}</div>
+                              <div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:.5px;text-transform:uppercase;">Departments</div>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+
+                      {dept_html}
+
+                      <div style="text-align:center;margin-top:16px;">
+                        <a href="{pages_base}/now/" style="display:inline-block;padding:12px 18px;border-radius:16px;background:linear-gradient(135deg,#1e40af,#1976d2);color:#fff;text-decoration:none;font-weight:900;">
+                          Open Now Page
+                        </a>
+                        <span style="display:inline-block;width:10px;"></span>
+                        <a href="{pages_base}/" style="display:inline-block;padding:12px 18px;border-radius:16px;background:#0ea5e9;color:#fff;text-decoration:none;font-weight:900;">
+                          Open Full Page
+                        </a>
+                      </div>
+
+                      <div style="margin-top:14px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.9;">
+                        Sent at <strong style="color:#64748b;">{sent_time}</strong> · GitHub Actions
+                      </div>
+
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>"""
+
 def send_email(subject: str, html: str):
     if not (SMTP_HOST and SMTP_USER and SMTP_PASS and MAIL_FROM and MAIL_TO):
         return
@@ -600,6 +751,7 @@ def main():
 
     dept_cards_all = []
     dept_cards_now = []
+    rows_by_dept_email = []  # for email (NOW only)
     employees_total_all = 0
     employees_total_now = 0
     depts_count = 0
@@ -639,11 +791,12 @@ def main():
             if grp == active_group:
                 buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
 
+        # collect rows for email: only current shift rows for this department
+        now_rows = buckets_now.get(active_group, [])
+        rows_by_dept_email.append({"dept": dept_name, "rows": now_rows})
+
         dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-
-        open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
-        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
-
+        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=None)
         dept_cards_all.append(card_all)
 
         # For NOW page: open the active shift group by default
@@ -696,7 +849,8 @@ def main():
 
     # Email: send NOW page design (same exact template)
     subject = f"Duty Roster — {active_group} — {now.strftime('%Y-%m-%d')}"
-    send_email(subject, html_now)
+    email_html = build_pretty_email_html(active_group, now, rows_by_dept_email, pages_base)
+    send_email(subject, email_html)
 
 
 if __name__ == "__main__":
