@@ -640,7 +640,10 @@ def main():
                 buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
 
         dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=None)
+
+        open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
+        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
+
         dept_cards_all.append(card_all)
 
         # For NOW page: open the active shift group by default
