@@ -1,10 +1,12 @@
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from io import BytesIO
 
 import requests
+import json
+import calendar
 from openpyxl import load_workbook
 import smtplib
 from email.mime.text import MIMEText
@@ -21,9 +23,6 @@ SMTP_USER = os.environ.get("SMTP_USER", "").strip()
 SMTP_PASS = os.environ.get("SMTP_PASS", "").strip()
 MAIL_FROM = os.environ.get("MAIL_FROM", "").strip()
 MAIL_TO = os.environ.get("MAIL_TO", "").strip()
-
-SUBSCRIBE_URL = os.environ.get("SUBSCRIBE_URL", "").strip()
-SUBSCRIBE_TOKEN = os.environ.get("SUBSCRIBE_TOKEN", "").strip()
 
 PAGES_BASE_URL = os.environ.get("PAGES_BASE_URL", "").strip()  # optional
 TZ = ZoneInfo("Asia/Muscat")
@@ -144,6 +143,14 @@ def current_shift_key(now: datetime) -> str:
     if t >= 14 * 60:
         return "ظهر"
     return "صباح"
+
+
+def roster_effective_datetime(now: datetime) -> datetime:
+    """Night shift after midnight should still use yesterday's roster date (until 06:00 Muscat)."""
+    active = current_shift_key(now)
+    if active == "ليل" and now.hour < 6:
+        return now - timedelta(days=1)
+    return now
 
 def download_excel(url: str) -> bytes:
     r = requests.get(url, timeout=60)
@@ -569,63 +576,185 @@ def page_shell_html(date_label: str, employees_total: int, departments_total: in
 # =========================
 # Email
 # =========================
-
-def send_email(subject: str, html: str, mail_to: str):
-    """Send HTML email to one or more recipients (comma-separated)."""
-    mail_to = (mail_to or "").strip()
-    recipients = [x.strip() for x in mail_to.split(",") if x.strip()]
-    if not recipients:
-        raise RuntimeError("MAIL_TO is empty (no recipients). Add MAIL_TO secret and/or subscribers.")
-
+def send_email(subject: str, html: str):
+    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and MAIL_FROM and MAIL_TO):
+        return
     msg = MIMEText(html, "html", "utf-8")
     msg["Subject"] = subject
     msg["From"] = MAIL_FROM
-    msg["To"] = ", ".join(recipients)
+    msg["To"] = MAIL_TO
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
         s.starttls()
         s.login(SMTP_USER, SMTP_PASS)
-        s.sendmail(MAIL_FROM, recipients, msg.as_string())
+        s.sendmail(MAIL_FROM, [x.strip() for x in MAIL_TO.split(",") if x.strip()], msg.as_string())
 
 
-def load_subscribers() -> list[str]:
-    """Load subscriber emails from Google Apps Script (Sheet) via GET ?token=...
+# =========================
+# Main
+# =========================
 
-    Expected JSON: {"ok": true, "emails": ["a@b.com", ...]}
-    """
-    if not SUBSCRIBE_URL or not SUBSCRIBE_TOKEN:
-        return []
-    try:
-        r = requests.get(SUBSCRIBE_URL, params={"token": SUBSCRIBE_TOKEN}, timeout=30)
-        r.raise_for_status()
-        j = r.json()
-        if j.get("ok"):
-            emails = []
-            for e in j.get("emails", []) or []:
-                e = str(e).strip().lower()
-                if e and "@" in e:
-                    emails.append(e)
-            # remove duplicates preserving order
-            seen = set()
-            out = []
-            for e in emails:
-                if e not in seen:
-                    seen.add(e)
-                    out.append(e)
-            return out
-    except Exception:
-        return []
-    return []
+def build_cards_for_date(wb, target_date: datetime, active_group: str):
+    """Build department cards HTML + totals for a given date."""
+    today_dow = (target_date.weekday() + 1) % 7  # Sun=0..Sat=6
+    today_day = target_date.day
 
+    dept_cards = []
+    employees_total = 0
+    depts_count = 0
+
+    for idx, (sheet_name, dept_name) in enumerate(DEPARTMENTS):
+        if sheet_name not in wb.sheetnames:
+            continue
+
+        ws = wb[sheet_name]
+        days_row, date_row = find_days_and_dates_rows(ws)
+        day_col = find_day_col(ws, days_row, date_row, today_dow, today_day)
+
+        if not (days_row and date_row and day_col):
+            continue
+
+        start_row = date_row + 1
+        emp_col = find_employee_col(ws, start_row=start_row)
+        if not emp_col:
+            continue
+
+        buckets = {k: [] for k in GROUP_ORDER}
+
+        for r in range(start_row, ws.max_row + 1):
+            name = norm(ws.cell(row=r, column=emp_col).value)
+            if not looks_like_employee_name(name):
+                continue
+
+            raw = norm(ws.cell(row=r, column=day_col).value)
+            if not looks_like_shift_code(raw):
+                continue
+
+            label, grp = map_shift(raw)
+            buckets.setdefault(grp, []).append({"name": name, "shift": label})
+
+        dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
+        open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
+        dept_cards.append(dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full))
+
+        employees_total += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
+        depts_count += 1
+
+    return "\n".join(dept_cards), employees_total, depts_count
+
+
+def page_shell_html_full_with_picker(month_iso: str, employees_total: int, departments_total: int, dept_cards_html: str, cta_url: str, sent_time: str):
+    """Full page with a date picker. It loads per-day HTML from ./data/roster.json."""
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Duty Roster</title>
+  <style>
+{CSS}
+    /* Date picker inside header */
+    .datePicker {{
+      margin-top:10px;
+      background:rgba(255,255,255,.18);
+      padding:6px 14px;
+      border-radius:30px;
+      border:1px solid rgba(255,255,255,.30);
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      outline:none;
+    }}
+    .datePicker::-webkit-calendar-picker-indicator {{
+      filter: invert(1);
+      opacity: .9;
+      cursor: pointer;
+    }}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>📋 Duty Roster</h1>
+    <input id="datePicker" class="datePicker" type="date" aria-label="Choose date">
+  </div>
+
+  <div class="summaryBar">
+    <div class="summaryChip">
+      <div id="empCount" class="chipVal">{employees_total}</div>
+      <div class="chipLabel">Employees</div>
+    </div>
+    <div class="summaryChip">
+      <div id="deptCount" class="chipVal" style="color:#059669;">{departments_total}</div>
+      <div class="chipLabel">Departments</div>
+    </div>
+  </div>
+
+  <div id="content">
+    {dept_cards_html}
+  </div>
+
+  <div class="btnWrap">
+    <a class="btn" href="{cta_url}">🌙 View NOW</a>
+  </div>
+
+  <div class="footer">
+    Sent at <strong>{sent_time}</strong>
+     &nbsp;·&nbsp; Month: <strong>{month_iso}</strong>
+  </div>
+
+</div>
+
+<script>
+(async function() {{
+  const picker = document.getElementById('datePicker');
+  const content = document.getElementById('content');
+  const empCount = document.getElementById('empCount');
+
+  const res = await fetch('./data/roster.json', {{ cache: 'no-store' }});
+  const data = await res.json();
+
+  const days = Object.keys(data.days || {{}}).sort();
+  if (!days.length) return;
+
+  const urlDate = new URLSearchParams(location.search).get('date');
+  const defaultDay = (urlDate && data.days[urlDate]) ? urlDate : (data.default_day || days[0]);
+
+  picker.min = days[0];
+  picker.max = days[days.length - 1];
+  picker.value = defaultDay;
+
+  function render(dayISO) {{
+    const d = data.days[dayISO];
+    if (!d) {{
+      content.innerHTML = '<div class="deptCard" style="padding:16px;text-align:center;">No data for this date.</div>';
+      empCount.textContent = '0';
+      return;
+    }}
+    content.innerHTML = d.cards_html || '';
+    empCount.textContent = String(d.employees_total || 0);
+    history.replaceState({{}}, '', '?date=' + dayISO);
+  }}
+
+  render(defaultDay);
+  picker.addEventListener('change', (e) => render(e.target.value));
+}})();
+</script>
+
+</body>
+</html>"""
 
 def main():
     if not EXCEL_URL:
         raise RuntimeError("EXCEL_URL missing")
 
     now = datetime.now(TZ)
-    # Sun=0..Sat=6
-    today_dow = (now.weekday() + 1) % 7
-    today_day = now.day
+    effective = roster_effective_datetime(now)
+    # Sun=0..Sat=6 (based on roster effective date)
+    today_dow = (effective.weekday() + 1) % 7
+    today_day = effective.day
 
     active_group = current_shift_key(now)  # "صباح" / "ظهر" / "ليل"
     pages_base = (PAGES_BASE_URL or infer_pages_base_url()).rstrip("/")
@@ -675,10 +804,7 @@ def main():
                 buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
 
         dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-
-        open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
-        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
-
+        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=None)
         dept_cards_all.append(card_all)
 
         # For NOW page: open the active shift group by default
@@ -690,30 +816,55 @@ def main():
 
         depts_count += 1
 
-    # pages
+    
+# pages
     os.makedirs("docs", exist_ok=True)
     os.makedirs("docs/now", exist_ok=True)
+    os.makedirs("docs/data", exist_ok=True)
 
-    date_label = now.strftime("%-d %B %Y") if hasattr(now, "strftime") else now.strftime("%d %B %Y")
-    # Windows runners sometimes don't support %-d; safe fallback
+    # Display date based on roster effective date
     try:
-        date_label = now.strftime("%-d %B %Y")
+        date_label = effective.strftime("%-d %B %Y")
     except Exception:
-        date_label = now.strftime("%d %B %Y")
+        date_label = effective.strftime("%d %B %Y")
 
     sent_time = now.strftime("%H:%M")
 
     full_url = f"{pages_base}/"
     now_url = f"{pages_base}/now/"
 
-    html_full = page_shell_html(
-        date_label=date_label,
-        employees_total=employees_total_all,
-        departments_total=depts_count,
-        dept_cards_html="\n".join(dept_cards_all),
-        cta_url=now_url,   # button on full page goes to NOW page
+    # Build per-day HTML for the whole month (static JSON for the date picker)
+    month_iso = effective.strftime("%Y-%m")
+    year = effective.year
+    month = effective.month
+    last_day = calendar.monthrange(year, month)[1]
+
+    roster_days = {}
+    for d in range(1, last_day + 1):
+        dt = effective.replace(day=d)
+        cards_html, emp_total, dept_total = build_cards_for_date(wb, dt, active_group)
+        day_iso = dt.strftime("%Y-%m-%d")
+        roster_days[day_iso] = {
+            "cards_html": cards_html,
+            "employees_total": emp_total,
+            "departments_total": dept_total,
+        }
+
+    default_day = effective.strftime("%Y-%m-%d")
+    with open("docs/data/roster.json", "w", encoding="utf-8") as f:
+        json.dump({"month": month_iso, "default_day": default_day, "days": roster_days}, f, ensure_ascii=False)
+
+    # Full page with picker (initially renders default day)
+    cards_today, emp_today, dept_today = build_cards_for_date(wb, effective, active_group)
+    html_full = page_shell_html_full_with_picker(
+        month_iso=month_iso,
+        employees_total=emp_today,
+        departments_total=dept_today,
+        dept_cards_html=cards_today,
+        cta_url=now_url,
         sent_time=sent_time,
     )
+
     html_now = page_shell_html(
         date_label=date_label,
         employees_total=employees_total_now,
@@ -730,15 +881,9 @@ def main():
         f.write(html_now)
 
     # Email: send NOW page design (same exact template)
-    subject = f"Duty Roster — {active_group} — {now.strftime('%Y-%m-%d')}"
+    subject = f"Duty Roster — {active_group} — {effective.strftime('%Y-%m-%d')}"
+    send_email(subject, html_now)
 
-    # ✅ Merge manual recipients (MAIL_TO) + subscribers from Google Sheet
-    manual = [x.strip().lower() for x in MAIL_TO.split(",") if x.strip()]
-    subs = load_subscribers()
-    all_recipients = sorted(set(manual + subs))
-    MAIL_TO_FINAL = ",".join(all_recipients)
-
-    send_email(subject, html_now, MAIL_TO_FINAL)
 
 if __name__ == "__main__":
     main()
