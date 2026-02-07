@@ -1032,6 +1032,28 @@ def page_shell_html_full_with_picker(month_iso: str, employees_total: int, depar
 </body>
 </html>"""
 
+def send_email(subject: str, html_body: str, recipients: str):
+    """Send email via SMTP with HTML content"""
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS, MAIL_FROM, recipients]):
+        print("❌ Email not sent: Missing SMTP configuration or recipients")
+        return
+    
+    try:
+        msg = MIMEText(html_body, "html", "utf-8")
+        msg["Subject"] = subject
+        msg["From"] = MAIL_FROM
+        msg["To"] = recipients
+        
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+        
+        print(f"✅ Email sent successfully to {len(recipients.split(','))} recipient(s)")
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+
+
 def load_subscribers() -> list[str]:
     """Load subscriber emails from Google Apps Script (Google Sheet) via GET ?token=...
 
@@ -1057,9 +1079,38 @@ def load_subscribers() -> list[str]:
                     seen.add(e)
                     out.append(e)
             return out
-    except Exception:
+    except Exception as e:
+        print(f"⚠️ Failed to load subscribers: {e}")
         return []
     return []
+
+
+def add_subscriber(email: str) -> bool:
+    """Add a new subscriber email to Google Sheet via POST
+    
+    Expected endpoint to accept: POST ?token=TOKEN with JSON body {"email": "..."}
+    Expected response: {"ok": true} or {"ok": false, "error": "..."}
+    """
+    if not SUBSCRIBE_URL or not SUBSCRIBE_TOKEN:
+        return False
+    
+    email = email.strip().lower()
+    if not email or "@" not in email:
+        return False
+    
+    try:
+        r = requests.post(
+            SUBSCRIBE_URL,
+            params={"token": SUBSCRIBE_TOKEN},
+            json={"email": email},
+            timeout=30
+        )
+        r.raise_for_status()
+        j = r.json()
+        return j.get("ok", False)
+    except Exception as e:
+        print(f"⚠️ Failed to add subscriber {email}: {e}")
+        return False
 
 
 
