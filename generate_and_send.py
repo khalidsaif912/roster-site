@@ -254,6 +254,8 @@ def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list
     </table>
   </body>
 </html>"""
+    
+    return html
 
 
 
@@ -922,9 +924,7 @@ def build_rows_for_email(wb, target_date: datetime, active_group: str):
         if not rows:
             continue
 
-        dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-        base_color = dept_color.get("base") if isinstance(dept_color, dict) else str(dept_color)
-        rows_by_dept.append({"dept": dept_name, "color": base_color or "#2563eb", "rows": rows})
+        rows_by_dept.append({"dept": dept_name, "rows": rows})
 
     return rows_by_dept
 
