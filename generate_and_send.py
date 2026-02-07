@@ -24,7 +24,7 @@ MAIL_TO = os.environ.get("MAIL_TO", "").strip()
 
 PAGES_BASE_URL = os.environ.get("PAGES_BASE_URL", "").strip()  # optional
 TZ = ZoneInfo("Asia/Muscat")
-
+AUTO_OPEN_ACTIVE_SHIFT_IN_FULL = True
 # Excel sheets
 DEPARTMENTS = [
     ("Officers", "Officers"),
