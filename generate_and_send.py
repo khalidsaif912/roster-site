@@ -986,6 +986,7 @@ def main():
     args = parser.parse_args()
 
     now = datetime.now(TZ)
+    iso_date = now.strftime("%Y-%m-%d")
     if args.date:
         try:
             y, m, d = [int(x) for x in args.date.strip().split('-')]
