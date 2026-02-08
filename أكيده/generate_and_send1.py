@@ -102,7 +102,7 @@ def looks_like_shift_code(s: str) -> bool:
         return False
     if looks_like_time(v):
         return False
-    if v in ["OFF", "O", "LV", "TR", "ST", "SL", "AL", "STM", "STN", "STNE22", "STME06", "STMN06", "STAE14", "OT"]:
+    if v in ["OFF", "O", "LV", "TR", "ST", "SL", "AL", "STM", "STN"]:
         return True
     if re.match(r"^(MN|AN|NN|NT|ME|AE|NE)\d{1,2}", v):
         return True
@@ -124,10 +124,8 @@ def map_shift(code: str):
         return ("🏖️ Leave", "إجازات")
     if c in ["TR"] or "TRAINING" in c:
         return ("📚 Training", "تدريب")
-    if c in ["ST", "STM", "STN", "STNE22", "STME06", "STMN06", "STAE14"] or "STANDBY" in c:
+    if c in ["ST", "STM", "STN", "STNE22", "STME06"] or "STANDBY" in c:
         return ("🧍 Standby", "مناوبات")
-    if c == "OT" or c.startswith("OT"):
-        return ("⏱️ OT", "مناوبات")
     if c in ["OFF", "O"] or re.search(r"(REST|OFF\s*DAY|REST\/OFF)", c):
         return ("🛌 Off Day", "راحة")
 
@@ -587,7 +585,7 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
   <div class="header">
     <h1>📋 Duty Roster</h1>
     <div class="dateTag" id="dateTag" role="button" tabindex="0" style="cursor:pointer;">📅 {date_label}</div>
-    <input id="datePicker" type="date" value="{iso_date}" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;" aria-hidden="true" />
+    <input id="datePicker" type="date" value="{iso_date}" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true" />
   </div>
 
   <!-- ════ SUMMARY CHIPS ════ -->
@@ -625,16 +623,6 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
   if(!tag || !picker) return;
 
   function openPicker(){{
-    // Position the (hidden) input مباشرة تحت التاريخ حتى يظهر التقويم بالمكان الصحيح
-    try{{
-      var r = tag.getBoundingClientRect();
-      var wrap = tag.closest('.header') || document.body;
-      var wr = wrap.getBoundingClientRect();
-      picker.style.left = (r.left - wr.left) + 'px';
-      picker.style.top  = (r.bottom - wr.top + 6) + 'px';
-      picker.style.width = Math.max(120, r.width) + 'px';
-    }}catch(e){{}}
-
     try{{
       if (picker.showPicker) {{ picker.showPicker(); }}
       else {{ picker.focus(); picker.click(); }}
