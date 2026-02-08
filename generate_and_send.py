@@ -1,5 +1,6 @@
 import os
 import re
+import argparse
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from io import BytesIO
@@ -101,10 +102,20 @@ def looks_like_shift_code(s: str) -> bool:
         return False
     if looks_like_time(v):
         return False
-    if v in ["OFF", "O", "LV", "TR", "ST", "SL", "AL", "STM", "STN"]:
+
+    # Common roster tokens
+    if v in ["OFF", "O", "LV", "TR", "ST", "SL", "AL", "STM", "STN", "STNE22", "STME06"]:
         return True
-    if re.match(r"^(MN|AN|NN|NT|ME|AE|NE)\d{1,2}", v):
+
+    # Standby extended patterns (e.g., STNE22 / STME06)
+    if re.match(r"^ST[MN]E\d{2}$", v):
         return True
+
+    # Normal shift codes
+    if re.match(r"^(MN|AN|NN|NT|ME|AE|NE)\d{1,2}$", v):
+        return True
+
+    # Text labels
     if re.search(r"(ANNUAL\s*LEAVE|SICK\s*LEAVE|REST\/OFF\s*DAY|REST|OFF\s*DAY|TRAINING|STANDBY)", v):
         return True
     return False
@@ -115,16 +126,17 @@ def map_shift(code: str):
     if not c or c == "0":
         return ("-", "أخرى")
 
-    if c == "AL" or "ANNUAL LEAVE" in c:
-        return ("🏖️ Leave", "إجازات")
-    if c == "SL" or "SICK LEAVE" in c:
+    if c == "AL" or "ANNUAL LEAVE" in c or c == "LV":
+        return ("🏖️ Annual Leave", "إجازات")
+    if c == "SL" or "SICK LEAVE" in c or "SICK" in c:
         return ("🤒 Sick Leave", "إجازات")
-    if c == "LV":
-        return ("🏖️ Leave", "إجازات")
     if c in ["TR"] or "TRAINING" in c:
         return ("📚 Training", "تدريب")
-    if c in ["ST", "STM", "STN"] or "STANDBY" in c:
+
+    # Standby (including extended codes)
+    if c in ["ST", "STM", "STN", "STNE22", "STME06"] or re.match(r"^ST[MN]E\d{2}$", c) or "STANDBY" in c:
         return ("🧍 Standby", "مناوبات")
+
     if c in ["OFF", "O"] or re.search(r"(REST|OFF\s*DAY|REST\/OFF)", c):
         return ("🛌 Off Day", "راحة")
 
@@ -132,6 +144,7 @@ def map_shift(code: str):
         return SHIFT_MAP[c]
 
     return (c0, "أخرى")
+
 
 def current_shift_key(now: datetime) -> str:
     # 21:00–04:59 Night, 14:00–20:59 Afternoon, else Morning
@@ -141,6 +154,37 @@ def current_shift_key(now: datetime) -> str:
     if t >= 14 * 60:
         return "ظهر"
     return "صباح"
+
+
+def category_for_range(raw_code: str) -> str | None:
+    """Return one of: 'AL', 'TR', 'SL' when code represents a multi-day range we want to show."""
+    u = norm(raw_code).upper()
+    if not u:
+        return None
+    if u == "AL" or u == "LV" or "ANNUAL" in u:
+        return "AL"
+    if u == "TR" or "TRAINING" in u:
+        return "TR"
+    if u == "SL" or "SICK" in u:
+        return "SL"
+    return None
+
+def _same_category(a: str, b: str) -> bool:
+    ca = category_for_range(a)
+    cb = category_for_range(b)
+    return ca is not None and ca == cb
+
+def _safe_ddmm(year: int, month: int, day: int) -> str:
+    try:
+        d = datetime(year, month, day)
+        return d.strftime("%d/%m")
+    except Exception:
+        return str(day)
+
+def range_suffix(year: int, month: int, start_day: int, end_day: int) -> str:
+    if start_day == end_day:
+        return ""
+    return f" (من {_safe_ddmm(year, month, start_day)} إلى {_safe_ddmm(year, month, end_day)})"
 
 def download_excel(url: str) -> bytes:
     r = requests.get(url, timeout=60)
@@ -785,13 +829,27 @@ def send_email(subject: str, html: str):
 # Main
 # =========================
 def main():
+    parser = argparse.ArgumentParser(description="Generate Duty Roster pages and send email.")
+    parser.add_argument("--date", help="Target roster date in YYYY-MM-DD (default: today in Asia/Muscat)")
+    args = parser.parse_args()
+
     if not EXCEL_URL:
         raise RuntimeError("EXCEL_URL missing")
 
     now = datetime.now(TZ)
-    # Sun=0..Sat=6
-    today_dow = (now.weekday() + 1) % 7
-    today_day = now.day
+
+    # Target date (for choosing the roster column)
+    if args.date:
+        try:
+            target = datetime.strptime(args.date.strip(), "%Y-%m-%d").date()
+        except Exception as e:
+            raise RuntimeError(f"Invalid --date format. Use YYYY-MM-DD. Got: {args.date}") from e
+    else:
+        target = now.date()
+
+    # Sun=0..Sat=6 (roster convention)
+    today_dow = (target.weekday() + 1) % 7
+    today_day = target.day
 
     active_group = current_shift_key(now)  # "صباح" / "ظهر" / "ليل"
     pages_base = (PAGES_BASE_URL or infer_pages_base_url()).rstrip("/")
@@ -835,7 +893,38 @@ def main():
             if not looks_like_shift_code(raw):
                 continue
 
+            # If AL / TR / SL spans multiple days, show (من .. إلى ..)
+            cat = category_for_range(raw)
             label, grp = map_shift(raw)
+
+            if cat in ["AL", "TR", "SL"]:
+                # collect all date-number columns in this sheet for this employee
+                date_cols = []
+                for cc in range(1, ws.max_column + 1):
+                    bot = norm(ws.cell(row=date_row, column=cc).value)
+                    if _is_date_number(bot):
+                        date_cols.append((int(float(bot)), cc))
+                date_cols.sort(key=lambda x: x[0])
+
+                day_to_raw = {}
+                for daynum, cc in date_cols:
+                    day_to_raw[daynum] = norm(ws.cell(row=r, column=cc).value)
+
+                start_day = today_day
+                end_day = today_day
+
+                d = today_day - 1
+                while d in day_to_raw and _same_category(day_to_raw.get(d, ""), raw):
+                    start_day = d
+                    d -= 1
+
+                d = today_day + 1
+                while d in day_to_raw and _same_category(day_to_raw.get(d, ""), raw):
+                    end_day = d
+                    d += 1
+
+                label = f"{label}{range_suffix(target.year, target.month, start_day, end_day)}"
+
             buckets.setdefault(grp, []).append({"name": name, "shift": label})
 
             if grp == active_group:
@@ -863,12 +952,11 @@ def main():
     os.makedirs("docs", exist_ok=True)
     os.makedirs("docs/now", exist_ok=True)
 
-    date_label = now.strftime("%-d %B %Y") if hasattr(now, "strftime") else now.strftime("%d %B %Y")
-    # Windows runners sometimes don't support %-d; safe fallback
+    date_label = ""
     try:
-        date_label = now.strftime("%-d %B %Y")
+        date_label = datetime(target.year, target.month, target.day).strftime("%-d %B %Y")
     except Exception:
-        date_label = now.strftime("%d %B %Y")
+        date_label = datetime(target.year, target.month, target.day).strftime("%d %B %Y")
 
     sent_time = now.strftime("%H:%M")
 
@@ -899,7 +987,7 @@ def main():
         f.write(html_now)
 
     # Email: send a dedicated email-safe template (better rendering in Gmail/Outlook)
-    subject = f"Duty Roster — {active_group} — {now.strftime('%Y-%m-%d')}"
+    subject = f"Duty Roster — {active_group} — {target.strftime('%Y-%m-%d')}"
     email_html = build_pretty_email_html(active_group, now, rows_by_dept, pages_base)
     send_email(subject, email_html)
 
