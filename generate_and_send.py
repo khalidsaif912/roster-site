@@ -779,8 +779,6 @@ def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list
 
     iso_date = now.strftime("%Y-%m-%d")
 
-    iso_date = now.strftime("%Y-%m-%d")
-
     # Shift theme (for status color)
     def shift_theme(g: str):
         if g == "صباح":
@@ -809,13 +807,41 @@ def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list
         trs = []
         for i, r in enumerate(rows):
             alt_bg = "#f8fafc" if i % 2 == 1 else "#ffffff"
-            trs.append(f"""
+            
+            # Extract name, date range, and shift type
+            name = r["name"]
+            shift_full = r["shift"]
+            
+            # Check if this is a leave/training with date range
+            # Pattern: "🏖️ Leave from 01 FEB TO 06FEB" or "📚 Training from ..."
+            import re
+            match = re.search(r'(.*?)\s+(from\s+\d{1,2}\s+\w+\s+TO\s+\d{1,2}\s*\w+)', shift_full)
+            
+            if match:
+                # Has date range - put it in the middle with smaller font
+                shift_icon = match.group(1).strip()  # e.g., "🏖️ Leave"
+                date_range = match.group(2).strip()   # e.g., "from 01 FEB TO 06FEB"
+                
+                trs.append(f"""
+              <tr>
+                <td colspan="2" style="padding:10px 12px;border-top:1px solid #eef2f7;background:{alt_bg};text-align:center;">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-weight:700;color:#0f172a;font-size:14px;">{name}</span>
+                    <span style="font-weight:600;color:#64748b;font-size:11px;letter-spacing:0.3px;">{date_range}</span>
+                    <span style="font-weight:700;color:{textc};font-size:14px;white-space:nowrap;">{shift_icon}</span>
+                  </div>
+                </td>
+              </tr>
+            """)
+            else:
+                # Normal shift - keep original format
+                trs.append(f"""
               <tr>
                 <td style="padding:10px 12px;border-top:1px solid #eef2f7;background:{alt_bg};font-weight:700;color:#0f172a;">
-                  {r["name"]}
+                  {name}
                 </td>
                 <td style="padding:10px 12px;border-top:1px solid #eef2f7;background:{alt_bg};white-space:nowrap;font-weight:700;color:{textc};">
-                  {r["shift"]}
+                  {shift_full}
                 </td>
               </tr>
             """)
@@ -988,6 +1014,7 @@ def main():
     args = parser.parse_args()
 
     now = datetime.now(TZ)
+    iso_date = now.strftime("%Y-%m-%d")
     if args.date:
         try:
             y, m, d = [int(x) for x in args.date.strip().split('-')]
@@ -1003,9 +1030,6 @@ def main():
 
     data = download_excel(EXCEL_URL)
     wb = load_workbook(BytesIO(data), data_only=True)
-
-    # Generate static pages for each date in the current month (used by the date picker)
-    generate_date_pages_for_month(wb, now.year, now.month, pages_base)
 
     dept_cards_all = []
     dept_cards_now = []
