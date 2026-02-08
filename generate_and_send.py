@@ -520,12 +520,32 @@ def dept_card_html(dept_name: str, dept_color: str, buckets: dict, open_group: s
         emp_rows_html = []
         for i, x in enumerate(rows):
             alt = " empRowAlt" if i % 2 == 1 else ""
-            emp_rows_html.append(
-                f"""<div class="empRow{alt}">
+            
+            # Check if this is a leave/training with date range
+            import re
+            shift_full = x["shift"]
+            match = re.search(r'(.*?)\s+(from\s+\d{1,2}\s+\w+\s+TO\s+\d{1,2}\s*\w+)', shift_full)
+            
+            if match:
+                # Has date range - format with date in middle
+                shift_icon = match.group(1).strip()  # e.g., "🏖️ Leave"
+                date_range = match.group(2).strip()   # e.g., "from 01 FEB TO 06FEB"
+                
+                emp_rows_html.append(
+                    f"""<div class="empRow{alt}" style="justify-content:center;gap:12px;flex-wrap:wrap;">
        <span class="empName">{x["name"]}</span>
-       <span class="empStatus" style="color:{text_color};">{x["shift"]}</span>
+       <span style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:0.3px;">{date_range}</span>
+       <span class="empStatus" style="color:{text_color};">{shift_icon}</span>
      </div>"""
-            )
+                )
+            else:
+                # Normal shift - keep original format
+                emp_rows_html.append(
+                    f"""<div class="empRow{alt}">
+       <span class="empName">{x["name"]}</span>
+       <span class="empStatus" style="color:{text_color};">{shift_full}</span>
+     </div>"""
+                )
 
         shift_blocks.append(
             f"""
@@ -1152,6 +1172,9 @@ def main():
 
     with open("docs/now/index.html", "w", encoding="utf-8") as f:
         f.write(html_now)
+
+    # Generate historical pages for date picker
+    generate_historical_pages(wb, pages_base)
 
     # Email: send a dedicated email-safe template (better rendering in Gmail/Outlook)
     subject = f"Duty Roster — {active_group} — {now.strftime('%Y-%m-%d')}"
