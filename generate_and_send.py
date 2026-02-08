@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 
 TZ = ZoneInfo("Asia/Muscat")
 
-<<<<<<< HEAD
+
 # For day-row matching only
 DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
