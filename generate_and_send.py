@@ -1,44 +1,14 @@
-import os
-import re
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-from io import BytesIO
 
-import requests
-import json
-import calendar
-from openpyxl import load_workbook
+# generate_and_send.py (FINAL CLEAN FIX)
+import os
 import smtplib
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from email.mime.text import MIMEText
 
-
-# =========================
-# Settings / Secrets
-# =========================
-EXCEL_URL = os.environ.get("EXCEL_URL", "").strip()
-
-SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER", "").strip()
-SMTP_PASS = os.environ.get("SMTP_PASS", "").strip()
-MAIL_FROM = os.environ.get("MAIL_FROM", "").strip()
-MAIL_TO = os.environ.get("MAIL_TO", "").strip()
-
-SUBSCRIBE_URL = os.environ.get("SUBSCRIBE_URL", "").strip()
-SUBSCRIBE_TOKEN = os.environ.get("SUBSCRIBE_TOKEN", "").strip()
-
-PAGES_BASE_URL = os.environ.get("PAGES_BASE_URL", "").strip()  # optional
 TZ = ZoneInfo("Asia/Muscat")
-AUTO_OPEN_ACTIVE_SHIFT_IN_FULL = True
-# Excel sheets
-DEPARTMENTS = [
-    ("Officers", "Officers"),
-    ("Supervisors", "Supervisors"),
-    ("Load Control", "Load Control"),
-    ("Export Checker", "Export Checker"),
-    ("Export Operators", "Export Operators"),
-]
 
+<<<<<<< HEAD
 # For day-row matching only
 DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
@@ -812,392 +782,61 @@ def send_email(subject: str, html: str, mail_to: str):
     if not recipients:
         raise RuntimeError("MAIL_TO is empty (no recipients). Add MAIL_TO secret and/or subscribers.")
 
+=======
+SMTP_HOST = os.environ.get("SMTP_HOST","")
+SMTP_PORT = int(os.environ.get("SMTP_PORT","587"))
+SMTP_USER = os.environ.get("SMTP_USER","")
+SMTP_PASS = os.environ.get("SMTP_PASS","")
+MAIL_FROM = os.environ.get("MAIL_FROM","")
+MAIL_TO = os.environ.get("MAIL_TO","")
+
+SUBSCRIBE_URL = os.environ.get("SUBSCRIBE_URL","")
+SUBSCRIBE_TOKEN = os.environ.get("SUBSCRIBE_TOKEN","")
+
+def page_shell(now):
+    return f"""<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><title>Duty Roster</title></head>
+<body style="font-family:Arial;background:#eef1f7;padding:16px">
+<h2>📋 جدول المناوبين</h2>
+<p>📅 {now.strftime('%Y-%m-%d %H:%M')}</p>
+
+<div style="background:#fff;padding:14px;border-radius:14px">
+<form method="POST" action="__SUBSCRIBE_URL__" target="_blank">
+<input type="hidden" name="token" value="__SUBSCRIBE_TOKEN__">
+<input name="email" type="email" required placeholder="بريدك الإلكتروني">
+<button type="submit">اشترك</button>
+</form>
+</div>
+
+</body></html>"""
+
+def send_email(html):
+>>>>>>> 2da09e321d02b308cd703083e0eb3bc44f0616ff
     msg = MIMEText(html, "html", "utf-8")
-    msg["Subject"] = subject
     msg["From"] = MAIL_FROM
-    msg["To"] = ", ".join(recipients)
+    msg["To"] = MAIL_TO
+    msg["Subject"] = "Duty Roster"
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
         s.starttls()
         s.login(SMTP_USER, SMTP_PASS)
-        s.sendmail(MAIL_FROM, recipients, msg.as_string())
-
-def build_cards_for_date(wb, target_date: datetime, active_group: str):
-    """Build department cards HTML + totals for a given date."""
-    today_dow = (target_date.weekday() + 1) % 7  # Sun=0..Sat=6
-    today_day = target_date.day
-
-    dept_cards = []
-    employees_total = 0
-    depts_count = 0
-
-    for idx, (sheet_name, dept_name) in enumerate(DEPARTMENTS):
-        if sheet_name not in wb.sheetnames:
-            continue
-
-        ws = wb[sheet_name]
-        days_row, date_row = find_days_and_dates_rows(ws)
-        day_col = find_day_col(ws, days_row, date_row, today_dow, today_day)
-
-        if not (days_row and date_row and day_col):
-            continue
-
-        start_row = date_row + 1
-        emp_col = find_employee_col(ws, start_row=start_row)
-        if not emp_col:
-            continue
-
-        buckets = {k: [] for k in GROUP_ORDER}
-
-        for r in range(start_row, ws.max_row + 1):
-            name = norm(ws.cell(row=r, column=emp_col).value)
-            if not looks_like_employee_name(name):
-                continue
-
-            raw = norm(ws.cell(row=r, column=day_col).value)
-            if not looks_like_shift_code(raw):
-                continue
-
-            label, grp = map_shift(raw)
-            buckets.setdefault(grp, []).append({"name": name, "shift": label})
-
-        dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-        open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
-        dept_cards.append(dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full))
-
-        employees_total += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
-        depts_count += 1
-
-    return "\n".join(dept_cards), employees_total, depts_count
-
-
-
-
-def build_rows_for_email(wb, target_date: datetime, active_group: str):
-    """Return rows grouped by department for EMAIL (active shift only)."""
-    today_dow = (target_date.weekday() + 1) % 7  # Sun=0..Sat=6
-    today_day = target_date.day
-
-    rows_by_dept = []
-    for idx, (sheet_name, dept_name) in enumerate(DEPARTMENTS):
-        if sheet_name not in wb.sheetnames:
-            continue
-
-        ws = wb[sheet_name]
-        days_row, date_row = find_days_and_dates_rows(ws)
-        day_col = find_day_col(ws, days_row, date_row, today_dow, today_day)
-        if not (days_row and date_row and day_col):
-            continue
-
-        start_row = date_row + 1
-        emp_col = find_employee_col(ws, start_row=start_row)
-        if not emp_col:
-            continue
-
-        rows = []
-        for r in range(start_row, ws.max_row + 1):
-            name = norm(ws.cell(row=r, column=emp_col).value)
-            if not looks_like_employee_name(name):
-                continue
-
-            raw = norm(ws.cell(row=r, column=day_col).value)
-            if not looks_like_shift_code(raw):
-                continue
-
-            label, grp = map_shift(raw)
-            if grp == active_group:
-                rows.append({"name": name, "shift": label})
-
-        if not rows:
-            continue
-
-        dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-        base_color = dept_color.get("base") if isinstance(dept_color, dict) else str(dept_color)
-        rows_by_dept.append({"dept": dept_name, "color": base_color or "#2563eb", "rows": rows})
-
-    return rows_by_dept
-
-
-def page_shell_html_full_with_picker(month_iso: str, employees_total: int, departments_total: int, dept_cards_html: str, cta_url: str, sent_time: str):
-    """Full page with a date picker. It loads per-day HTML from ./data/roster.json."""
-    return f"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="x-apple-disable-message-reformatting">
-  <title>Duty Roster</title>
-  <style>
-{CSS}
-    /* Date picker inside header */
-    .datePicker {{
-      margin-top:10px;
-      background:rgba(255,255,255,.18);
-      padding:6px 14px;
-      border-radius:30px;
-      border:1px solid rgba(255,255,255,.30);
-      color:#fff;
-      font-size:13px;
-      font-weight:700;
-      outline:none;
-    }}
-    .datePicker::-webkit-calendar-picker-indicator {{
-      filter: invert(1);
-      opacity: .9;
-      cursor: pointer;
-    }}
-  </style>
-</head>
-<body>
-<div class="wrap">
-
-  <div class="header">
-    <h1>📋 Duty Roster</h1>
-    <input id="datePicker" class="datePicker" type="date" aria-label="Choose date">
-  </div>
-
-  <div class="summaryBar">
-    <div class="summaryChip">
-      <div id="empCount" class="chipVal">{employees_total}</div>
-      <div class="chipLabel">Employees</div>
-    </div>
-    <div class="summaryChip">
-      <div id="deptCount" class="chipVal" style="color:#059669;">{departments_total}</div>
-      <div class="chipLabel">Departments</div>
-    </div>
-  </div>
-
-  <div id="content">
-    {dept_cards_html}
-  </div>
-
-  <div class="btnWrap">
-    <a class="btn" href="{cta_url}">🌙 View NOW</a>
-  </div>
-
-  <div class="footer">
-    Sent at <strong>{sent_time}</strong>
-     &nbsp;·&nbsp; Month: <strong>{month_iso}</strong>
-  </div>
-
-</div>
-
-<script>
-(async function() {{
-  const picker = document.getElementById('datePicker');
-  const content = document.getElementById('content');
-  const empCount = document.getElementById('empCount');
-
-  const res = await fetch('./data/roster.json', {{ cache: 'no-store' }});
-  const data = await res.json();
-
-  const days = Object.keys(data.days || {{}}).sort();
-  if (!days.length) return;
-
-  const urlDate = new URLSearchParams(location.search).get('date');
-  const defaultDay = (urlDate && data.days[urlDate]) ? urlDate : (data.default_day || days[0]);
-
-  picker.min = days[0];
-  picker.max = days[days.length - 1];
-  picker.value = defaultDay;
-
-  function render(dayISO) {{
-    const d = data.days[dayISO];
-    if (!d) {{
-      content.innerHTML = '<div class="deptCard" style="padding:16px;text-align:center;">No data for this date.</div>';
-      empCount.textContent = '0';
-      return;
-    }}
-    content.innerHTML = d.cards_html || '';
-    empCount.textContent = String(d.employees_total || 0);
-    history.replaceState({{}}, '', '?date=' + dayISO);
-  }}
-
-  render(defaultDay);
-  picker.addEventListener('change', (e) => render(e.target.value));
-}})();
-</script>
-
-</body>
-</html>"""
-
-def load_subscribers() -> list[str]:
-    """Load subscriber emails from Google Apps Script (Google Sheet) via GET ?token=...
-
-    Expected JSON: {"ok": true, "emails": ["a@b.com", ...]}
-    """
-    if not SUBSCRIBE_URL or not SUBSCRIBE_TOKEN:
-        return []
-    try:
-        r = requests.get(SUBSCRIBE_URL, params={"token": SUBSCRIBE_TOKEN}, timeout=30)
-        r.raise_for_status()
-        j = r.json()
-        if j.get("ok"):
-            emails = []
-            for e in (j.get("emails") or []):
-                e = str(e).strip().lower()
-                if e and "@" in e:
-                    emails.append(e)
-            # unique preserve order
-            seen=set()
-            out=[]
-            for e in emails:
-                if e not in seen:
-                    seen.add(e)
-                    out.append(e)
-            return out
-    except Exception:
-        return []
-    return []
-
-
+        s.sendmail(MAIL_FROM, MAIL_TO.split(","), msg.as_string())
 
 def main():
-    if not EXCEL_URL:
-        raise RuntimeError("EXCEL_URL missing")
-
     now = datetime.now(TZ)
-    effective = roster_effective_datetime(now)
-    # Sun=0..Sat=6 (based on roster effective date)
-    today_dow = (effective.weekday() + 1) % 7
-    today_day = effective.day
+    html = page_shell(now)
 
-    active_group = current_shift_key(now)  # "صباح" / "ظهر" / "ليل"
-    pages_base = (PAGES_BASE_URL or infer_pages_base_url()).rstrip("/")
+    if SUBSCRIBE_URL:
+        html = html.replace("__SUBSCRIBE_URL__", SUBSCRIBE_URL)
+    if SUBSCRIBE_TOKEN:
+        html = html.replace("__SUBSCRIBE_TOKEN__", SUBSCRIBE_TOKEN)
 
-    data = download_excel(EXCEL_URL)
-    wb = load_workbook(BytesIO(data), data_only=True)
-
-    dept_cards_all = []
-    dept_cards_now = []
-    employees_total_all = 0
-    employees_total_now = 0
-    depts_count = 0
-
-    for idx, (sheet_name, dept_name) in enumerate(DEPARTMENTS):
-        if sheet_name not in wb.sheetnames:
-            continue
-
-        ws = wb[sheet_name]
-        days_row, date_row = find_days_and_dates_rows(ws)
-        day_col = find_day_col(ws, days_row, date_row, today_dow, today_day)
-
-        if not (days_row and date_row and day_col):
-            # skip if sheet layout unexpected
-            continue
-
-        start_row = date_row + 1
-        emp_col = find_employee_col(ws, start_row=start_row)
-        if not emp_col:
-            continue
-
-        buckets = {k: [] for k in GROUP_ORDER}
-        buckets_now = {k: [] for k in GROUP_ORDER}
-
-        for r in range(start_row, ws.max_row + 1):
-            name = norm(ws.cell(row=r, column=emp_col).value)
-            if not looks_like_employee_name(name):
-                continue
-
-            raw = norm(ws.cell(row=r, column=day_col).value)
-            if not looks_like_shift_code(raw):
-                continue
-
-            label, grp = map_shift(raw)
-            buckets.setdefault(grp, []).append({"name": name, "shift": label})
-
-            if grp == active_group:
-                buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
-
-        dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-        card_all = dept_card_html(dept_name, dept_color, buckets, open_group=None)
-        dept_cards_all.append(card_all)
-
-        # For NOW page: open the active shift group by default
-        card_now = dept_card_html(dept_name, dept_color, buckets_now, open_group=active_group)
-        dept_cards_now.append(card_now)
-
-        employees_total_all += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
-        employees_total_now += sum(len(buckets_now.get(g, [])) for g in GROUP_ORDER)
-
-        depts_count += 1
-
-    
-# pages
     os.makedirs("docs", exist_ok=True)
-    os.makedirs("docs/now", exist_ok=True)
-    os.makedirs("docs/data", exist_ok=True)
-
-    # Display date based on roster effective date
-    try:
-        date_label = effective.strftime("%-d %B %Y")
-    except Exception:
-        date_label = effective.strftime("%d %B %Y")
-
-    sent_time = now.strftime("%H:%M")
-
-    full_url = f"{pages_base}/"
-    now_url = f"{pages_base}/now/"
-
-    # Build per-day HTML for the whole month (static JSON for the date picker)
-    month_iso = effective.strftime("%Y-%m")
-    year = effective.year
-    month = effective.month
-    last_day = calendar.monthrange(year, month)[1]
-
-    roster_days = {}
-    for d in range(1, last_day + 1):
-        dt = effective.replace(day=d)
-        cards_html, emp_total, dept_total = build_cards_for_date(wb, dt, active_group)
-        day_iso = dt.strftime("%Y-%m-%d")
-        roster_days[day_iso] = {
-            "cards_html": cards_html,
-            "employees_total": emp_total,
-            "departments_total": dept_total,
-        }
-
-    default_day = effective.strftime("%Y-%m-%d")
-    with open("docs/data/roster.json", "w", encoding="utf-8") as f:
-        json.dump({"month": month_iso, "default_day": default_day, "days": roster_days}, f, ensure_ascii=False)
-
-    # Full page with picker (initially renders default day)
-    cards_today, emp_today, dept_today = build_cards_for_date(wb, effective, active_group)
-    html_full = page_shell_html_full_with_picker(
-        month_iso=month_iso,
-        employees_total=emp_today,
-        departments_total=dept_today,
-        dept_cards_html=cards_today,
-        cta_url=now_url,
-        sent_time=sent_time,
-    )
-
-    html_now = page_shell_html(
-        date_label=date_label,
-        employees_total=employees_total_now,
-        departments_total=depts_count,
-        dept_cards_html="\n".join(dept_cards_now),
-        cta_url=full_url,  # button on now page goes to FULL page
-        sent_time=sent_time,
-    )
-
     with open("docs/index.html", "w", encoding="utf-8") as f:
-        f.write(html_full)
+        f.write(html)
 
-    with open("docs/now/index.html", "w", encoding="utf-8") as f:
-        f.write(html_now)
-
-    # Email: send NOW page design (same exact template)
-    subject = f"Duty Roster — {active_group} — {effective.strftime('%Y-%m-%d')}"
-    rows_by_dept = build_rows_for_email(wb, effective, active_group)
-    email_html = build_pretty_email_html(active_group, now, rows_by_dept, pages_base)
-
-    # ✅ Merge manual recipients (MAIL_TO) + subscribers from Google Sheet
-    manual = [x.strip().lower() for x in MAIL_TO.split(",") if x.strip()]
-    subs = load_subscribers()
-    all_recipients = sorted(set(manual + subs))
-    mail_to_final = ",".join(all_recipients)
-
-    send_email(subject, email_html, mail_to_final)
+    send_email(html)
 
 if __name__ == "__main__":
     main()
