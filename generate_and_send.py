@@ -1243,7 +1243,7 @@ def main():
 
     dept_cards_all = []
     dept_cards_now = []
-    rows_by_dept = []  # for email (NOW only)
+    all_shifts_by_dept = []  # ← للإيميل: كل المناوبات
     employees_total_all = 0
     employees_total_now = 0
     depts_count = 0
@@ -1299,14 +1299,14 @@ def main():
                     suf = range_suffix_for_day(today_day, daynum_to_raw, "TR")
                     if suf:
                         label = f"{label} {suf}"
+            
             buckets.setdefault(grp, []).append({"name": name, "shift": label})
 
             if grp == active_group:
                 buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
 
-        # Collect NOW rows for email (current shift only)
-        now_rows = buckets_now.get(active_group, [])
-        rows_by_dept.append({"dept": dept_name, "rows": now_rows})
+        # ← جمع كل المناوبات للإيميل
+        all_shifts_by_dept.append({"dept": dept_name, "shifts": buckets})
 
         # تحديد اللون للقسم
         if dept_name == "Unassigned":
@@ -1338,9 +1338,7 @@ def main():
     except Exception:
         date_label = now.strftime("%d %B %Y")
 
-
     iso_date = now.strftime("%Y-%m-%d")
-
     sent_time = now.strftime("%H:%M")
 
     full_url = f"{pages_base}/"
@@ -1371,9 +1369,9 @@ def main():
     with open("docs/now/index.html", "w", encoding="utf-8") as f:
         f.write(html_now)
 
-    # Email: send a dedicated email-safe template (better rendering in Gmail/Outlook)
-    subject = f"Duty Roster — {active_group} — {now.strftime('%Y-%m-%d')}"
-    email_html = build_pretty_email_html(active_group, now, rows_by_dept, pages_base)
+    # Email: send all shifts for today
+    subject = f"Duty Roster — {now.strftime('%d %B %Y')} — {active_group} Active"
+    email_html = build_pretty_email_html(active_group, now, all_shifts_by_dept, pages_base)
     send_email(subject, email_html)
 
 
