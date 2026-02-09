@@ -1,5 +1,6 @@
 import os
 import re
+import argparse
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from io import BytesIO
@@ -101,7 +102,7 @@ def looks_like_shift_code(s: str) -> bool:
         return False
     if looks_like_time(v):
         return False
-    if v in ["OFF", "O", "LV", "TR", "ST", "SL", "AL", "STM", "STN"]:
+    if v in ["OFF", "O", "LV", "TR", "ST", "SL", "AL", "STM", "STN", "STNE22", "STME06", "STMN06", "STAE14", "OT"]:
         return True
     if re.match(r"^(MN|AN|NN|NT|ME|AE|NE)\d{1,2}", v):
         return True
@@ -123,8 +124,10 @@ def map_shift(code: str):
         return ("🏖️ Leave", "إجازات")
     if c in ["TR"] or "TRAINING" in c:
         return ("📚 Training", "تدريب")
-    if c in ["ST", "STM", "STN"] or "STANDBY" in c:
+    if c in ["ST", "STM", "STN", "STNE22", "STME06", "STMN06", "STAE14"] or "STANDBY" in c:
         return ("🧍 Standby", "مناوبات")
+    if c == "OT" or c.startswith("OT"):
+        return ("⏱️ OT", "مناوبات")
     if c in ["OFF", "O"] or re.search(r"(REST|OFF\s*DAY|REST\/OFF)", c):
         return ("🛌 Off Day", "راحة")
 
@@ -222,6 +225,50 @@ def find_day_col(ws, days_row: int, date_row: int, today_dow: int, today_day: in
             return c
 
     return None
+
+
+def get_daynum_to_col(ws, date_row: int):
+    m = {}
+    for c in range(1, ws.max_column + 1):
+        v = norm(ws.cell(row=date_row, column=c).value)
+        if _is_date_number(v):
+            m[int(float(v))] = c
+    return m
+
+def _matches_kind(raw: str, kind: str) -> bool:
+    up = norm(raw).upper()
+    if not up:
+        return False
+    if kind == "AL":
+        return up == "AL" or "ANNUAL LEAVE" in up or up == "LV"
+    if kind == "TR":
+        return up == "TR" or "TRAINING" in up
+    if kind == "SL":
+        return up == "SL" or "SICK LEAVE" in up
+    return False
+
+def range_suffix_for_day(daynum: int, daynum_to_raw: dict[int, str], kind: str) -> str:
+    """
+    If the given day is inside a consecutive multi-day block of kind (AL/TR/SL),
+    return Arabic suffix: (من X إلى Y). Otherwise ''.
+    """
+    if daynum not in daynum_to_raw or not _matches_kind(daynum_to_raw.get(daynum, ""), kind):
+        return ""
+    # walk left
+    start = daynum
+    d = daynum - 1
+    while d >= 1 and _matches_kind(daynum_to_raw.get(d, ""), kind):
+        start = d
+        d -= 1
+    # walk right
+    end = daynum
+    d = daynum + 1
+    while d <= 31 and _matches_kind(daynum_to_raw.get(d, ""), kind):
+        end = d
+        d += 1
+    if start == end:
+        return ""
+    return f"(من {start} إلى {end})"
 
 def find_employee_col(ws, start_row: int, max_scan_rows: int = 200):
     scores = {}
@@ -521,7 +568,7 @@ def dept_card_html(dept_name: str, dept_color: str, buckets: dict, open_group: s
     </div>
     """
 
-def page_shell_html(date_label: str, employees_total: int, departments_total: int, dept_cards_html: str, cta_url: str, sent_time: str):
+def page_shell_html(date_label: str, iso_date: str, employees_total: int, departments_total: int, dept_cards_html: str, cta_url: str, sent_time: str):
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -539,7 +586,8 @@ def page_shell_html(date_label: str, employees_total: int, departments_total: in
   <!-- ════ HEADER ════ -->
   <div class="header">
     <h1>📋 Duty Roster</h1>
-    <div class="dateTag">📅 {date_label}</div>
+    <div class="dateTag" id="dateTag" role="button" tabindex="0" style="cursor:pointer;">📅 {date_label}</div>
+    <input id="datePicker" type="date" value="{iso_date}" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;" aria-hidden="true" />
   </div>
 
   <!-- ════ SUMMARY CHIPS ════ -->
@@ -569,8 +617,163 @@ def page_shell_html(date_label: str, employees_total: int, departments_total: in
   </div>
 
 </div>
+
+<script>
+(function(){{
+  var tag = document.getElementById('dateTag');
+  var picker = document.getElementById('datePicker');
+  if(!tag || !picker) return;
+
+  function openPicker(){{
+    // Position the (hidden) input مباشرة تحت التاريخ حتى يظهر التقويم بالمكان الصحيح
+    try{{
+      var r = tag.getBoundingClientRect();
+      var wrap = tag.closest('.header') || document.body;
+      var wr = wrap.getBoundingClientRect();
+      picker.style.left = (r.left - wr.left) + 'px';
+      picker.style.top  = (r.bottom - wr.top + 6) + 'px';
+      picker.style.width = Math.max(120, r.width) + 'px';
+    }}catch(e){{}}
+
+    try{{
+      if (picker.showPicker) {{ picker.showPicker(); }}
+      else {{ picker.focus(); picker.click(); }}
+    }}catch(e){{
+      picker.focus(); picker.click();
+    }}
+  }}
+
+  tag.addEventListener('click', openPicker);
+  tag.addEventListener('keydown', function(e){{
+    if(e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); openPicker(); }}
+  }});
+
+  function computeBasePath(){{
+    var p = window.location.pathname || '/';
+    // Strip "/now/" and anything after it
+    p = p.replace(/\/now\/.*$/,'/');
+    // Strip "/date/YYYY-MM-DD/" and anything after it
+    p = p.replace(/\/date\/\d{{4}}-\d{{2}}-\d{{2}}\/.*$/,'/');
+    return p.replace(/\/+$/,''); // no trailing slash
+  }}
+
+  picker.addEventListener('change', function(){{
+    if(!picker.value) return;
+    var base = computeBasePath();
+    var target = base + '/date/' + picker.value + '/';
+    window.location.href = target;
+  }});
+}})();
+</script>
+
 </body>
 </html>"""
+
+
+def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str):
+    """
+    Generates static pages for each day number found in each sheet's date row.
+    Output: docs/date/YYYY-MM-DD/index.html
+    NOTE: Assumes roster workbook represents the given (year, month).
+    """
+    os.makedirs("docs/date", exist_ok=True)
+
+    for day in range(1, 32):
+        try:
+            dt = datetime(year, month, day, tzinfo=TZ)
+        except Exception:
+            continue
+
+        # Build cards across departments for this date
+        today_dow = (dt.weekday() + 1) % 7  # SUN=0..SAT=6
+        today_day = dt.day
+        active_group = current_shift_key(dt)  # used only for which group to open
+
+        dept_cards_all = []
+        employees_total_all = 0
+        depts_count = 0
+
+        for idx, (sheet_name, dept_name) in enumerate(DEPARTMENTS):
+            if sheet_name not in wb.sheetnames:
+                continue
+            ws = wb[sheet_name]
+            days_row, date_row = find_days_and_dates_rows(ws)
+            day_col = find_day_col(ws, days_row, date_row, today_dow, today_day)
+            if not (days_row and date_row and day_col):
+                continue
+
+            start_row = date_row + 1
+            emp_col = find_employee_col(ws, start_row=start_row)
+            daynum_to_col = get_daynum_to_col(ws, date_row)
+            if not emp_col:
+                continue
+
+            buckets = {k: [] for k in GROUP_ORDER}
+
+            for r in range(start_row, ws.max_row + 1):
+                name = norm(ws.cell(row=r, column=emp_col).value)
+                if not looks_like_employee_name(name):
+                    continue
+
+                daynum_to_raw = {dn: norm(ws.cell(row=r, column=col).value) for dn, col in daynum_to_col.items()}
+                raw = daynum_to_raw.get(today_day, "")
+                if not looks_like_shift_code(raw):
+                    continue
+
+                label, grp = map_shift(raw)
+
+                up = norm(raw).upper()
+                if grp == "إجازات":
+                    if up == "AL" or "ANNUAL LEAVE" in up or up == "LV":
+                        suf = range_suffix_for_day(today_day, daynum_to_raw, "AL")
+                        if suf:
+                            label = f"{label} {suf}"
+                    elif up == "SL" or "SICK LEAVE" in up:
+                        suf = range_suffix_for_day(today_day, daynum_to_raw, "SL")
+                        if suf:
+                            label = f"{label} {suf}"
+                elif grp == "تدريب":
+                    if up == "TR" or "TRAINING" in up:
+                        suf = range_suffix_for_day(today_day, daynum_to_raw, "TR")
+                        if suf:
+                            label = f"{label} {suf}"
+
+                buckets.setdefault(grp, []).append({"name": name, "shift": label})
+
+            dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
+            open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
+            dept_cards_all.append(dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full))
+
+            employees_total_all += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
+            depts_count += 1
+
+        # skip empty dates (no departments)
+        if depts_count == 0:
+            continue
+
+        # date labels
+        try:
+            date_label = dt.strftime("%-d %B %Y")
+        except Exception:
+            date_label = dt.strftime("%d %B %Y")
+        iso_date = dt.strftime("%Y-%m-%d")
+        sent_time = datetime.now(TZ).strftime("%H:%M")
+
+        full_url = f"{pages_base}/"
+        html = page_shell_html(
+            date_label=date_label,
+            iso_date=iso_date,
+            employees_total=employees_total_all,
+            departments_total=depts_count,
+            dept_cards_html="\n".join(dept_cards_all),
+            cta_url=full_url,
+            sent_time=sent_time,
+        )
+
+        out_dir = os.path.join("docs", "date", iso_date)
+        os.makedirs(out_dir, exist_ok=True)
+        with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
+            f.write(html)
 
 
 def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list, pages_base: str) -> str:
@@ -585,6 +788,10 @@ def build_pretty_email_html(active_group: str, now: datetime, rows_by_dept: list
         date_label = now.strftime("%d %B %Y")
 
     sent_time = now.strftime("%H:%M")
+
+    iso_date = now.strftime("%Y-%m-%d")
+
+    iso_date = now.strftime("%Y-%m-%d")
 
     # Shift theme (for status color)
     def shift_theme(g: str):
@@ -788,7 +995,17 @@ def main():
     if not EXCEL_URL:
         raise RuntimeError("EXCEL_URL missing")
 
+    parser = argparse.ArgumentParser(description='Generate roster pages and send email')
+    parser.add_argument('--date', help='Override roster date (YYYY-MM-DD)')
+    args = parser.parse_args()
+
     now = datetime.now(TZ)
+    if args.date:
+        try:
+            y, m, d = [int(x) for x in args.date.strip().split('-')]
+            now = datetime(y, m, d, now.hour, now.minute, tzinfo=TZ)
+        except Exception:
+            raise RuntimeError('Invalid --date format. Use YYYY-MM-DD')
     # Sun=0..Sat=6
     today_dow = (now.weekday() + 1) % 7
     today_day = now.day
@@ -798,6 +1015,9 @@ def main():
 
     data = download_excel(EXCEL_URL)
     wb = load_workbook(BytesIO(data), data_only=True)
+
+    # Generate static pages for each date in the current month (used by the date picker)
+    generate_date_pages_for_month(wb, now.year, now.month, pages_base)
 
     dept_cards_all = []
     dept_cards_now = []
@@ -820,6 +1040,7 @@ def main():
 
         start_row = date_row + 1
         emp_col = find_employee_col(ws, start_row=start_row)
+        daynum_to_col = get_daynum_to_col(ws, date_row)
         if not emp_col:
             continue
 
@@ -831,11 +1052,31 @@ def main():
             if not looks_like_employee_name(name):
                 continue
 
-            raw = norm(ws.cell(row=r, column=day_col).value)
+            # Collect this employee's row values for all date columns (for ranges)
+            daynum_to_raw = {dn: norm(ws.cell(row=r, column=col).value) for dn, col in daynum_to_col.items()}
+
+            raw = daynum_to_raw.get(today_day, "")
             if not looks_like_shift_code(raw):
                 continue
 
             label, grp = map_shift(raw)
+
+            # Add date ranges for multi-day AL/TR/SL blocks
+            up = norm(raw).upper()
+            if grp == "إجازات":
+                if up == "AL" or "ANNUAL LEAVE" in up or up == "LV":
+                    suf = range_suffix_for_day(today_day, daynum_to_raw, "AL")
+                    if suf:
+                        label = f"{label} {suf}"
+                elif up == "SL" or "SICK LEAVE" in up:
+                    suf = range_suffix_for_day(today_day, daynum_to_raw, "SL")
+                    if suf:
+                        label = f"{label} {suf}"
+            elif grp == "تدريب":
+                if up == "TR" or "TRAINING" in up:
+                    suf = range_suffix_for_day(today_day, daynum_to_raw, "TR")
+                    if suf:
+                        label = f"{label} {suf}"
             buckets.setdefault(grp, []).append({"name": name, "shift": label})
 
             if grp == active_group:
@@ -870,6 +1111,9 @@ def main():
     except Exception:
         date_label = now.strftime("%d %B %Y")
 
+
+    iso_date = now.strftime("%Y-%m-%d")
+
     sent_time = now.strftime("%H:%M")
 
     full_url = f"{pages_base}/"
@@ -877,6 +1121,7 @@ def main():
 
     html_full = page_shell_html(
         date_label=date_label,
+        iso_date=iso_date,
         employees_total=employees_total_all,
         departments_total=depts_count,
         dept_cards_html="\n".join(dept_cards_all),
@@ -885,6 +1130,7 @@ def main():
     )
     html_now = page_shell_html(
         date_label=date_label,
+        iso_date=iso_date,
         employees_total=employees_total_now,
         departments_total=depts_count,
         dept_cards_html="\n".join(dept_cards_now),
