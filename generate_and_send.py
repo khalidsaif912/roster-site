@@ -159,7 +159,7 @@ def download_excel(url: str) -> bytes:
     return r.content
 
 def infer_pages_base_url():
-    return "https://khalidsaif912.github.io/roster-site/now/"
+    return "https://khalidsaif912.github.io/roster-site"
 
 
 # =========================
@@ -265,22 +265,45 @@ def range_suffix_for_day(day: int, daynum_to_raw: dict, code_key: str):
     up_key = code_key.upper()
     start = end = day
 
-    # backward
+    # تحديد الأكواد المقبولة لهذا النوع من الإجازة/التدريب
+    acceptable_codes = []
+    if up_key in ["AL", "LV"] or "ANNUAL" in up_key:
+        # الإجازة السنوية
+        acceptable_codes = ["AL", "LV", "ANNUAL LEAVE"]
+    elif up_key == "SL" or "SICK" in up_key:
+        # الإجازة المرضية
+        acceptable_codes = ["SL", "SICK LEAVE"]
+    elif up_key == "TR" or "TRAINING" in up_key:
+        # التدريب
+        acceptable_codes = ["TR", "TRAINING"]
+    else:
+        # أي كود آخر - يجب أن يكون مطابق تماماً
+        acceptable_codes = [up_key]
+
+    def is_same_type(val: str) -> bool:
+        """تحقق إذا كان الكود من نفس النوع"""
+        val_upper = val.upper()
+        for code in acceptable_codes:
+            if code in val_upper or val_upper == code:
+                return True
+        return False
+
+    # backward - البحث للخلف
     for d in reversed(sorted_days):
         if d >= day:
             continue
-        val = norm(daynum_to_raw.get(d, "")).upper()
-        if val == up_key or val == "AL" or "ANNUAL LEAVE" in val or val == "SL" or "SICK LEAVE" in val or val == "TR" or "TRAINING" in val:
+        val = norm(daynum_to_raw.get(d, ""))
+        if is_same_type(val):
             start = d
         else:
             break
 
-    # forward
+    # forward - البحث للأمام
     for d in sorted_days:
         if d <= day:
             continue
-        val = norm(daynum_to_raw.get(d, "")).upper()
-        if val == up_key or val == "AL" or "ANNUAL LEAVE" in val or val == "SL" or "SICK LEAVE" in val or val == "TR" or "TRAINING" in val:
+        val = norm(daynum_to_raw.get(d, ""))
+        if is_same_type(val):
             end = d
         else:
             break
@@ -288,6 +311,9 @@ def range_suffix_for_day(day: int, daynum_to_raw: dict, code_key: str):
     if start == end:
         return ""
     return f"(من {start} إلى {end})"
+
+
+
 
 # =========================
 # Department card colors
@@ -1228,13 +1254,20 @@ def main():
             now = datetime(y, m, d, now.hour, now.minute, tzinfo=TZ)
         except Exception:
             raise RuntimeError('Invalid --date format. Use YYYY-MM-DD')
-    # Sun=0..Sat=6
+    
     today_dow = (now.weekday() + 1) % 7
     today_day = now.day
 
-    active_group = current_shift_key(now)  # "Morning" / "Afternoon" / "Night"
-    pages_base = (PAGES_BASE_URL or infer_pages_base_url()).rstrip("/")
-
+    active_group = current_shift_key(now)
+    
+    # ← الحصول على pages_base وتنظيفه
+    pages_base_raw = PAGES_BASE_URL or infer_pages_base_url()
+    # إزالة أي سلاش من النهاية
+    pages_base = pages_base_raw.rstrip("/")
+    # إزالة /now من النهاية إن وجدت
+    if pages_base.endswith("/now"):
+        pages_base = pages_base[:-4]
+    
     data = download_excel(EXCEL_URL)
     wb = load_workbook(BytesIO(data), data_only=True)
 
@@ -1243,7 +1276,7 @@ def main():
 
     dept_cards_all = []
     dept_cards_now = []
-    all_shifts_by_dept = []  # ← للإيميل: كل المناوبات
+    all_shifts_by_dept = []
     employees_total_all = 0
     employees_total_now = 0
     depts_count = 0
@@ -1257,7 +1290,6 @@ def main():
         day_col = find_day_col(ws, days_row, date_row, today_dow, today_day)
 
         if not (days_row and date_row and day_col):
-            # skip if sheet layout unexpected
             continue
 
         start_row = date_row + 1
@@ -1274,7 +1306,6 @@ def main():
             if not looks_like_employee_name(name):
                 continue
 
-            # Collect this employee's row values for all date columns (for ranges)
             daynum_to_raw = {dn: norm(ws.cell(row=r, column=col).value) for dn, col in daynum_to_col.items()}
 
             raw = daynum_to_raw.get(today_day, "")
@@ -1283,7 +1314,6 @@ def main():
 
             label, grp = map_shift(raw)
 
-            # Add date ranges for multi-day AL/TR/SL blocks
             up = norm(raw).upper()
             if grp == "Leave":
                 if up == "AL" or "ANNUAL LEAVE" in up or up == "LV":
@@ -1305,10 +1335,8 @@ def main():
             if grp == active_group:
                 buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
 
-        # ← جمع كل المناوبات للإيميل
         all_shifts_by_dept.append({"dept": dept_name, "shifts": buckets})
 
-        # تحديد اللون للقسم
         if dept_name == "Unassigned":
             dept_color = UNASSIGNED_COLOR
         else:
@@ -1318,7 +1346,6 @@ def main():
         card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
         dept_cards_all.append(card_all)
 
-        # For NOW page: open the active shift group by default
         card_now = dept_card_html(dept_name, dept_color, buckets_now, open_group=active_group)
         dept_cards_now.append(card_now)
 
@@ -1327,12 +1354,9 @@ def main():
 
         depts_count += 1
 
-    # pages
     os.makedirs("docs", exist_ok=True)
     os.makedirs("docs/now", exist_ok=True)
 
-    date_label = now.strftime("%-d %B %Y") if hasattr(now, "strftime") else now.strftime("%d %B %Y")
-    # Windows runners sometimes don't support %-d; safe fallback
     try:
         date_label = now.strftime("%-d %B %Y")
     except Exception:
@@ -1350,7 +1374,7 @@ def main():
         employees_total=employees_total_all,
         departments_total=depts_count,
         dept_cards_html="\n".join(dept_cards_all),
-        cta_url=now_url,   # button on full page goes to NOW page
+        cta_url=now_url,
         sent_time=sent_time,
     )
     html_now = page_shell_html(
@@ -1359,7 +1383,7 @@ def main():
         employees_total=employees_total_now,
         departments_total=depts_count,
         dept_cards_html="\n".join(dept_cards_now),
-        cta_url=full_url,  # button on now page goes to FULL page
+        cta_url=full_url,
         sent_time=sent_time,
     )
 
