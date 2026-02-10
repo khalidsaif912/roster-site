@@ -1,252 +1,218 @@
-<!DOCTYPE html>
-<html dir="rtl">
+<!doctype html>
+<html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <title>نموذج الاشتراك</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 28px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        input,
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 14px;
-            font-family: Arial, sans-serif;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.1);
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .message {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            display: none;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-        
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            color: #667eea;
-            margin-top: 20px;
-        }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 10px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Subscribe — Duty Roster</title>
+
+  <!-- favicon -->
+  <link rel="icon" href="/roster-site/favicon.ico">
+
+  <style>
+    body{margin:0;background:#eef1f7;font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;-webkit-font-smoothing:antialiased;}
+    *{box-sizing:border-box;}
+    .wrap{max-width:680px;margin:0 auto;padding:16px 14px 28px;}
+    .header{background:linear-gradient(135deg,#1e40af 0%,#1976d2 50%,#0ea5e9 100%);color:#fff;padding:24px 18px 18px;border-radius:20px;text-align:center;box-shadow:0 8px 28px rgba(30,64,175,.25);position:relative;overflow:hidden;}
+    .header:before{content:'';position:absolute;top:-30px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08);}
+    .header:after{content:'';position:absolute;bottom:-50px;left:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06);}
+    .header h1{margin:0;font-size:24px;font-weight:900;letter-spacing:-.3px;position:relative;z-index:1;}
+    .header p{margin:10px 0 0;font-size:14px;opacity:.92;line-height:1.6;position:relative;z-index:1;}
+    .topBar{margin-top:12px;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;position:relative;z-index:1;}
+    .miniBtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:12px;font-weight:900;text-decoration:none;cursor:pointer;user-select:none;}
+    .card{margin-top:16px;background:#fff;border-radius:18px;border:1px solid rgba(15,23,42,.07);box-shadow:0 4px 18px rgba(15,23,42,.08);overflow:hidden;}
+    .cardHead{padding:14px 16px;border-bottom:1px solid rgba(15,23,42,.06);display:flex;justify-content:space-between;align-items:center;}
+    .cardTitle{font-size:16px;font-weight:900;letter-spacing:-.2px;}
+    .badge{background:#f1f5f9;border:1px solid rgba(15,23,42,.08);color:#475569;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900;}
+    .cardBody{padding:14px 16px;}
+    .label{font-size:12px;font-weight:900;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+    .input{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(15,23,42,.14);font-size:14px;outline:none;}
+    .help{margin-top:10px;font-size:12px;color:#64748b;line-height:1.7;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+    .opt{flex:1;min-width:260px;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid rgba(15,23,42,.10);background:#f8fafc;font-size:13px;font-weight:900;cursor:pointer;user-select:none;}
+    .opt input{margin:0;}
+    .btn{width:100%;margin-top:14px;padding:14px 16px;border:0;border-radius:16px;background:linear-gradient(135deg,#1e40af,#1976d2);color:#fff;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 6px 20px rgba(30,64,175,.3);}
+    .btn[disabled]{opacity:.7;cursor:not-allowed;}
+    .footer{margin-top:18px;text-align:center;font-size:12px;color:#94a3b8;padding:12px 0;line-height:1.9;}
+
+    .msg{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.10);
+      background:#f8fafc;
+      font-size:13px;
+      font-weight:800;
+      color:#0f172a;
+      display:none;
+      line-height:1.6;
+    }
+    .msg.ok{border-color:rgba(5,150,105,.25); background:rgba(5,150,105,.08); color:#065f46;}
+    .msg.err{border-color:rgba(220,38,38,.25); background:rgba(220,38,38,.06); color:#991b1b;}
+
+    [dir="rtl"] .cardHead{flex-direction:row-reverse;}
+    [dir="rtl"] .opt{flex-direction:row-reverse;}
+    [dir="rtl"] .topBar{flex-direction:row-reverse;}
+
+    @media (max-width:520px){
+      .wrap{padding:12px 10px 22px;}
+      .header h1{font-size:21px;}
+      .miniBtn{width:100%;}
+      .topBar{gap:8px;}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔔 الاشتراك في جدول الخدمة</h1>
-        
-        <form id="subscriptionForm">
-            <div class="form-group">
-                <label for="email">البريد الإلكتروني:</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    placeholder="your@email.com"
-                    required
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="mode">نوع الطلب:</label>
-                <select id="mode" name="mode">
-                    <option value="subscribe">اشتراك</option>
-                    <option value="unsubscribe">إلغاء الاشتراك</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="lang">اللغة المفضلة:</label>
-                <select id="lang" name="lang">
-                    <option value="ar">العربية 🇸🇦</option>
-                    <option value="en">English 🇺🇸</option>
-                </select>
-            </div>
-
-            <button type="submit" id="submitBtn">إرسال ✓</button>
-        </form>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>جاري الإرسال...</p>
-        </div>
-
-        <div id="message" class="message"></div>
+  <div class="wrap">
+    <div class="header">
+      <h1 id="tTitle">📩 Subscribe</h1>
+      <p id="tSub">We will send you a confirmation link by email to activate your subscription.</p>
+      <div class="topBar">
+        <a class="miniBtn" href="../" id="tBack">⬅️ Back</a>
+        <div class="miniBtn" id="langBtn">AR</div>
+      </div>
     </div>
 
-    <script>
-        // ⚠️ استبدل هذا الرابط برابطك الخاص
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkucdwj4rx578-qHWggGPp8KrRT1a37-x2hgPXND4HuyFQ3xBIN-_fMkGFToRA-TUD/exec';
+    <div class="card">
+      <div class="cardHead">
+        <div class="cardTitle" id="tCardTitle">Subscription</div>
+        <div class="badge" id="tBadge">Simple</div>
+      </div>
 
-        const form = document.getElementById('subscriptionForm');
-        const messageDiv = document.getElementById('message');
-        const loadingDiv = document.getElementById('loading');
-        const submitBtn = document.getElementById('submitBtn');
+      <div class="cardBody">
+        <!-- ✅ رابط Web App -->
+        <script>
+          const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxkucdwj4rx578-qHWggGPp8KrRT1a37-x2hgPXND4HuyFQ3xBIN-_fMkGFToRA-TUD/exec";
+        </script>
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        <!-- iframe مخفي عشان ما يفتح تبويب جديد -->
+        <iframe name="hidden_iframe" style="display:none;"></iframe>
 
-            // الحصول على البيانات
-            const email = document.getElementById('email').value.trim();
-            const mode = document.getElementById('mode').value;
-            const lang = document.getElementById('lang').value;
+        <form method="POST" target="hidden_iframe" id="subForm">
+          <div class="label" id="tEmailLbl">Email</div>
+          <input class="input" type="email" name="email" required placeholder="name@example.com" autocomplete="email">
 
-            // التحقق من البريد
-            if (!email || !isValidEmail(email)) {
-                showMessage('خطأ: البريد الإلكتروني غير صحيح', 'error');
-                return;
-            }
+          <input type="hidden" name="lang" id="langField" value="en">
 
-            // إظهار حالة التحميل
-            loadingDiv.style.display = 'block';
-            messageDiv.style.display = 'none';
-            submitBtn.disabled = true;
+          <div style="height:12px"></div>
+          <div class="label" id="tModeLbl">Delivery</div>
 
-            try {
-                // إرسال البيانات
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        email: email,
-                        mode: mode,
-                        lang: lang
-                    })
-                });
+          <div class="row">
+            <label class="opt">
+              <input type="radio" name="mode" value="ALL" checked>
+              <span id="tAll">All shifts — once daily</span>
+            </label>
+            <label class="opt">
+              <input type="radio" name="mode" value="CURRENT">
+              <span id="tCur">Current shift — 3× daily (each shift once)</span>
+            </label>
+          </div>
 
-                const text = await response.text();
+          <button class="btn" type="submit" id="submitBtn">✅ Subscribe</button>
 
-                // إظهار الرسالة
-                loadingDiv.style.display = 'none';
-                showMessage(text, 'success');
+          <div class="help" id="tHelp">
+            After you click Subscribe, we will send a confirmation link to your email. Please confirm to activate.
+          </div>
 
-                // إعادة تعيين النموذج
-                form.reset();
+          <div class="msg" id="msgBox"></div>
+        </form>
+      </div>
+    </div>
 
-            } catch (error) {
-                loadingDiv.style.display = 'none';
-                console.error('Error:', error);
-                showMessage('خطأ: حدث خطأ في الاتصال. حاول لاحقاً', 'error');
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
+    <div class="footer" id="tFoot">Duty Roster · Subscribe</div>
+  </div>
 
-        // دالة للتحقق من صحة البريد
-        function isValidEmail(email) {
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return regex.test(email);
-        }
+  <script>
+    // bind action
+    const form = document.getElementById('subForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const msgBox = document.getElementById('msgBox');
 
-        // دالة لإظهار الرسائل
-        function showMessage(text, type) {
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-        }
-    </script>
+    function showMsg(type, text){
+      msgBox.className = 'msg ' + (type || '');
+      msgBox.textContent = text;
+      msgBox.style.display = 'block';
+    }
+
+    // حماية بسيطة: إذا الرابط غلط
+    if (!WEB_APP_URL || !WEB_APP_URL.startsWith('https://script.google.com/macros/s/')) {
+      showMsg('err', 'WEB_APP_URL is not set correctly.');
+      submitBtn.disabled = true;
+    }
+
+    form.action = WEB_APP_URL;
+
+    let lang = "en";
+    const T = {
+      en: {
+        title:"📩 Subscribe",
+        sub:"We will send you a confirmation link by email to activate your subscription.",
+        back:"⬅️ Back",
+        cardTitle:"Subscription",
+        badge:"Simple",
+        emailLbl:"Email",
+        modeLbl:"Delivery",
+        all:"All shifts — once daily",
+        cur:"Current shift — 3× daily (each shift once)",
+        submit:"✅ Subscribe",
+        help:"After you click Subscribe, we will send a confirmation link to your email. Please confirm to activate.",
+        foot:"Duty Roster · Subscribe",
+        langBtn:"AR",
+        ok:"✅ Request sent! Check your email and click the confirmation link.",
+        err:"❌ Could not submit. Please try again."
+      },
+      ar: {
+        title:"📩 الاشتراك",
+        sub:"سيصلك بريد إلكتروني يحتوي رابطًا لتأكيد الاشتراك وتفعيله.",
+        back:"⬅️ رجوع",
+        cardTitle:"الاشتراك",
+        badge:"بسيط",
+        emailLbl:"البريد الإلكتروني",
+        modeLbl:"طريقة الإرسال",
+        all:"كل المناوبات — مرة يوميًا",
+        cur:"المناوبة الحالية — 3 مرات يوميًا (كل مناوبة مرة)",
+        submit:"✅ اشترك",
+        help:"بعد الضغط على اشترك سنرسل رابط تأكيد إلى بريدك. اضغط الرابط لتفعيل الاشتراك.",
+        foot:"Duty Roster · الاشتراك",
+        langBtn:"EN",
+        ok:"✅ تم إرسال الطلب! افحص بريدك واضغط رابط التأكيد.",
+        err:"❌ تعذر الإرسال. حاول مرة أخرى."
+      }
+    };
+
+    function applyLang(){
+      const t = T[lang];
+      document.documentElement.lang = lang;
+      document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
+      tTitle.textContent = t.title;
+      tSub.textContent = t.sub;
+      tBack.textContent = t.back;
+      tCardTitle.textContent = t.cardTitle;
+      tBadge.textContent = t.badge;
+      tEmailLbl.textContent = t.emailLbl;
+      tModeLbl.textContent = t.modeLbl;
+      tAll.textContent = t.all;
+      tCur.textContent = t.cur;
+      submitBtn.textContent = t.submit;
+      tHelp.textContent = t.help;
+      tFoot.textContent = t.foot;
+      langBtn.textContent = t.langBtn;
+      langField.value = lang;
+    }
+
+    langBtn.addEventListener('click', ()=>{
+      lang = (lang === "ar") ? "en" : "ar";
+      applyLang();
+    });
+
+    // رسالة نجاح محلية + تعطيل زر مؤقتًا
+    form.addEventListener('submit', () => {
+      submitBtn.disabled = true;
+      showMsg('ok', T[lang].ok);
+      setTimeout(()=>{ submitBtn.disabled = false; }, 2500);
+    });
+
+    applyLang();
+  </script>
 </body>
 </html>
