@@ -730,7 +730,7 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
   </div>
 
 <div class="btnWrap">
-  <a href="./subscribe/" class="btn">📩 Subscribe</a>
+  <a href="{pages_base}/subscribe/" class="btn">📩 Subscribe</a>
 </div>
 
   <!-- ════ FOOTER ════ -->
