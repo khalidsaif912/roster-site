@@ -1,9 +1,8 @@
 name: Roster Site + Email
-
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "0 */2 * * *"  # كل ساعتين (يمكنك التعديل)
 
 permissions:
   contents: write
@@ -14,21 +13,128 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
+      
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+      
+      # تسريع التثبيت بحفظ المكتبات
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
+      
+      # ✅ التحقق من تغيير اسم الملف
+      - name: Check if Excel file changed
+        id: check_changes
+        env:
+          SOURCE_NAME_URL: ${{ secrets.SOURCE_NAME_URL }}
+        run: |
+          python << 'EOF'
+          import os
+          import requests
+          from pathlib import Path
+          import sys
+          
+          def main():
+              try:
+                  # قراءة اسم الملف من الرابط
+                  source_url = os.getenv('SOURCE_NAME_URL')
+                  
+                  if not source_url:
+                      print("❌ خطأ: SOURCE_NAME_URL غير موجود في Secrets")
+                      sys.exit(1)
+                  
+                  print(f"🔗 جاري التحقق من: {source_url}")
+                  response = requests.get(source_url, timeout=15)
+                  response.raise_for_status()
+                  
+                  current_filename = response.text.strip()
+                  
+                  if not current_filename:
+                      print("❌ خطأ: ملف source_name.txt فارغ")
+                      sys.exit(1)
+                  
+                  print(f"📄 اسم الملف الحالي: {current_filename}")
+                  
+                  # مقارنة مع الملف السابق
+                  cache_file = "last_filename.txt"
+                  changed = True
+                  old_filename = "لا يوجد"
+                  
+                  if Path(cache_file).exists():
+                      with open(cache_file, 'r', encoding='utf-8') as f:
+                          old_filename = f.read().strip()
+                      
+                      if old_filename:
+                          print(f"📄 اسم الملف السابق: {old_filename}")
+                          
+                          if old_filename == current_filename:
+                              print("✅ لا توجد تغييرات - نفس الملف")
+                              changed = False
+                          else:
+                              print(f"🔄 تم اكتشاف تغيير في الملف!")
+                              print(f"   📌 القديم: {old_filename}")
+                              print(f"   📌 الجديد: {current_filename}")
+                  else:
+                      print("🆕 أول تشغيل - سيتم معالجة الملف")
+                  
+                  # حفظ اسم الملف الجديد
+                  with open(cache_file, 'w', encoding='utf-8') as f:
+                      f.write(current_filename)
+                  
+                  print(f"💾 تم حفظ اسم الملف في {cache_file}")
+                  
+                  # إخراج المتغيرات لـ GitHub Actions
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write(f"changed={str(changed).lower()}\n")
+                      f.write(f"filename={current_filename}\n")
+                      f.write(f"old_filename={old_filename}\n")
+                  
+                  print(f"\n{'='*60}")
+                  print(f"📊 النتيجة النهائية: changed = {changed}")
+                  print(f"{'='*60}\n")
+                  
+              except requests.exceptions.Timeout:
+                  print("❌ انتهت مهلة الاتصال - الرابط بطيء جداً")
+                  sys.exit(1)
+              except requests.exceptions.RequestException as e:
+                  print(f"❌ خطأ في تحميل الرابط: {e}")
+                  sys.exit(1)
+              except Exception as e:
+                  print(f"❌ خطأ غير متوقع: {e}")
+                  import traceback
+                  traceback.print_exc()
+                  sys.exit(1)
+          
+          if __name__ == "__main__":
+              main()
+          EOF
+      
+      # ✅ عرض معلومات التغيير
+      - name: Display change info
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 تقرير الفحص:"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✓ هل تغير الملف؟ ${{ steps.check_changes.outputs.changed }}"
+          echo "✓ الملف الحالي: ${{ steps.check_changes.outputs.filename }}"
+          echo "✓ الملف السابق: ${{ steps.check_changes.outputs.old_filename }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      
+      # ✅ معالجة الملف فقط عند التغيير
       - name: Generate page + send email
+        if: steps.check_changes.outputs.changed == 'true'
         env:
           EXCEL_URL: ${{ secrets.EXCEL_URL }}
-          SOURCE_NAME_URL: ${{ secrets.SOURCE_NAME_URL }}   # ← أضِف هذا
+          SOURCE_NAME_URL: ${{ secrets.SOURCE_NAME_URL }}
           PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
@@ -39,12 +145,33 @@ jobs:
           SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }}
           SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
         run: |
+          echo "🔄 بدء معالجة الملف: ${{ steps.check_changes.outputs.filename }}"
           python generate_and_send.py
-
+          echo "✅ اكتملت المعالجة بنجاح"
+      
+      # ✅ حفظ التغييرات
       - name: Commit updated docs
+        if: steps.check_changes.outputs.changed == 'true'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs
-          git commit -m "Update roster pages" || echo "No changes to commit"
-          git push
+          git add docs last_filename.txt
+          if git diff --staged --quiet; then
+            echo "⚠️ لا توجد تغييرات للحفظ"
+          else
+            git commit -m "📝 Update roster: ${{ steps.check_changes.outputs.filename }}"
+            git push
+            echo "✅ تم رفع التحديثات إلى GitHub"
+          fi
+      
+      # ✅ رسالة عند عدم وجود تغييرات
+      - name: Skip - No changes detected
+        if: steps.check_changes.outputs.changed == 'false'
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ لا توجد تغييرات في البيانات"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📄 الملف الحالي: ${{ steps.check_changes.outputs.filename }}"
+          echo "⏭️  تم تخطي المعالجة والإيميل"
+          echo "💾 تم توفير الوقت والموارد"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
