@@ -21,7 +21,6 @@ EXCEL_URL = os.environ.get("EXCEL_URL", "").strip()
 SOURCE_NAME_URL = os.environ.get("SOURCE_NAME_URL", "").strip()
 SOURCE_NAME_FALLBACK = os.environ.get("SOURCE_NAME_FALLBACK", "latest.xlsx").strip()
 
-
 SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "").strip()
@@ -166,13 +165,13 @@ def download_excel(url: str) -> bytes:
 
 
 def download_text(url: str) -> str:
-    \"\"\"Download a small text file (e.g., source_name.txt).\"\"\"
+    """Download a small text file (e.g., source_name.txt)."""
     r = requests.get(url, timeout=30)
     r.raise_for_status()
     return r.text.strip()
 
 def get_source_name() -> str:
-    \"\"\"Return the original roster file name for display on the website.\"\"\"
+    """Return the original roster file name for display on the website."""
     if SOURCE_NAME_URL:
         try:
             name = download_text(SOURCE_NAME_URL)
@@ -537,7 +536,7 @@ def dept_card_html(dept_name: str, dept_color: dict, buckets: dict, open_group: 
     """
 
 def page_shell_html(date_label: str, iso_date: str, employees_total: int, departments_total: int,
-                     dept_cards_html: str, cta_url: str, sent_time: str, source_name: str = \"\") -> str:
+                     dept_cards_html: str, cta_url: str, sent_time: str, source_name: str = "") -> str:
 
     # ⬅️ أضف هذا السطر
     pages_base = infer_pages_base_url().rstrip("/")
@@ -820,7 +819,7 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
 </html>"""
 
 
-def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, source_name: str = \"\"):
+def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str):
     """
     Generate static pages for each day of the given month.
     Used by the date picker to navigate to different dates.
@@ -933,7 +932,7 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                 dept_cards_html="\n".join(dept_cards_all),
                 cta_url=now_url,
                 sent_time=sent_time,
-                           source_name=source_name,
+                source_name=source_name,
             )
             html_now = page_shell_html(
                 date_label=date_label,
@@ -943,7 +942,7 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                 dept_cards_html="\n".join(dept_cards_now),
                 cta_url=full_url,
                 sent_time=sent_time,
-                           source_name=source_name,
+                source_name=source_name,
             )
 
             date_dir = f"docs/date/{iso_date}"
@@ -1347,8 +1346,9 @@ def main():
     wb = load_workbook(BytesIO(data), data_only=True)
     source_name = get_source_name()
 
+
     # Generate static pages for each date in the current month (used by the date picker)
-    generate_date_pages_for_month(wb, now.year, now.month, pages_base, source_name=source_name)
+    generate_date_pages_for_month(wb, now.year, now.month, pages_base)
 
     dept_cards_all = []
     dept_cards_now = []
@@ -1452,7 +1452,6 @@ def main():
         dept_cards_html="\n".join(dept_cards_all),
         cta_url=now_url,
         sent_time=sent_time,
-        source_name=source_name,
     )
     html_now = page_shell_html(
         date_label=date_label,
@@ -1462,7 +1461,6 @@ def main():
         dept_cards_html="\n".join(dept_cards_now),
         cta_url=full_url,
         sent_time=sent_time,
-        source_name=source_name,
     )
 
     with open("docs/index.html", "w", encoding="utf-8") as f:
