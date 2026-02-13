@@ -2,7 +2,7 @@ name: Roster Site + Email
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 */2 * * *"  # كل ساعتين (يمكنك التعديل)
+    - cron: "*/10 * * * *"  # فحص كل 10 دقائق
 
 permissions:
   contents: write
@@ -19,7 +19,6 @@ jobs:
         with:
           python-version: "3.11"
       
-      # تسريع التثبيت بحفظ المكتبات
       - name: Cache pip packages
         uses: actions/cache@v3
         with:
@@ -31,7 +30,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      # ✅ التحقق من تغيير اسم الملف
       - name: Check if Excel file changed
         id: check_changes
         env:
@@ -42,10 +40,10 @@ jobs:
           import requests
           from pathlib import Path
           import sys
+          from datetime import datetime, timezone, timedelta
           
           def main():
               try:
-                  # قراءة اسم الملف من الرابط
                   source_url = os.getenv('SOURCE_NAME_URL')
                   
                   if not source_url:
@@ -64,7 +62,6 @@ jobs:
                   
                   print(f"📄 اسم الملف الحالي: {current_filename}")
                   
-                  # مقارنة مع الملف السابق
                   cache_file = "last_filename.txt"
                   changed = True
                   old_filename = "لا يوجد"
@@ -86,20 +83,45 @@ jobs:
                   else:
                       print("🆕 أول تشغيل - سيتم معالجة الملف")
                   
-                  # حفظ اسم الملف الجديد
                   with open(cache_file, 'w', encoding='utf-8') as f:
                       f.write(current_filename)
                   
                   print(f"💾 تم حفظ اسم الملف في {cache_file}")
                   
-                  # إخراج المتغيرات لـ GitHub Actions
+                  # تحديد الوقت الحالي بتوقيت مسقط (UTC+4)
+                  muscat_tz = timezone(timedelta(hours=4))
+                  now = datetime.now(muscat_tz)
+                  current_hour = now.hour
+                  current_minute = now.minute
+                  
+                  print(f"🕐 الوقت الحالي بتوقيت مسقط: {now.strftime('%H:%M')}")
+                  
+                  # تحديد أوقات الإيميلات المجدولة (6:00, 15:00, 21:00)
+                  scheduled_hours = [6, 15, 21]
+                  is_scheduled_time = False
+                  
+                  # التحقق إذا كان الوقت الحالي في نطاق 10 دقائق من الأوقات المجدولة
+                  for scheduled_hour in scheduled_hours:
+                      if current_hour == scheduled_hour and current_minute < 10:
+                          is_scheduled_time = True
+                          print(f"📧 وقت إيميل مجدول: {scheduled_hour}:00")
+                          break
+                  
+                  # تحديد إذا كان يجب المعالجة والإرسال
+                  should_process = changed or is_scheduled_time
+                  
                   with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                       f.write(f"changed={str(changed).lower()}\n")
+                      f.write(f"should_process={str(should_process).lower()}\n")
+                      f.write(f"is_scheduled_email={str(is_scheduled_time).lower()}\n")
                       f.write(f"filename={current_filename}\n")
                       f.write(f"old_filename={old_filename}\n")
                   
                   print(f"\n{'='*60}")
-                  print(f"📊 النتيجة النهائية: changed = {changed}")
+                  print(f"📊 النتيجة النهائية:")
+                  print(f"   - تغيير في الملف: {changed}")
+                  print(f"   - وقت إيميل مجدول: {is_scheduled_time}")
+                  print(f"   - يجب المعالجة: {should_process}")
                   print(f"{'='*60}\n")
                   
               except requests.exceptions.Timeout:
@@ -118,20 +140,20 @@ jobs:
               main()
           EOF
       
-      # ✅ عرض معلومات التغيير
       - name: Display change info
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "📊 تقرير الفحص:"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "✓ هل تغير الملف؟ ${{ steps.check_changes.outputs.changed }}"
+          echo "✓ وقت إيميل مجدول؟ ${{ steps.check_changes.outputs.is_scheduled_email }}"
+          echo "✓ يجب المعالجة؟ ${{ steps.check_changes.outputs.should_process }}"
           echo "✓ الملف الحالي: ${{ steps.check_changes.outputs.filename }}"
           echo "✓ الملف السابق: ${{ steps.check_changes.outputs.old_filename }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
       
-      # ✅ معالجة الملف فقط عند التغيير
       - name: Generate page + send email
-        if: steps.check_changes.outputs.changed == 'true'
+        if: steps.check_changes.outputs.should_process == 'true'
         env:
           EXCEL_URL: ${{ secrets.EXCEL_URL }}
           SOURCE_NAME_URL: ${{ secrets.SOURCE_NAME_URL }}
@@ -145,13 +167,16 @@ jobs:
           SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }}
           SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
         run: |
-          echo "🔄 بدء معالجة الملف: ${{ steps.check_changes.outputs.filename }}"
+          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            echo "🔄 بدء معالجة الملف (تغيير مكتشف): ${{ steps.check_changes.outputs.filename }}"
+          else
+            echo "📧 بدء معالجة الملف (إيميل مجدول): ${{ steps.check_changes.outputs.filename }}"
+          fi
           python generate_and_send.py
-          echo "✅ اكتملت المعالجة بنجاح"
+          echo "✅ اكتملت المعالجة وإرسال الإيميل بنجاح"
       
-      # ✅ حفظ التغييرات
       - name: Commit updated docs
-        if: steps.check_changes.outputs.changed == 'true'
+        if: steps.check_changes.outputs.should_process == 'true'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
@@ -159,19 +184,109 @@ jobs:
           if git diff --staged --quiet; then
             echo "⚠️ لا توجد تغييرات للحفظ"
           else
-            git commit -m "📝 Update roster: ${{ steps.check_changes.outputs.filename }}"
+            if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+              git commit -m "📝 Update roster: ${{ steps.check_changes.outputs.filename }}"
+            else
+              git commit -m "📧 Scheduled email update"
+            fi
             git push
             echo "✅ تم رفع التحديثات إلى GitHub"
           fi
       
-      # ✅ رسالة عند عدم وجود تغييرات
-      - name: Skip - No changes detected
-        if: steps.check_changes.outputs.changed == 'false'
+      - name: Skip - No action needed
+        if: steps.check_changes.outputs.should_process == 'false'
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "✅ لا توجد تغييرات في البيانات"
+          echo "✅ لا حاجة لإجراء (لا تغيير ولا وقت مجدول)"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "📄 الملف الحالي: ${{ steps.check_changes.outputs.filename }}"
           echo "⏭️  تم تخطي المعالجة والإيميل"
           echo "💾 تم توفير الوقت والموارد"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+```
+
+---
+
+## 📊 كيف يعمل؟
+
+### 🕐 **الأوقات المجدولة (بتوقيت مسقط UTC+4):**
+```
+06:00 - 06:10 → إيميل مجدول ✉️
+15:00 - 15:10 → إيميل مجدول ✉️
+21:00 - 21:10 → إيميل مجدول ✉️
+```
+
+### 🔄 **باقي الأوقات:**
+```
+فحص كل 10 دقائق
+إيميل فقط إذا تغير الملف
+```
+
+---
+
+## 📅 مثال يوم كامل:
+```
+🕐 00:00 → فحص ✅ (لا تغيير، لا إيميل)
+🕐 00:10 → فحص ✅ (لا تغيير، لا إيميل)
+...
+🕐 06:00 → فحص + إيميل مجدول ✉️ (حتى بدون تغيير!)
+🕐 06:10 → فحص ✅ (لا تغيير، لا إيميل)
+🕐 06:20 → فحص ✅ (لا تغيير، لا إيميل)
+...
+🕐 09:30 → فحص ✅ (لا تغيير، لا إيميل)
+🕐 09:40 → فحص + تغيير مكتشف! → إيميل ✉️
+🕐 09:50 → فحص ✅ (لا تغيير، لا إيميل)
+...
+🕐 15:00 → فحص + إيميل مجدول ✉️ (حتى بدون تغيير!)
+🕐 15:10 → فحص ✅ (لا تغيير، لا إيميل)
+...
+🕐 21:00 → فحص + إيميل مجدول ✉️ (حتى بدون تغيير!)
+🕐 21:10 → فحص ✅ (لا تغيير، لا إيميل)
+...
+
+📊 إجمالي اليوم:
+   - 144 فحص
+   - 3 إيميلات مجدولة (6ص، 3م، 9م)
+   - + إيميلات عند التغيير
+```
+
+---
+
+## 🎯 السيناريوهات المختلفة:
+
+### السيناريو 1: يوم بدون تغييرات
+```
+📧 الإيميلات: 3 (في 6ص، 3م، 9م فقط)
+```
+
+### السيناريو 2: يوم بتغيير واحد (الساعة 10 صباحاً)
+```
+📧 الإيميلات: 4
+   - 06:00 (مجدول)
+   - 10:00 (تغيير)
+   - 15:00 (مجدول)
+   - 21:00 (مجدول)
+```
+
+### السيناريو 3: يوم بتغييرين (10ص، 4م)
+```
+📧 الإيميلات: 5
+   - 06:00 (مجدول)
+   - 10:00 (تغيير)
+   - 15:00 (مجدول) ← قد يكون نفس وقت التغيير
+   - 16:00 (تغيير)
+   - 21:00 (مجدول)
+```
+
+---
+
+## 📈 الاستهلاك المتوقع:
+```
+فحوصات يومية: 144 × 3 ثواني = 7 دقائق
+إيميلات مجدولة: 3 × 1.5 دقيقة = 4.5 دقيقة
+إيميلات التغيير: ~2 × 1.5 دقيقة = 3 دقيقة
+
+إجمالي يومي: ~14.5 دقيقة
+إجمالي شهري: ~435 دقيقة
+
+✅ ضمن الحد المجاني (2,000 دقيقة) بأمان!
