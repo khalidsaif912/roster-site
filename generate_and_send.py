@@ -57,7 +57,7 @@ SHIFT_MAP = {
 }
 
 # تم تحويل كل الأسماء للإنجليزية
-GROUP_ORDER = ["Morning", "Afternoon", "Night", "Standby", "Off Day", "Leave", "Training", "Other"]
+GROUP_ORDER = ["Morning", "Afternoon", "Night", "Standby", "Off Day", "Annual Leave", "Sick Leave", "Training", "Other"]
 
 
 # =========================
@@ -127,21 +127,24 @@ def map_shift(code: str):
     if not c or c == "0":
         return ("-", "Other")
 
-    if c == "AL" or "ANNUAL LEAVE" in c:
-        return ("🏖️ Leave", "Leave")
+    # ✅ Leave types (separated)
+    if c == "AL" or c == "LV" or "ANNUAL LEAVE" in c:
+        return ("🏖️ Annual Leave", "Annual Leave")
+
     if c == "SL" or "SICK LEAVE" in c:
-        return ("🤒 Sick Leave", "Leave")
-    if c == "LV":
-        return ("🏖️ Leave", "Leave")
+        return ("🤒 Sick Leave", "Sick Leave")
+
+    # Training
     if c in ["TR"] or "TRAINING" in c:
         return ("📚 Training", "Training")
 
-    # 🔹 باقي الستاندباي
+    # 🔹 Standby
     if c in ["ST", "STM", "STN", "STNE22", "STME06", "STMN06", "STAE14"] or "STANDBY" in c:
         return ("🧍 Standby", "Standby")
 
     if c == "OT" or c.startswith("OT"):
         return ("⏱️ OT", "Standby")
+
     if c in ["OFF", "O"] or re.search(r"(REST|OFF\s*DAY|REST\/OFF)", c):
         return ("🛌 Off Day", "Off Day")
 
@@ -439,6 +442,17 @@ SHIFT_COLORS = {
         "status_color": "#555555",
         "icon": "🧍"
     }, 
+    "Sick Leave": {
+    "border": "#ef444444",
+    "bg": "#fee2e2",
+    "summary_bg": "#fee2e2",
+    "summary_border": "#ef444433",
+    "label_color": "#991b1b",
+    "count_bg": "#ef444422",
+    "count_color": "#991b1b",
+    "status_color": "#991b1b",
+    "icon": "🤒",
+   },
     "Other": {
         "border": "#94a3b844",
         "bg": "#f1f5f9",
@@ -477,8 +491,10 @@ def dept_card_html(dept_name: str, dept_color: dict, buckets: dict, open_group: 
             display_name = "Night"
         elif group_key == "Off Day":
             display_name = "Off Day"
-        elif group_key == "Leave":
+        elif group_key == "Annual Leave":
             display_name = "Annual Leave"
+        elif group_key == "Sick Leave":
+           display_name = "Sick Leave"
         elif group_key == "Training":
             display_name = "Training"
         elif group_key == "Standby":
