@@ -346,7 +346,7 @@ def range_suffix_for_day(day: int, daynum_to_raw: dict, code_key: str):
 
     if start == end:
         return ""
-    return f"(<span style='font-size:0.75em;opacity:0.8;'>FROM</span> {start} <span style='font-size:0.75em;opacity:0.8;'>TO</span> {end})"
+    return f"(من {start} إلى {end})"
 
 
 
