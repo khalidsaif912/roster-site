@@ -1,0 +1,147 @@
+/**
+ * إعدادات النظام
+ */
+const CONFIG = {
+  SHEET_PENDING: 'Pending',
+  SHEET_SUBS: 'Subscribers',
+  APP_NAME: 'Duty Roster',
+  PRIMARY_COLOR: '#1a73e8' // اللون الأزرق الخاص بموقعك
+};
+
+/**
+ * 1. استقبال الطلبات من الفورم (الاشتراك الأولي) مع منع التكرار
+ */
+function doPost(e) {
+  try {
+    const email = String(e.parameter.email || '').trim().toLowerCase();
+    const mode  = String(e.parameter.mode  || '').trim(); 
+    const lang  = String(e.parameter.lang  || 'ar').trim();
+    const isAr  = (lang === 'ar');
+
+    if (!email) return ContentService.createTextOutput("Missing email");
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const pendingSheet = ss.getSheetByName(CONFIG.SHEET_PENDING);
+    const subsSheet = ss.getSheetByName(CONFIG.SHEET_SUBS);
+
+    if (!pendingSheet || !subsSheet) return ContentService.createTextOutput("Error: Sheets not found");
+
+    // --- فحص التكرار ---
+    
+    // 1. هل هو مشترك بالفعل؟
+    if (isEmailInSheet(subsSheet, email)) {
+      return showMessagePage(
+        isAr ? "أنت مشترك بالفعل!" : "Already Subscribed!",
+        isAr ? "هذا البريد الإلكتروني مسجل لدينا مسبقاً في قائمة المشتركين." : "This email is already in our subscriber list.",
+        "✅", 
+        isAr
+      );
+    }
+
+    // 2. هل أرسل طلباً وهو قيد الانتظار؟
+    if (isEmailInSheet(pendingSheet, email)) {
+      return showMessagePage(
+        isAr ? "الطلب قيد الانتظار" : "Request Pending",
+        isAr ? "لقد أرسلنا لك رابط التأكيد مسبقاً، يرجى فحص بريدك الإلكتروني لتفعيله." : "We already sent a confirmation link. Please check your email to activate it.",
+        "⏳",
+        isAr
+      );
+    }
+
+    // --- إذا لم يكن مكرراً، نكمل الإجراءات ---
+    const token = Utilities.getUuid();
+    pendingSheet.appendRow([email, mode, lang, token, new Date()]);
+
+    const confirmUrl = ScriptApp.getService().getUrl() + '?action=confirm&token=' + encodeURIComponent(token);
+    const subject = isAr ? `تأكيد الاشتراك — ${CONFIG.APP_NAME}` : `Confirm Subscription — ${CONFIG.APP_NAME}`;
+    
+    const htmlEmail = isAr 
+      ? `<div dir="rtl" style="font-family: sans-serif; text-align: center; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+          <h2 style="color: #1a73e8;">مرحباً،</h2>
+          <p>شكراً لاهتمامك بالاشتراك في <b>${CONFIG.APP_NAME}</b>.</p>
+          <p>يرجى الضغط على الزر أدناه لتفعيل اشتراكك وتأكيد هويتك:</p>
+          <br>
+          <a href="${confirmUrl}" style="background-color: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">تأكيد الاشتراك الآن</a>
+          <p style="margin-top: 25px; color: #888; font-size: 0.8em;">إذا لم تطلب هذا الاشتراك، يمكنك تجاهل هذا الإيميل.</p>
+         </div>`
+      : `<div style="font-family: sans-serif; text-align: center; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+          <h2 style="color: #1a73e8;">Hello,</h2>
+          <p>Thank you for subscribing to <b>${CONFIG.APP_NAME}</b>.</p>
+          <p>Please click the button below to confirm your email and activate your subscription:</p>
+          <br>
+          <a href="${confirmUrl}" style="background-color: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Confirm Subscription</a>
+          <p style="margin-top: 25px; color: #888; font-size: 0.8em;">If you didn't request this, you can safely ignore this email.</p>
+         </div>`;
+
+    MailApp.sendEmail({ to: email, subject: subject, htmlBody: htmlEmail });
+
+    return showMessagePage(
+      isAr ? "خطوة واحدة متبقية!" : "One more step!",
+      isAr ? "تم إرسال رابط التأكيد إلى بريدك الإلكتروني. يرجى الضغط عليه لتفعيل الاشتراك." : "A confirmation link has been sent to your email. Please click it to activate.",
+      "📧",
+      isAr
+    );
+
+  } catch (err) {
+    return ContentService.createTextOutput("ERROR: " + err.toString());
+  }
+}
+
+/**
+ * 2. استقبال طلبات التأكيد (عند الضغط على الرابط في الإيميل)
+ */
+function doGet(e) {
+  try {
+    const action = e.parameter.action;
+    const token = e.parameter.token;
+
+    if (action === 'confirm' && token) {
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      const pendingSheet = ss.getSheetByName(CONFIG.SHEET_PENDING);
+      const subsSheet = ss.getSheetByName(CONFIG.SHEET_SUBS);
+      const data = pendingSheet.getDataRange().getValues();
+      
+      for (let i = 0; i < data.length; i++) {
+        if (data[i][3] === token) {
+          subsSheet.appendRow([data[i][0], data[i][1], data[i][2], new Date()]);
+          pendingSheet.deleteRow(i + 1);
+          return showMessagePage("تم التأكيد!", "شكراً لك، تم تفعيل اشتراكك بنجاح في Duty Roster.", "✔", true);
+        }
+      }
+      return ContentService.createTextOutput("Invalid or expired token.");
+    }
+    return ContentService.createTextOutput("Invalid Request");
+  } catch (err) {
+    return ContentService.createTextOutput("Error: " + err.toString());
+  }
+}
+
+/**
+ * دالة مساعدة للبحث عن الإيميل
+ */
+function isEmailInSheet(sheet, email) {
+  const data = sheet.getDataRange().getValues();
+  for (let i = 0; i < data.length; i++) {
+    if (data[i][0].toString().toLowerCase() === email) return true;
+  }
+  return false;
+}
+
+/**
+ * دالة موحدة لعرض رسائل الاستجابة بتصميم الموقع
+ */
+function showMessagePage(title, message, icon, isAr) {
+  const html = `
+    <div dir="${isAr ? 'rtl' : 'ltr'}" style="font-family: sans-serif; text-align: center; padding: 50px; background-color: #f0f4f8; min-height: 100vh; display: flex; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 450px; width: 90%;">
+        <div style="font-size: 60px; margin-bottom: 20px;">${icon}</div>
+        <h2 style="color: ${CONFIG.PRIMARY_COLOR}; margin-bottom: 15px;">${title}</h2>
+        <p style="color: #444; line-height: 1.6; font-size: 17px;">${message}</p>
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+          <p style="font-size: 13px; color: #999;">${CONFIG.APP_NAME} &copy; 2024</p>
+        </div>
+      </div>
+    </div>
+  `;
+  return HtmlService.createHtmlOutput(html).setTitle(title);
+}
