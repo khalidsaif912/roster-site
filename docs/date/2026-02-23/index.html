@@ -355,7 +355,7 @@
       <div class="shiftBody">
         <div class="empRow">
        <span class="empName">Talal Al Balushi - 81300</span>
-       <span class="empStatus" style="color:#065f46;">🏖️ Annual Leave</span>
+       <span class="empStatus" style="color:#065f46;">(<span style='font-size:0.75em;opacity:0.8;'>FROM</span> 21 <span style='font-size:0.75em;opacity:0.8;'>TO</span> 23)</span>
      </div>
       </div>
     </details>
@@ -481,7 +481,7 @@
       <div class="shiftBody">
         <div class="empRow">
        <span class="empName">Qasim Al Maqbali - 81409</span>
-       <span class="empStatus" style="color:#991b1b;">🤒 Sick Leave</span>
+       <span class="empStatus" style="color:#991b1b;">(<span style='font-size:0.75em;opacity:0.8;'>FROM</span> 1 <span style='font-size:0.75em;opacity:0.8;'>TO</span> 28)</span>
      </div>
       </div>
     </details>
@@ -799,10 +799,10 @@
       <div class="shiftBody">
         <div class="empRow">
        <span class="empName">Salim Sulieman - 8722</span>
-       <span class="empStatus" style="color:#065f46;">🏖️ Annual Leave</span>
+       <span class="empStatus" style="color:#065f46;">(<span style='font-size:0.75em;opacity:0.8;'>FROM</span> 19 <span style='font-size:0.75em;opacity:0.8;'>TO</span> 24)</span>
      </div><div class="empRow empRowAlt">
        <span class="empName">Said Al Fahkri - 8744</span>
-       <span class="empStatus" style="color:#065f46;">🏖️ Annual Leave</span>
+       <span class="empStatus" style="color:#065f46;">(<span style='font-size:0.75em;opacity:0.8;'>FROM</span> 13 <span style='font-size:0.75em;opacity:0.8;'>TO</span> 28)</span>
      </div>
       </div>
     </details>
@@ -839,9 +839,9 @@
 
   <!-- ════ FOOTER ════ -->
   <div class="footer">
-    Sent at <strong>00:00</strong>
-     &nbsp;·&nbsp; Total: <strong>80 employees</strong>
-    <br>Source file: <strong>Export New Roster February 2026 - RAMADAN Version 4.xlsx</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">23FEB2026 / 00:00</strong>
+    <br>Total: <strong>80 employees</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026 _ RAMADAN Version 4.xlsx</strong>
   </div>
 
 </div>
@@ -851,6 +851,31 @@
   var tag = document.getElementById('dateTag');
   var picker = document.getElementById('datePicker');
   if(!tag || !picker) return;
+
+  // التحقق إذا كان المستخدم في صفحة تاريخ قديم
+  function checkAndRedirectToToday(){
+    var path = window.location.pathname || '/';
+    // إذا كان في صفحة /date/YYYY-MM-DD/
+    var dateMatch = path.match(/\/date\/(\d{4})-(\d{2})-(\d{2})\//);
+    if(dateMatch){
+      var pageDate = dateMatch[1] + '-' + dateMatch[2] + '-' + dateMatch[3];
+      var today = new Date();
+      var todayStr = today.getFullYear() + '-' + 
+                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(today.getDate()).padStart(2, '0');
+      
+      // إذا التاريخ في الصفحة مختلف عن اليوم، ارجع للصفحة الرئيسية
+      if(pageDate !== todayStr){
+        var base = computeBasePath();
+        window.location.href = base + '/';
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // عند تحميل الصفحة، تحقق من التاريخ
+  if(checkAndRedirectToToday()) return;
 
   function openPicker(){
     // Position the (hidden) input مباشرة تحت التاريخ حتى يظهر التقويم بالمكان الصحيح
