@@ -65,6 +65,12 @@
     }
     .summaryChip .chipVal { font-size:22px; font-weight:900; color:#1e40af; }
     .summaryChip .chipLabel { font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.6px; margin-top:2px; }
+    
+    /* Current Shift button as chip */
+    a.summaryChip:hover {
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(30,64,175,.25);
+    }
 
     /* ═══════ SHIFT FILTER BUTTONS ═══════ */
     .shiftFilterBar {
@@ -259,6 +265,12 @@
       <div class="chipVal" style="color:#059669;">5</div>
       <div class="chipLabel">Departments</div>
     </div>
+    
+    <a href="https://khalidsaif912.github.io/roster-site/now/" class="summaryChip" style="text-decoration:none;background:linear-gradient(135deg,#1e40af,#1976d2);color:#fff;cursor:pointer;transition:transform .2s;">
+      <div class="chipVal" style="color:#fff;">🔄</div>
+      <div class="chipLabel" style="color:rgba(255,255,255,.9);">Current Shift</div>
+    </a>
+    
   </div>
 
   <!-- ════ SHIFT FILTER (NOW PAGE ONLY) ════ -->
@@ -913,7 +925,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">01FEB2026 / 00:00</strong>
     <br>Total: <strong>80 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026_RAMADAN Version--4.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026_RAMADAN Version4.xlsx</strong>
   </div>
 
 </div>
@@ -1051,10 +1063,9 @@
     return 'Morning';
   }
   
-  // Set active shift on load
-  var currentShift = getCurrentShift();
+  // Set active shift on load - default to All
   filterBtns.forEach(function(btn){
-    if(btn.dataset.shift === currentShift){
+    if(btn.dataset.shift === 'All'){
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
@@ -1063,35 +1074,44 @@
   
   // Filter function
   function filterShifts(selectedShift){
-    // Hide all cards first
-    allShiftCards.forEach(function(card){ card.style.display = 'none'; });
-    
     var totalEmployees = 0;
     
-    // Show only selected shift cards and count employees
-    if(shiftGroups[selectedShift]){
-      shiftGroups[selectedShift].forEach(function(card){
+    if(selectedShift === 'All'){
+      // Show all shifts
+      allShiftCards.forEach(function(card){
         card.style.display = '';
-        // Auto-open the selected shift
-        card.setAttribute('open', '');
-        // Count employees in this card
         var count = card.querySelector('.shiftCount');
         if(count) totalEmployees += parseInt(count.textContent) || 0;
       });
-    }
-    
-    // Also show Off Day, Leave, Training, Standby in all shifts
-    var alwaysShow = ['Off Day', 'Annual Leave', 'Sick Leave', 'Training', 'Standby', 'Other'];
-    alwaysShow.forEach(function(type){
-      if(shiftGroups[type]){
-        shiftGroups[type].forEach(function(card){
+    } else {
+      // Hide all cards first
+      allShiftCards.forEach(function(card){ card.style.display = 'none'; });
+      
+      // Show only selected shift cards and count employees
+      if(shiftGroups[selectedShift]){
+        shiftGroups[selectedShift].forEach(function(card){
           card.style.display = '';
-          // Count employees
+          // Auto-open the selected shift
+          card.setAttribute('open', '');
+          // Count employees in this card
           var count = card.querySelector('.shiftCount');
           if(count) totalEmployees += parseInt(count.textContent) || 0;
         });
       }
-    });
+      
+      // Also show Off Day, Leave, Training, Standby in all shifts
+      var alwaysShow = ['Off Day', 'Annual Leave', 'Sick Leave', 'Training', 'Standby', 'Other'];
+      alwaysShow.forEach(function(type){
+        if(shiftGroups[type]){
+          shiftGroups[type].forEach(function(card){
+            card.style.display = '';
+            // Count employees
+            var count = card.querySelector('.shiftCount');
+            if(count) totalEmployees += parseInt(count.textContent) || 0;
+          });
+        }
+      });
+    }
     
     // Update employee count in summary
     var employeeChip = document.querySelector('.summaryChip .chipVal');
@@ -1116,8 +1136,8 @@
     });
   });
   
-  // Auto-filter on page load
-  filterShifts(currentShift);
+  // Auto-filter on page load - show all shifts by default
+  filterShifts('All');
 })();
 </script>
 
