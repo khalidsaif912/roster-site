@@ -808,7 +808,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">25FEB2026 / 00:00</strong>
     <br>Total: <strong>80 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026_RAMADAN Version-4.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026_RAMADAN Version4v.xlsx</strong>
   </div>
 
 </div>
@@ -822,14 +822,20 @@
   // التحقق إذا كان المستخدم في صفحة تاريخ قديم
   function checkAndRedirectToToday(){
     var path = window.location.pathname || '/';
+    // تحقق إذا كنا في صفحة /now/
+    var isNowPage = path.includes('/now');
+    
     // إذا كان في صفحة /date/YYYY-MM-DD/
     var dateMatch = path.match(/\/date\/(\d{4})-(\d{2})-(\d{2})\//);
     if(dateMatch){
       var pageDate = dateMatch[1] + '-' + dateMatch[2] + '-' + dateMatch[3];
-      var today = new Date();
-      var todayStr = today.getFullYear() + '-' + 
-                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                     String(today.getDate()).padStart(2, '0');
+      
+      // الحصول على التاريخ في توقيت مسقط (UTC+4)
+      var now = new Date();
+      var muscatTime = new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
+      var todayStr = muscatTime.getFullYear() + '-' + 
+                     String(muscatTime.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(muscatTime.getDate()).padStart(2, '0');
       
       // إذا التاريخ في الصفحة مختلف عن اليوم
       if(pageDate !== todayStr){
@@ -838,8 +844,14 @@
         if(isPageLoad){
           // تحديث الصفحة → امسح العلامة وارجع لتاريخ اليوم
           sessionStorage.removeItem('pageLoaded');
-          var base = computeBasePath();
-          window.location.href = base + '/';
+          // احصل على المسار الأساسي
+          var basePath = path.replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/').replace(/\/now\/.*$/,'/').replace(/\/+$/,'');
+          // ارجع للصفحة الرئيسية (مع أو بدون /now/)
+          if(isNowPage){
+            window.location.href = basePath + '/now/';
+          } else {
+            window.location.href = basePath + '/';
+          }
           return true;
         } else {
           // أول تحميل بعد الضغط على التاريخ → ضع علامة
@@ -877,27 +889,23 @@
     if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }
   });
 
-  function computeBasePath(){
-    var p = window.location.pathname || '/';
-    // تحقق إذا كنا في صفحة /now/
-    var isNowPage = p.includes('/now');
-    // Strip "/date/YYYY-MM-DD/" and anything after it
-    p = p.replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/');
-    // Strip "/now/" temporarily to clean the path
-    p = p.replace(/\/now\/.*$/,'/');
-    // Clean up extra slashes
-    p = p.replace(/\/+$/,'');
-    // Add /now back if we were on the now page
-    if(isNowPage) p = p + '/now';
-    return p;
-  }
-
   picker.addEventListener('change', function(){
     if(!picker.value) return;
     // عند اختيار تاريخ جديد، امسح العلامة حتى يتم وضعها من جديد
     sessionStorage.removeItem('pageLoaded');
-    var base = computeBasePath();
+    
+    var path = window.location.pathname || '/';
+    var isNowPage = path.includes('/now');
+    
+    // احصل على المسار الأساسي
+    var base = path.replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/').replace(/\/now\/.*$/,'/').replace(/\/+$/,'');
+    
+    // بناء المسار الجديد: /date/YYYY-MM-DD/ أو /date/YYYY-MM-DD/now/
     var target = base + '/date/' + picker.value + '/';
+    if(isNowPage){
+      target = target + 'now/';
+    }
+    
     window.location.href = target;
   });
 })();
