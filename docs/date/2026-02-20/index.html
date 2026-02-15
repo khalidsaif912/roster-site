@@ -60,25 +60,27 @@
       align-items:stretch;
       gap:12px; 
       margin-top:14px;
-      flex-wrap:wrap;
+      flex-wrap:nowrap; /* منع الانتقال لصف ثاني */
     }
     .summaryChip {
       background:#fff;
       border:1px solid rgba(15,23,42,.1);
       border-radius:14px;
-      padding:10px 20px;
+      padding:10px 16px; /* تقليل padding قليلاً */
       text-align:center;
       box-shadow:0 2px 8px rgba(15,23,42,.06);
       transition:all .25s ease;
+      min-width:90px; /* حد أدنى للعرض */
     }
     .summaryChip .chipVal { font-size:22px; font-weight:900; color:#1e40af; }
     .summaryChip .chipLabel { 
-      font-size:11px; 
+      font-size:10px; /* خط أصغر قليلاً */
       font-weight:600; 
       color:#64748b; 
       text-transform:uppercase; 
-      letter-spacing:.6px; 
+      letter-spacing:.5px; 
       margin-top:2px;
+      white-space:nowrap; /* منع الكسر */
     }
 
     /* ═══════ SHIFT FILTER BUTTONS AS CHIPS ═══════ */
@@ -86,6 +88,7 @@
       border:2px solid transparent;
       position:relative;
       overflow:hidden;
+      padding:10px 14px; /* padding أصغر للأزرار */
     }
     button.summaryChip.shiftFilterBtn:hover {
       transform:translateY(-3px);
@@ -128,11 +131,17 @@
     button.shiftFilterBtn.all .chipVal { color:#1e40af; }
     button.shiftFilterBtn.all .chipLabel { color:#1e40af; }
     
+    /* للشاشات المتوسطة */
+    @media (max-width:900px){
+      .summaryBar { flex-wrap:wrap; } /* السماح بالانتقال للصف الثاني */
+    }
+    
+    /* للموبايل */
     @media (max-width:600px){
       .summaryBar { gap:8px; }
-      .summaryChip { padding:8px 14px; min-width:70px; }
+      .summaryChip { padding:8px 12px; min-width:70px; }
       .summaryChip .chipVal { font-size:19px; }
-      .summaryChip .chipLabel { font-size:10px; }
+      .summaryChip .chipLabel { font-size:9px; }
     }
 
 
@@ -912,7 +921,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">20FEB2026 / 00:00</strong>
     <br>Total: <strong>80 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026_RAMADAN-Version-4.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026_RAMADAN-Version4.xlsx</strong>
   </div>
 
 </div>
