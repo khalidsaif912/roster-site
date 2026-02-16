@@ -45,12 +45,43 @@
       background:rgba(255,255,255,.06);
     }
     .header h1 { margin:0; font-size:24px; font-weight:800; position:relative; z-index:1; letter-spacing:-.3px; }
+    
+    /* Date Picker Wrapper */
+    .datePickerWrapper {
+      position:relative;
+      display:inline-block;
+      margin-top:10px;
+      z-index:1;
+    }
     .header .dateTag {
-      display:inline-block; margin-top:10px;
+      display:inline-block;
       background:rgba(255,255,255,.18);
-      padding:5px 18px; border-radius:30px;
-      font-size:13px; font-weight:600; letter-spacing:.3px;
-      position:relative; z-index:1;
+      padding:5px 18px;
+      border-radius:30px;
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:.3px;
+      cursor:pointer;
+      transition:all .3s;
+      border:2px solid rgba(255,255,255,.2);
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+    .header .dateTag:hover {
+      background:rgba(255,255,255,.25);
+      transform:translateY(-1px);
+    }
+    #datePicker {
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      opacity:0;
+      cursor:pointer;
+      font-size:16px; /* منع zoom في iOS */
+      border:none;
     }
 
     /* ═══════ SUMMARY BAR ═══════ */
@@ -266,8 +297,10 @@
   <!-- ════ HEADER ════ -->
   <div class="header">
     <h1>📋 Duty Roster</h1>
-    <div class="dateTag" id="dateTag" role="button" tabindex="0" style="cursor:pointer;">📅 9 February 2026</div>
-    <input id="datePicker" type="date" value="2026-02-09" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;" aria-hidden="true" />
+    <div class="datePickerWrapper">
+      <label for="datePicker" class="dateTag">📅 9 February 2026</label>
+      <input id="datePicker" type="date" value="2026-02-09" />
+    </div>
   </div>
 
   <!-- ════ SUMMARY CHIPS ════ -->
@@ -921,18 +954,17 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">09FEB2026 / 00:00</strong>
     <br>Total: <strong>80 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster Feb_2026_RAMADAN_Version_4.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster_February_2026_RAMADAN_Version_4.xlsx</strong>
   </div>
 
 </div>
 
 <script>
 (function(){
-  var tag = document.getElementById('dateTag');
   var picker = document.getElementById('datePicker');
-  if(!tag || !picker) return;
+  if(!picker) return;
 
-  // التحقق إذا كان المستخدم في صفحة تاريخ قديم
+  // التحقق من التاريخ وإعادة التوجيه
   function checkAndRedirectToToday(){
     var path = window.location.pathname || '/';
     var isNowPage = path.includes('/now');
@@ -952,11 +984,7 @@
         if(isPageLoad){
           sessionStorage.removeItem('pageLoaded');
           var basePath = path.replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/').replace(/\/now\/.*$/,'/').replace(/\/+$/,'');
-          if(isNowPage){
-            window.location.href = basePath + '/now/';
-          } else {
-            window.location.href = basePath + '/';
-          }
+          window.location.href = isNowPage ? basePath + '/now/' : basePath + '/';
           return true;
         } else {
           sessionStorage.setItem('pageLoaded', 'true');
@@ -968,86 +996,21 @@
 
   if(checkAndRedirectToToday()) return;
 
-  // دالة محسّنة لفتح Date Picker - تعمل على iOS
-  function openPicker(e){
-    // منع السلوك الافتراضي
-    if(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    // إعداد موضع الـ picker
-    try{
-      var r = tag.getBoundingClientRect();
-      var wrap = tag.closest('.header') || document.body;
-      var wr = wrap.getBoundingClientRect();
-      picker.style.left = (r.left - wr.left) + 'px';
-      picker.style.top  = (r.bottom - wr.top + 6) + 'px';
-      picker.style.width = Math.max(120, r.width) + 'px';
-    }catch(ex){}
-
-    // طرق متعددة لفتح التقويم - تعمل على كل المتصفحات
-    setTimeout(function(){
-      try{
-        // الطريقة 1: showPicker (Chrome, Safari الحديث)
-        if(picker.showPicker) {
-          picker.showPicker();
-          return;
-        }
-      }catch(e1){}
-      
-      try{
-        // الطريقة 2: focus + click (iOS Safari)
-        picker.focus();
-        setTimeout(function(){
-          picker.click();
-        }, 50);
-      }catch(e2){}
-    }, 10);
-  }
-
-  // ربط الأحداث بطريقة محسّنة لـ iOS
-  tag.style.cursor = 'pointer';
-  tag.style.webkitTapHighlightColor = 'rgba(0,0,0,0)'; // إزالة تأثير النقر في iOS
-  tag.style.userSelect = 'none';
-  tag.style.webkitUserSelect = 'none';
-  
-  // أحداث الماوس واللمس
-  tag.addEventListener('click', openPicker, false);
-  tag.addEventListener('touchend', function(e){
-    e.preventDefault();
-    openPicker(e);
-  }, false);
-  
-  tag.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' || e.key === ' ') { 
-      e.preventDefault(); 
-      openPicker(e); 
-    }
-  });
-
-  // عند تغيير التاريخ
+  // عند تغيير التاريخ - بسيط جداً
   picker.addEventListener('change', function(){
     if(!picker.value) return;
+    
     sessionStorage.removeItem('pageLoaded');
     
     var path = window.location.pathname || '/';
     var isNowPage = path.includes('/now');
-    
     var base = path.replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/').replace(/\/now\/.*$/,'/').replace(/\/+$/,'');
     
     var target = base + '/date/' + picker.value + '/';
-    if(isNowPage){
-      target = target + 'now/';
-    }
+    if(isNowPage) target += 'now/';
     
     window.location.href = target;
   });
-  
-  // منع التمرير عند النقر على التاريخ (iOS)
-  tag.addEventListener('touchstart', function(e){
-    e.stopPropagation();
-  }, { passive: true });
 })();
 
 // ═══════════════════════════════════════════════════
