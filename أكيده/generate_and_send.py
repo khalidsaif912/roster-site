@@ -57,7 +57,7 @@ SHIFT_MAP = {
 }
 
 # تم تحويل كل الأسماء للإنجليزية
-GROUP_ORDER = ["Morning", "Afternoon", "Night", "Standby", "Off Day", "Leave", "Training", "Other"]
+GROUP_ORDER = ["Morning", "Afternoon", "Night", "Standby", "Off Day", "Annual Leave", "Sick Leave", "Training", "Other"]
 
 
 # =========================
@@ -127,21 +127,24 @@ def map_shift(code: str):
     if not c or c == "0":
         return ("-", "Other")
 
-    if c == "AL" or "ANNUAL LEAVE" in c:
-        return ("🏖️ Leave", "Leave")
+    # ✅ Leave types (separated)
+    if c == "AL" or c == "LV" or "ANNUAL LEAVE" in c:
+        return ("🏖️ Annual Leave", "Annual Leave")
+
     if c == "SL" or "SICK LEAVE" in c:
-        return ("🤒 Sick Leave", "Leave")
-    if c == "LV":
-        return ("🏖️ Leave", "Leave")
+        return ("🤒 Sick Leave", "Sick Leave")
+
+    # Training
     if c in ["TR"] or "TRAINING" in c:
         return ("📚 Training", "Training")
 
-    # 🔹 باقي الستاندباي
+    # 🔹 Standby - إظهار الكود الأصلي
     if c in ["ST", "STM", "STN", "STNE22", "STME06", "STMN06", "STAE14"] or "STANDBY" in c:
-        return ("🧍 Standby", "Standby")
+        return (f"🧍 {c0}", "Standby")
 
     if c == "OT" or c.startswith("OT"):
-        return ("⏱️ OT", "Standby")
+        return (f"⏱️ {c0}", "Standby")
+
     if c in ["OFF", "O"] or re.search(r"(REST|OFF\s*DAY|REST\/OFF)", c):
         return ("🛌 Off Day", "Off Day")
 
@@ -155,19 +158,57 @@ def current_shift_key(now: datetime) -> str:
     t = now.hour * 60 + now.minute
     if t >= 21 * 60 or t < 5 * 60:
         return "Night"
-    if t >= 14 * 60:
+    if t >= 13 * 60:
         return "Afternoon"
     return "Morning"
 
 def download_excel(url: str) -> bytes:
-    r = requests.get(url, timeout=60)
+    """Download the Excel file bytes.
+
+    Notes for OneDrive/SharePoint:
+    - Share links often return an HTML preview unless `download=1` is present.
+    - We also validate the response to avoid crashing openpyxl on non-xlsx content.
+    """
+    if not url:
+        raise ValueError("EXCEL_URL is empty")
+
+    # Force direct download for common OneDrive/SharePoint share links
+    try:
+        from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
+
+        u = urlparse(url)
+        host = (u.netloc or "").lower()
+        if ("onedrive.live.com" in host) or ("1drv.ms" in host) or ("sharepoint.com" in host):
+            qs = dict(parse_qsl(u.query, keep_blank_values=True))
+            if "download" not in qs:
+                qs["download"] = "1"
+                u = u._replace(query=urlencode(qs, doseq=True))
+                url = urlunparse(u)
+    except Exception:
+        pass
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (GitHub Actions) roster-site",
+        "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream,*/*",
+    }
+    r = requests.get(url, headers=headers, timeout=60, allow_redirects=True)
     r.raise_for_status()
-    return r.content
 
+    ctype = (r.headers.get("Content-Type") or "").lower()
+    data = r.content or b""
 
+    # Basic validation: xlsx is a ZIP container and starts with PK
+    if not data.startswith(b"PK"):
+        # Help debugging: show a short hint
+        hint = ""
+        if "text/html" in ctype:
+            hint = " (got HTML preview page; check OneDrive link/download=1)"
+        elif ctype.startswith("image/"):
+            hint = " (got an image; EXCEL_URL points to wrong file)"
+        raise ValueError(f"Downloaded file is not a valid .xlsx (Content-Type: {ctype or 'unknown'}){hint}")
 
-SOURCE_NAME_URL = os.environ.get("SOURCE_NAME_URL", "").strip()
-SOURCE_NAME_FALLBACK = os.environ.get("SOURCE_NAME_FALLBACK", "latest.xlsx").strip()
+    return data
+
 
 def download_text(url: str) -> str:
     """Download a small text file (e.g., source_name.txt)."""
@@ -291,7 +332,6 @@ def range_suffix_for_day(day: int, daynum_to_raw: dict, code_key: str):
         return ""
 
     up_key = code_key.upper()
-    start = end = day
 
     # تحديد الأكواد المقبولة لهذا النوع من الإجازة/التدريب
     acceptable_codes = []
@@ -310,35 +350,41 @@ def range_suffix_for_day(day: int, daynum_to_raw: dict, code_key: str):
 
     def is_same_type(val: str) -> bool:
         """تحقق إذا كان الكود من نفس النوع"""
+        if not val:
+            return False
         val_upper = val.upper()
         for code in acceptable_codes:
             if code in val_upper or val_upper == code:
                 return True
         return False
 
-    # backward - البحث للخلف
-    for d in reversed(sorted_days):
-        if d >= day:
-            continue
-        val = norm(daynum_to_raw.get(d, ""))
+    # إيجاد بداية ونهاية النطاق المتصل
+    start = day
+    end = day
+    
+    # البحث للخلف لإيجاد بداية النطاق
+    current = day - 1
+    while current in sorted_days:
+        val = norm(daynum_to_raw.get(current, ""))
         if is_same_type(val):
-            start = d
+            start = current
+            current -= 1
         else:
             break
-
-    # forward - البحث للأمام
-    for d in sorted_days:
-        if d <= day:
-            continue
-        val = norm(daynum_to_raw.get(d, ""))
+    
+    # البحث للأمام لإيجاد نهاية النطاق
+    current = day + 1
+    while current in sorted_days:
+        val = norm(daynum_to_raw.get(current, ""))
         if is_same_type(val):
-            end = d
+            end = current
+            current += 1
         else:
             break
 
     if start == end:
         return ""
-    return f"(من {start} إلى {end})"
+    return f"(<span style='font-size:0.75em;opacity:0.8;'>FROM</span> {start} <span style='font-size:0.75em;opacity:0.8;'>TO</span> {end})"
 
 
 
@@ -406,7 +452,7 @@ SHIFT_COLORS = {
         "status_color": "#3730a3",
         "icon": "🛋️",
     },
-    "Leave": {
+    "Annual Leave": {
         "border": "#10b98144",
         "bg": "#d1fae5",
         "summary_bg": "#d1fae5",
@@ -439,6 +485,17 @@ SHIFT_COLORS = {
         "status_color": "#555555",
         "icon": "🧍"
     }, 
+    "Sick Leave": {
+    "border": "#ef444444",
+    "bg": "#fee2e2",
+    "summary_bg": "#fee2e2",
+    "summary_border": "#ef444433",
+    "label_color": "#991b1b",
+    "count_bg": "#ef444422",
+    "count_color": "#991b1b",
+    "status_color": "#991b1b",
+    "icon": "🤒",
+   },
     "Other": {
         "border": "#94a3b844",
         "bg": "#f1f5f9",
@@ -477,8 +534,10 @@ def dept_card_html(dept_name: str, dept_color: dict, buckets: dict, open_group: 
             display_name = "Night"
         elif group_key == "Off Day":
             display_name = "Off Day"
-        elif group_key == "Leave":
+        elif group_key == "Annual Leave":
             display_name = "Annual Leave"
+        elif group_key == "Sick Leave":
+           display_name = "Sick Leave"
         elif group_key == "Training":
             display_name = "Training"
         elif group_key == "Standby":
@@ -541,7 +600,7 @@ def dept_card_html(dept_name: str, dept_color: dict, buckets: dict, open_group: 
     """
 
 def page_shell_html(date_label: str, iso_date: str, employees_total: int, departments_total: int,
-                     dept_cards_html: str, cta_url: str, sent_time: str, source_name: str = "") -> str:
+                     dept_cards_html: str, cta_url: str, sent_time: str, source_name: str = "", last_updated: str = "", is_now_page: bool = False) -> str:
 
     # ⬅️ أضف هذا السطر
     pages_base = infer_pages_base_url().rstrip("/")
@@ -593,26 +652,136 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
       background:rgba(255,255,255,.06);
     }}
     .header h1 {{ margin:0; font-size:24px; font-weight:800; position:relative; z-index:1; letter-spacing:-.3px; }}
+    
+    /* Date Picker Wrapper */
+    .datePickerWrapper {{
+      position:relative;
+      display:inline-block;
+      margin-top:10px;
+      z-index:1;
+    }}
     .header .dateTag {{
-      display:inline-block; margin-top:10px;
+      display:inline-block;
       background:rgba(255,255,255,.18);
-      padding:5px 18px; border-radius:30px;
-      font-size:13px; font-weight:600; letter-spacing:.3px;
-      position:relative; z-index:1;
+      padding:5px 18px;
+      border-radius:30px;
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:.3px;
+      cursor:pointer;
+      transition:all .3s;
+      border:2px solid rgba(255,255,255,.2);
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+      -webkit-user-select:none;
+    }}
+    .header .dateTag:hover {{
+      background:rgba(255,255,255,.25);
+      transform:translateY(-1px);
+    }}
+    #datePicker {{
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      opacity:0;
+      cursor:pointer;
+      font-size:16px; /* منع zoom في iOS */
+      border:none;
     }}
 
     /* ═══════ SUMMARY BAR ═══════ */
-    .summaryBar {{ display:flex; justify-content:center; gap:12px; margin-top:14px; }}
+    .summaryBar {{ 
+      display:flex; 
+      justify-content:center; 
+      align-items:stretch;
+      gap:12px; 
+      margin-top:14px;
+      flex-wrap:nowrap; /* منع الانتقال لصف ثاني */
+    }}
     .summaryChip {{
       background:#fff;
       border:1px solid rgba(15,23,42,.1);
       border-radius:14px;
-      padding:10px 20px;
+      padding:10px 16px; /* تقليل padding قليلاً */
       text-align:center;
       box-shadow:0 2px 8px rgba(15,23,42,.06);
+      transition:all .25s ease;
+      min-width:90px; /* حد أدنى للعرض */
     }}
     .summaryChip .chipVal {{ font-size:22px; font-weight:900; color:#1e40af; }}
-    .summaryChip .chipLabel {{ font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.6px; margin-top:2px; }}
+    .summaryChip .chipLabel {{ 
+      font-size:10px; /* خط أصغر قليلاً */
+      font-weight:600; 
+      color:#64748b; 
+      text-transform:uppercase; 
+      letter-spacing:.5px; 
+      margin-top:2px;
+      white-space:nowrap; /* منع الكسر */
+    }}
+
+    /* ═══════ SHIFT FILTER BUTTONS AS CHIPS ═══════ */
+    button.summaryChip.shiftFilterBtn {{
+      border:2px solid transparent;
+      position:relative;
+      overflow:hidden;
+      padding:10px 14px; /* padding أصغر للأزرار */
+    }}
+    button.summaryChip.shiftFilterBtn:hover {{
+      transform:translateY(-3px);
+      box-shadow:0 8px 20px rgba(15,23,42,.12);
+    }}
+    button.summaryChip.shiftFilterBtn.active {{
+      border-color:currentColor;
+      box-shadow:0 6px 16px rgba(15,23,42,.18);
+    }}
+    button.summaryChip.shiftFilterBtn.active::before {{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      background:currentColor;
+      opacity:.06;
+    }}
+    
+    /* ألوان الورديات */
+    button.shiftFilterBtn.morning {{
+      color:#f59e0b;
+    }}
+    button.shiftFilterBtn.morning .chipVal {{ color:#f59e0b; }}
+    button.shiftFilterBtn.morning .chipLabel {{ color:#92400e; }}
+    
+    button.shiftFilterBtn.afternoon {{
+      color:#f97316;
+    }}
+    button.shiftFilterBtn.afternoon .chipVal {{ color:#f97316; }}
+    button.shiftFilterBtn.afternoon .chipLabel {{ color:#9a3412; }}
+    
+    button.shiftFilterBtn.night {{
+      color:#8b5cf6;
+    }}
+    button.shiftFilterBtn.night .chipVal {{ color:#8b5cf6; }}
+    button.shiftFilterBtn.night .chipLabel {{ color:#5b21b6; }}
+    
+    button.shiftFilterBtn.all {{
+      color:#1e40af;
+    }}
+    button.shiftFilterBtn.all .chipVal {{ color:#1e40af; }}
+    button.shiftFilterBtn.all .chipLabel {{ color:#1e40af; }}
+    
+    /* للشاشات المتوسطة */
+    @media (max-width:900px){{
+      .summaryBar {{ flex-wrap:wrap; }} /* السماح بالانتقال للصف الثاني */
+    }}
+    
+    /* للموبايل */
+    @media (max-width:600px){{
+      .summaryBar {{ gap:8px; }}
+      .summaryChip {{ padding:8px 12px; min-width:70px; }}
+      .summaryChip .chipVal {{ font-size:19px; }}
+      .summaryChip .chipLabel {{ font-size:9px; }}
+    }}
+
 
     /* ═══════ DEPARTMENT CARD ═══════ */
     .deptCard {{
@@ -735,8 +904,10 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
   <!-- ════ HEADER ════ -->
   <div class="header">
     <h1>📋 Duty Roster</h1>
-    <div class="dateTag" id="dateTag" role="button" tabindex="0" style="cursor:pointer;">📅 {date_label}</div>
-    <input id="datePicker" type="date" value="{iso_date}" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;" aria-hidden="true" />
+    <div class="datePickerWrapper">
+      <label for="datePicker" class="dateTag">📅 {date_label}</label>
+      <input id="datePicker" type="date" value="{iso_date}" />
+    </div>
   </div>
 
   <!-- ════ SUMMARY CHIPS ════ -->
@@ -749,6 +920,24 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
       <div class="chipVal" style="color:#059669;">{departments_total}</div>
       <div class="chipLabel">Departments</div>
     </div>
+    {"" if not is_now_page else '''
+    <button class="summaryChip shiftFilterBtn morning" data-shift="Morning" style="cursor:pointer;">
+      <div class="chipVal">☀️</div>
+      <div class="chipLabel">Morning</div>
+    </button>
+    <button class="summaryChip shiftFilterBtn afternoon" data-shift="Afternoon" style="cursor:pointer;">
+      <div class="chipVal">🌤️</div>
+      <div class="chipLabel">Afternoon</div>
+    </button>
+    <button class="summaryChip shiftFilterBtn night" data-shift="Night" style="cursor:pointer;">
+      <div class="chipVal">🌙</div>
+      <div class="chipLabel">Night</div>
+    </button>
+    <button class="summaryChip shiftFilterBtn all active" data-shift="All" style="cursor:pointer;">
+      <div class="chipVal">📋</div>
+      <div class="chipLabel">All Shifts</div>
+    </button>
+    '''}
   </div>
 
   <!-- ════ DEPARTMENT CARDS ════ -->
@@ -765,58 +954,179 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
 
   <!-- ════ FOOTER ════ -->
   <div class="footer">
-    Sent at <strong>{sent_time}</strong>
-     &nbsp;·&nbsp; Total: <strong>{employees_total} employees</strong>
-    <br>Source file: <strong>{source_name}</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">{last_updated}</strong>
+    <br>Total: <strong>{employees_total} employees</strong>
+     &nbsp;·&nbsp; Source: <strong>{source_name}</strong>
   </div>
 
 </div>
 
 <script>
 (function(){{
-  var tag = document.getElementById('dateTag');
   var picker = document.getElementById('datePicker');
-  if(!tag || !picker) return;
+  if(!picker) return;
 
-  function openPicker(){{
-    // Position the (hidden) input مباشرة تحت التاريخ حتى يظهر التقويم بالمكان الصحيح
-    try{{
-      var r = tag.getBoundingClientRect();
-      var wrap = tag.closest('.header') || document.body;
-      var wr = wrap.getBoundingClientRect();
-      picker.style.left = (r.left - wr.left) + 'px';
-      picker.style.top  = (r.bottom - wr.top + 6) + 'px';
-      picker.style.width = Math.max(120, r.width) + 'px';
-    }}catch(e){{}}
-
-    try{{
-      if (picker.showPicker) {{ picker.showPicker(); }}
-      else {{ picker.focus(); picker.click(); }}
-    }}catch(e){{
-      picker.focus(); picker.click();
+  // التحقق من التاريخ وإعادة التوجيه
+  function checkAndRedirectToToday(){{
+    var path = window.location.pathname || '/';
+    var isNowPage = path.includes('/now');
+    
+    var dateMatch = path.match(/\/date\/(\\d{{4}})-(\\d{{2}})-(\\d{{2}})\//);
+    if(dateMatch){{
+      var pageDate = dateMatch[1] + '-' + dateMatch[2] + '-' + dateMatch[3];
+      
+      var now = new Date();
+      var muscatTime = new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
+      var todayStr = muscatTime.getFullYear() + '-' + 
+                     String(muscatTime.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(muscatTime.getDate()).padStart(2, '0');
+      
+      if(pageDate !== todayStr){{
+        var isPageLoad = sessionStorage.getItem('pageLoaded');
+        if(isPageLoad){{
+          sessionStorage.removeItem('pageLoaded');
+          var basePath = path.replace(/\/date\/\\d{{4}}-\\d{{2}}-\\d{{2}}\\/.*$/,'/').replace(/\/now\/.*$/,'/').replace(/\/+$/,'');
+          window.location.href = isNowPage ? basePath + '/now/' : basePath + '/';
+          return true;
+        }} else {{
+          sessionStorage.setItem('pageLoaded', 'true');
+        }}
+      }}
     }}
+    return false;
   }}
 
-  tag.addEventListener('click', openPicker);
-  tag.addEventListener('keydown', function(e){{
-    if(e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); openPicker(); }}
-  }});
+  if(checkAndRedirectToToday()) return;
 
-  function computeBasePath(){{
-    var p = window.location.pathname || '/';
-    // Strip "/now/" and anything after it
-    p = p.replace(/\/now\/.*$/,'/');
-    // Strip "/date/YYYY-MM-DD/" and anything after it
-    p = p.replace(/\/date\/\\d{{4}}-\\d{{2}}-\\d{{2}}\\/.*$/,'/');
-    return p.replace(/\/+$/,''); // no trailing slash
-  }}
-
+  // عند تغيير التاريخ - بسيط جداً
   picker.addEventListener('change', function(){{
     if(!picker.value) return;
-    var base = computeBasePath();
+    
+    sessionStorage.removeItem('pageLoaded');
+    
+    var path = window.location.pathname || '/';
+    var isNowPage = path.includes('/now');
+    var base = path.replace(/\/date\/\\d{{4}}-\\d{{2}}-\\d{{2}}\\/.*$/,'/').replace(/\/now\/.*$/,'/').replace(/\/+$/,'');
+    
     var target = base + '/date/' + picker.value + '/';
+    if(isNowPage) target += 'now/';
+    
     window.location.href = target;
   }});
+}})();
+
+// ═══════════════════════════════════════════════════
+// Shift Filter (NOW PAGE ONLY)
+// ═══════════════════════════════════════════════════
+(function(){{
+  var filterBtns = document.querySelectorAll('.shiftFilterBtn');
+  if(!filterBtns.length) return; // Not a /now/ page
+  
+  var allShiftCards = document.querySelectorAll('.shiftCard');
+  
+  // Group shift cards by shift type
+  var shiftGroups = {{}};
+  allShiftCards.forEach(function(card){{
+    var summary = card.querySelector('.shiftSummary');
+    if(!summary) return;
+    
+    var label = summary.querySelector('.shiftLabel');
+    if(!label) return;
+    
+    var shiftType = label.textContent.trim();
+    if(!shiftGroups[shiftType]) shiftGroups[shiftType] = [];
+    shiftGroups[shiftType].push(card);
+  }});
+  
+  // Determine current shift based on time
+  function getCurrentShift(){{
+    var now = new Date();
+    var muscatTime = new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
+    var hour = muscatTime.getHours();
+    var minute = muscatTime.getMinutes();
+    var t = hour * 60 + minute;
+    
+    if(t >= 21 * 60 || t < 5 * 60) return 'Night';
+    if(t >= 14 * 60) return 'Afternoon';
+    return 'Morning';
+  }}
+  
+  // Set active shift on load - default to current shift
+  var currentShift = getCurrentShift();
+  filterBtns.forEach(function(btn){{
+    if(btn.dataset.shift === currentShift){{
+      btn.classList.add('active');
+    }} else {{
+      btn.classList.remove('active');
+    }}
+  }});
+  
+  // Filter function
+  function filterShifts(selectedShift){{
+    var totalEmployees = 0;
+    
+    if(selectedShift === 'All'){{
+      // Show all shifts
+      allShiftCards.forEach(function(card){{
+        card.style.display = '';
+        var count = card.querySelector('.shiftCount');
+        if(count) totalEmployees += parseInt(count.textContent) || 0;
+      }});
+    }} else {{
+      // Hide all cards first
+      allShiftCards.forEach(function(card){{ card.style.display = 'none'; }});
+      
+      // Show only selected shift cards and count employees
+      if(shiftGroups[selectedShift]){{
+        shiftGroups[selectedShift].forEach(function(card){{
+          card.style.display = '';
+          // Auto-open the selected shift
+          card.setAttribute('open', '');
+          // Count employees in this card
+          var count = card.querySelector('.shiftCount');
+          if(count) totalEmployees += parseInt(count.textContent) || 0;
+        }});
+      }}
+      
+      // Also show Off Day, Leave, Training, Standby in all shifts
+      var alwaysShow = ['Off Day', 'Annual Leave', 'Sick Leave', 'Training', 'Standby', 'Other'];
+      alwaysShow.forEach(function(type){{
+        if(shiftGroups[type]){{
+          shiftGroups[type].forEach(function(card){{
+            card.style.display = '';
+            // Count employees
+            var count = card.querySelector('.shiftCount');
+            if(count) totalEmployees += parseInt(count.textContent) || 0;
+          }});
+        }}
+      }});
+    }}
+    
+    // Update employee count in summary
+    var employeeChip = document.querySelector('.summaryChip .chipVal');
+    if(employeeChip){{
+      employeeChip.textContent = totalEmployees;
+    }}
+    
+    // Update button states
+    filterBtns.forEach(function(btn){{
+      if(btn.dataset.shift === selectedShift){{
+        btn.classList.add('active');
+      }} else {{
+        btn.classList.remove('active');
+      }}
+    }});
+  }}
+  
+  // Add click handlers
+  filterBtns.forEach(function(btn){{
+    btn.addEventListener('click', function(){{
+      filterShifts(this.dataset.shift);
+    }});
+  }});
+  
+  // Auto-filter on page load - show current shift
+  filterShifts(currentShift);
 }})();
 </script>
 
@@ -879,20 +1189,24 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                     label, grp = map_shift(raw)
 
                     up = norm(raw).upper()
-                    if grp == "Leave":
+                    # إضافة نطاق التواريخ FROM TO للإجازات السنوية
+                    if grp == "Annual Leave":
                         if up == "AL" or "ANNUAL LEAVE" in up or up == "LV":
                             suf = range_suffix_for_day(day, daynum_to_raw, "AL")
                             if suf:
-                                label = f"{label} {suf}"
-                        elif up == "SL" or "SICK LEAVE" in up:
+                                label = suf  # فقط النطاق الزمني
+                    # إضافة نطاق التواريخ FROM TO للإجازات المرضية
+                    elif grp == "Sick Leave":
+                        if up == "SL" or "SICK LEAVE" in up:
                             suf = range_suffix_for_day(day, daynum_to_raw, "SL")
                             if suf:
-                                label = f"{label} {suf}"
+                                label = suf  # فقط النطاق الزمني
+                    # إضافة نطاق التواريخ FROM TO للتدريب
                     elif grp == "Training":
                         if up == "TR" or "TRAINING" in up:
                             suf = range_suffix_for_day(day, daynum_to_raw, "TR")
                             if suf:
-                                label = f"{label} {suf}"
+                                label = suf  # فقط النطاق الزمني
 
                     buckets.setdefault(grp, []).append({"name": name, "shift": label})
 
@@ -909,11 +1223,13 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                 card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
                 dept_cards_all.append(card_all)
 
-                card_now = dept_card_html(dept_name, dept_color, buckets_now, open_group=active_group)
+                # صفحة /now/ تحتوي على كل الورديات (سيتم الفلترة بـ JavaScript)
+                card_now = dept_card_html(dept_name, dept_color, buckets, open_group=active_group)
                 dept_cards_now.append(card_now)
 
                 employees_total_all += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
-                employees_total_now += sum(len(buckets_now.get(g, [])) for g in GROUP_ORDER)
+                # حساب فقط الوردية الحالية لـ total في /now/
+                employees_total_now += sum(len(buckets.get(g, [])) for g in [active_group, "Off Day", "Annual Leave", "Sick Leave", "Training", "Standby", "Other"])
 
                 depts_count += 1
 
@@ -925,6 +1241,7 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
 
             iso_date = date_obj.strftime("%Y-%m-%d")
             sent_time = date_obj.strftime("%H:%M")
+            last_updated = date_obj.strftime("%d%b%Y / %H:%M").upper()
 
             full_url = f"{pages_base}/"
             now_url = f"{pages_base}/now/"
@@ -937,7 +1254,9 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                 dept_cards_html="\n".join(dept_cards_all),
                 cta_url=now_url,
                 sent_time=sent_time,
-                           source_name=source_name,
+                source_name=source_name,
+                last_updated=last_updated,
+                is_now_page=False,
             )
             html_now = page_shell_html(
                 date_label=date_label,
@@ -947,14 +1266,20 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                 dept_cards_html="\n".join(dept_cards_now),
                 cta_url=full_url,
                 sent_time=sent_time,
-                           source_name=source_name,
+                source_name=source_name,
+                last_updated=last_updated,
+                is_now_page=True,
             )
 
             date_dir = f"docs/date/{iso_date}"
             os.makedirs(date_dir, exist_ok=True)
+            os.makedirs(f"{date_dir}/now", exist_ok=True)
 
             with open(f"{date_dir}/index.html", "w", encoding="utf-8") as f:
                 f.write(html_full)
+            
+            with open(f"{date_dir}/now/index.html", "w", encoding="utf-8") as f:
+                f.write(html_now)
 
         except Exception as e:
             print(f"Skipping {year}-{month:02d}-{day:02d}: {e}")
@@ -963,15 +1288,38 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
 
 def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_dept: list, pages_base: str) -> str:
     """
-    Builds a beautifully formatted HTML email showing ALL shifts for today.
+    Builds a beautifully formatted HTML email showing ONLY the active shift plus Standby for the same shift.
     all_shifts_by_dept = [{"dept": ..., "shifts": {"Morning": [...], "Afternoon": [...], ...}}, ...]
     """
-    # Calculate totals across all shifts
+    # Show only: active shift + Standby entries that match the active shift
+    include_groups = [active_shift_key, "Standby"]
+
+    def standby_matches_active(shift_text: str) -> bool:
+        up = (shift_text or "").upper()
+        if active_shift_key == "Morning":
+            return bool(re.search(r"(MN|ME)\d{1,2}", up))
+        if active_shift_key == "Afternoon":
+            return bool(re.search(r"(AN|AE)\d{1,2}", up))
+        if active_shift_key == "Night":
+            return bool(re.search(r"(NN|NE|NT)\d{1,2}", up))
+        return False
+
+    def get_group_employees(shifts_data: dict, group_key: str):
+        if group_key != "Standby":
+            return shifts_data.get(group_key, []) or []
+        # Standby: keep only those that match the active shift (e.g., STME06 for Morning)
+        emps = shifts_data.get("Standby", []) or []
+        return [e for e in emps if standby_matches_active(e.get("shift", ""))]
+
+    # Calculate totals across included groups only
     total_employees = 0
     depts_with_employees = 0
-    
+
     for d in all_shifts_by_dept:
-        dept_total = sum(len(employees) for employees in d["shifts"].values())
+        shifts_data = d.get("shifts", {})
+        dept_total = 0
+        for g in include_groups:
+            dept_total += len(get_group_employees(shifts_data, g))
         if dept_total > 0:
             depts_with_employees += 1
             total_employees += dept_total
@@ -985,22 +1333,23 @@ def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_
     for idx, d in enumerate(all_shifts_by_dept):
         dept_name = d["dept"]
         shifts_data = d["shifts"]
-        
-        # Skip if department has no employees today
-        dept_total = sum(len(employees) for employees in shifts_data.values())
+        # Skip if department has no employees for the included groups
+        dept_total = 0
+        for g in include_groups:
+            dept_total += len(get_group_employees(shifts_data, g))
         if dept_total == 0:
             continue
-        
         # Determine department color
         if dept_name == "Unassigned":
             dept_color = UNASSIGNED_COLOR
         else:
             dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
-
-        # Build shift sections
+        # Build shift sections (only active shift + matching Standby)
         shift_sections = ""
         for group_key in GROUP_ORDER:
-            employees = shifts_data.get(group_key, [])
+            if group_key not in include_groups:
+                continue
+            employees = get_group_employees(shifts_data, group_key)
             if not employees:
                 continue
 
@@ -1099,7 +1448,7 @@ def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_
               </td>
             </tr>
 
-            <!-- All Shifts -->
+            <!-- Included Shifts -->
             <tr>
               <td colspan="2" style="padding:10px;">
                 {shift_sections}
@@ -1111,6 +1460,7 @@ def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_
     dept_html = "".join(dept_cards)
     sent_time = now.strftime("%H:%M")
     date_str = now.strftime("%d %B %Y")
+    last_updated = now.strftime("%d%b%Y / %H:%M").upper()
 
     # Translate active_shift_key display
     shift_display_map = {
@@ -1277,7 +1627,7 @@ def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#fff;border-radius:0 0 20px 20px;border:1px solid rgba(15,23,42,.08);border-top:none;">
                 <tr>
                   <td style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;line-height:1.9;">
-                    Sent at <strong style="color:#64748b;">{sent_time}</strong>
+                    <strong style="color:#475569;">Last Updated:</strong> <strong style="color:#1e40af;">{last_updated}</strong>
                     <br>
                     Total on duty: <strong style="color:#64748b;">{total_employees} employees</strong> across <strong style="color:#64748b;">{depts_with_employees} departments</strong>
                   </td>
@@ -1301,18 +1651,59 @@ def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_
 # =========================
 # Email
 # =========================
+def get_subscriber_emails():
+    """
+    يقرأ قائمة الإيميلات من Google Apps Script
+    """
+    subscriber_url = os.environ.get('SUBSCRIBE_URL', '').strip()
+    
+    if not subscriber_url:
+        return os.environ.get('MAIL_TO', '').strip()
+    
+    try:
+        print(f"📥 Fetching subscriber emails...")
+        response = requests.get(subscriber_url, timeout=10)
+        response.raise_for_status()
+        
+        email_list = response.text.strip()
+        
+        if not email_list:
+            print("⚠️ No subscribers found, using MAIL_TO")
+            return os.environ.get('MAIL_TO', '').strip()
+        
+        subscriber_count = len([e for e in email_list.split(',') if e.strip()])
+        print(f"✅ Found {subscriber_count} active subscribers")
+        
+        return email_list
+        
+    except Exception as e:
+        print(f"❌ Error fetching subscribers: {e}")
+        print("⚠️ Falling back to MAIL_TO")
+        return os.environ.get('MAIL_TO', '').strip()
+
+
 def send_email(subject: str, html: str):
-    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and MAIL_FROM and MAIL_TO):
+    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and MAIL_FROM):
         return
+
+    recipient_list = get_subscriber_emails()
+    recipients = [x.strip() for x in recipient_list.split(",") if x.strip()]
+
+    if not recipients:
+        print("⚠️ No recipients found, skipping email")
+        return
+
     msg = MIMEText(html, "html", "utf-8")
     msg["Subject"] = subject
     msg["From"] = MAIL_FROM
-    msg["To"] = MAIL_TO
+    msg["To"] = MAIL_TO or MAIL_FROM  # ✅ لا تعرض قائمة المشتركين
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
         s.starttls()
         s.login(SMTP_USER, SMTP_PASS)
-        s.sendmail(MAIL_FROM, [x.strip() for x in MAIL_TO.split(",") if x.strip()], msg.as_string())
+        s.sendmail(MAIL_FROM, recipients, msg.as_string())
+
+    print(f"✅ Sent to {len(recipients)} subscribers")
 
 
 # =========================
@@ -1347,7 +1738,13 @@ def main():
     if pages_base.endswith("/now"):
         pages_base = pages_base[:-4]
     
-    data = download_excel(EXCEL_URL)
+    try:
+        data = download_excel(EXCEL_URL)
+    except Exception as e:
+        print(f"ERROR downloading Excel: {e}")
+        # Do not crash the workflow; skip processing so Actions stays green.
+        return
+
     wb = load_workbook(BytesIO(data), data_only=True)
     source_name = get_source_name()
 
@@ -1395,20 +1792,24 @@ def main():
             label, grp = map_shift(raw)
 
             up = norm(raw).upper()
-            if grp == "Leave":
+            # إضافة نطاق التواريخ FROM TO للإجازات السنوية
+            if grp == "Annual Leave":
                 if up == "AL" or "ANNUAL LEAVE" in up or up == "LV":
                     suf = range_suffix_for_day(today_day, daynum_to_raw, "AL")
                     if suf:
-                        label = f"{label} {suf}"
-                elif up == "SL" or "SICK LEAVE" in up:
+                        label = suf  # فقط النطاق الزمني بدون اسم الإجازة
+            # إضافة نطاق التواريخ FROM TO للإجازات المرضية
+            elif grp == "Sick Leave":
+                if up == "SL" or "SICK LEAVE" in up:
                     suf = range_suffix_for_day(today_day, daynum_to_raw, "SL")
                     if suf:
-                        label = f"{label} {suf}"
+                        label = suf  # فقط النطاق الزمني بدون اسم الإجازة
+            # إضافة نطاق التواريخ FROM TO للتدريب
             elif grp == "Training":
                 if up == "TR" or "TRAINING" in up:
                     suf = range_suffix_for_day(today_day, daynum_to_raw, "TR")
                     if suf:
-                        label = f"{label} {suf}"
+                        label = suf  # فقط النطاق الزمني بدون اسم الإجازة
             
             buckets.setdefault(grp, []).append({"name": name, "shift": label})
 
@@ -1426,11 +1827,13 @@ def main():
         card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
         dept_cards_all.append(card_all)
 
-        card_now = dept_card_html(dept_name, dept_color, buckets_now, open_group=active_group)
+        # صفحة /now/ تحتوي على كل الورديات (سيتم الفلترة بـ JavaScript)
+        card_now = dept_card_html(dept_name, dept_color, buckets, open_group=active_group)
         dept_cards_now.append(card_now)
 
         employees_total_all += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
-        employees_total_now += sum(len(buckets_now.get(g, [])) for g in GROUP_ORDER)
+        # حساب فقط الوردية الحالية لـ total في /now/
+        employees_total_now += sum(len(buckets.get(g, [])) for g in [active_group, "Off Day", "Annual Leave", "Sick Leave", "Training", "Standby", "Other"])
 
         depts_count += 1
 
@@ -1444,6 +1847,7 @@ def main():
 
     iso_date = now.strftime("%Y-%m-%d")
     sent_time = now.strftime("%H:%M")
+    last_updated = now.strftime("%d%b%Y / %H:%M").upper()
 
     full_url = f"{pages_base}/"
     now_url = f"{pages_base}/now/"
@@ -1457,6 +1861,8 @@ def main():
         cta_url=now_url,
         sent_time=sent_time,
         source_name=source_name,
+        last_updated=last_updated,
+        is_now_page=False,
     )
     html_now = page_shell_html(
         date_label=date_label,
@@ -1467,6 +1873,8 @@ def main():
         cta_url=full_url,
         sent_time=sent_time,
         source_name=source_name,
+        last_updated=last_updated,
+        is_now_page=True,
     )
 
     with open("docs/index.html", "w", encoding="utf-8") as f:
@@ -1475,7 +1883,7 @@ def main():
     with open("docs/now/index.html", "w", encoding="utf-8") as f:
         f.write(html_now)
 
-    # Email: send all shifts for today
+    # Email: send ONLY active shift + matching Standby
     subject = f"Duty Roster — {now.strftime('%d %B %Y')} — {active_group} Active"
     email_html = build_pretty_email_html(active_group, now, all_shifts_by_dept, pages_base)
     send_email(subject, email_html)

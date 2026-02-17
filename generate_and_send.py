@@ -1,5 +1,7 @@
 import os
 import re
+import json
+import calendar
 import argparse
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -32,6 +34,9 @@ MAIL_TO = os.environ.get("MAIL_TO", "").strip()
 PAGES_BASE_URL = os.environ.get("PAGES_BASE_URL", "").strip()  # optional
 TZ = ZoneInfo("Asia/Muscat")
 AUTO_OPEN_ACTIVE_SHIFT_IN_FULL = True
+
+# Local cache directory inside repo (committed by actions)
+ROSTERS_DIR = os.environ.get("ROSTERS_DIR", "rosters").strip() or "rosters"
 # Excel sheets
 DEPARTMENTS = [
     ("Officers", "Officers"),
@@ -154,7 +159,7 @@ def map_shift(code: str):
     return (f"❓ {c0}", "Other")
 
 def current_shift_key(now: datetime) -> str:
-    # 21:00–04:59 Night, 14:00–20:59 Afternoon, else Morning
+    # 21:00–04:59 Night, 13:00–20:59 Afternoon, else Morning
     t = now.hour * 60 + now.minute
     if t >= 21 * 60 or t < 5 * 60:
         return "Night"
@@ -230,6 +235,94 @@ def get_source_name() -> str:
 def infer_pages_base_url():
     return "https://khalidsaif912.github.io/roster-site"
 
+
+
+# =========================
+# Month parsing + local cache (repo)
+# =========================
+MONTH_NAME_TO_NUM = {
+    "january": 1, "jan": 1,
+    "february": 2, "feb": 2,
+    "march": 3, "mar": 3,
+    "april": 4, "apr": 4,
+    "may": 5,
+    "june": 6, "jun": 6,
+    "july": 7, "jul": 7,
+    "august": 8, "aug": 8,
+    "september": 9, "sep": 9, "sept": 9,
+    "october": 10, "oct": 10,
+    "november": 11, "nov": 11,
+    "december": 12, "dec": 12,
+}
+
+def month_key_from_filename(name: str) -> str | None:
+    """Extract YYYY-MM from roster attachment file name (e.g., 'February 2026')."""
+    if not name:
+        return None
+    n = name.lower()
+    n = re.sub(r"[\._\-]+", " ", n)
+    n = re.sub(r"\s+", " ", n).strip()
+    m = re.search(
+        r"\b(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sep|sept|october|oct|november|nov|december|dec)\b\s+(\d{4})\b",
+        n,
+    )
+    if not m:
+        return None
+    mon_name, year_s = m.group(1), m.group(2)
+    mon = MONTH_NAME_TO_NUM.get(mon_name)
+    if not mon:
+        return None
+    return f"{int(year_s):04d}-{mon:02d}"
+
+def add_months(year: int, month: int, delta: int) -> tuple[int, int]:
+    y = year
+    m = month + delta
+    while m <= 0:
+        y -= 1
+        m += 12
+    while m > 12:
+        y += 1
+        m -= 12
+    return y, m
+
+def cache_paths(month_key: str) -> tuple[str, str]:
+    os.makedirs(ROSTERS_DIR, exist_ok=True)
+    return (
+        os.path.join(ROSTERS_DIR, f"{month_key}.xlsx"),
+        os.path.join(ROSTERS_DIR, f"{month_key}.meta.json"),
+    )
+
+def write_bytes(path: str, data: bytes):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "wb") as f:
+        f.write(data)
+
+def read_json(path: str) -> dict | None:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def write_json(path: str, obj: dict):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, indent=2)
+
+def try_load_cached_workbook(month_key: str):
+    xlsx_path, _ = cache_paths(month_key)
+    if not os.path.exists(xlsx_path):
+        return None
+    try:
+        with open(xlsx_path, "rb") as f:
+            return load_workbook(BytesIO(f.read()), data_only=True)
+    except Exception:
+        return None
+
+def cached_source_name(month_key: str) -> str:
+    _, meta_path = cache_paths(month_key)
+    meta = read_json(meta_path) or {}
+    return (meta.get("original_filename") or meta.get("source_name") or "").strip()
 
 # =========================
 # Detect rows/cols (Days row + Date numbers row)
@@ -600,10 +693,13 @@ def dept_card_html(dept_name: str, dept_color: dict, buckets: dict, open_group: 
     """
 
 def page_shell_html(date_label: str, iso_date: str, employees_total: int, departments_total: int,
-                     dept_cards_html: str, cta_url: str, sent_time: str, source_name: str = "", last_updated: str = "", is_now_page: bool = False) -> str:
+                     dept_cards_html: str, cta_url: str, sent_time: str, source_name: str = "", last_updated: str = "", is_now_page: bool = False,
+                     min_date: str = "", max_date: str = "", notice_html: str = "") -> str:
 
     # ⬅️ أضف هذا السطر
-    pages_base = infer_pages_base_url().rstrip("/")
+    pages_base = (PAGES_BASE_URL or infer_pages_base_url()).rstrip("/")
+    min_attr = f'min="{min_date}"' if min_date else ""
+    max_attr = f'max="{max_date}"' if max_date else ""
 
     return f"""<!doctype html>
 <html lang="en">
@@ -906,9 +1002,11 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
     <h1>📋 Duty Roster</h1>
     <div class="datePickerWrapper">
       <label for="datePicker" class="dateTag">📅 {date_label}</label>
-      <input id="datePicker" type="date" value="{iso_date}" />
+      <input id="datePicker" type="date" value="{iso_date}" {min_attr} {max_attr} />
     </div>
   </div>
+
+  {notice_html if notice_html else ""}
 
   <!-- ════ SUMMARY CHIPS ════ -->
   <div class="summaryBar">
@@ -1047,7 +1145,7 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
     var t = hour * 60 + minute;
     
     if(t >= 21 * 60 || t < 5 * 60) return 'Night';
-    if(t >= 14 * 60) return 'Afternoon';
+    if(t >= 13 * 60) return 'Afternoon';
     return 'Morning';
   }}
   
@@ -1134,10 +1232,12 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
 </html>"""
 
 
-def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, source_name: str = ""):
+def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, source_name: str = "", min_date: str = "", max_date: str = ""):
     """
     Generate static pages for each day of the given month.
     Used by the date picker to navigate to different dates.
+
+    If wb is None, it still generates pages but shows a 'no roster' notice.
     """
     import calendar
     from datetime import datetime as dt
@@ -1156,84 +1256,87 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
             employees_total_now = 0
             depts_count = 0
 
-            for idx, (sheet_name, dept_name) in enumerate(DEPARTMENTS):
-                if sheet_name not in wb.sheetnames:
-                    continue
-
-                ws = wb[sheet_name]
-                days_row, date_row = find_days_and_dates_rows(ws)
-                day_col = find_day_col(ws, days_row, date_row, dow, day)
-
-                if not (days_row and date_row and day_col):
-                    continue
-
-                start_row = date_row + 1
-                emp_col = find_employee_col(ws, start_row=start_row)
-                daynum_to_col = get_daynum_to_col(ws, date_row)
-                if not emp_col:
-                    continue
-
-                buckets = {k: [] for k in GROUP_ORDER}
-                buckets_now = {k: [] for k in GROUP_ORDER}
-
-                for r in range(start_row, ws.max_row + 1):
-                    name = norm(ws.cell(row=r, column=emp_col).value)
-                    if not looks_like_employee_name(name):
+            notice_html = ""
+            if wb is None:
+                notice_html = (
+                    "<div class='deptCard' style='padding:14px;border:1px dashed rgba(15,23,42,.20);background:#fff;'>"
+                    "⚠️ لا يوجد روستر لهذا الشهر بعد.</div>"
+                )
+            else:
+                for idx, (sheet_name, dept_name) in enumerate(DEPARTMENTS):
+                    if sheet_name not in wb.sheetnames:
                         continue
 
-                    daynum_to_raw = {dn: norm(ws.cell(row=r, column=col).value) for dn, col in daynum_to_col.items()}
-                    raw = daynum_to_raw.get(day, "")
-                    if not looks_like_shift_code(raw):
+                    ws = wb[sheet_name]
+                    days_row, date_row = find_days_and_dates_rows(ws)
+                    day_col = find_day_col(ws, days_row, date_row, dow, day)
+
+                    if not (days_row and date_row and day_col):
                         continue
 
-                    label, grp = map_shift(raw)
+                    start_row = date_row + 1
+                    emp_col = find_employee_col(ws, start_row=start_row)
+                    daynum_to_col = get_daynum_to_col(ws, date_row)
+                    if not emp_col:
+                        continue
 
-                    up = norm(raw).upper()
-                    # إضافة نطاق التواريخ FROM TO للإجازات السنوية
-                    if grp == "Annual Leave":
-                        if up == "AL" or "ANNUAL LEAVE" in up or up == "LV":
-                            suf = range_suffix_for_day(day, daynum_to_raw, "AL")
-                            if suf:
-                                label = suf  # فقط النطاق الزمني
-                    # إضافة نطاق التواريخ FROM TO للإجازات المرضية
-                    elif grp == "Sick Leave":
-                        if up == "SL" or "SICK LEAVE" in up:
-                            suf = range_suffix_for_day(day, daynum_to_raw, "SL")
-                            if suf:
-                                label = suf  # فقط النطاق الزمني
-                    # إضافة نطاق التواريخ FROM TO للتدريب
-                    elif grp == "Training":
-                        if up == "TR" or "TRAINING" in up:
-                            suf = range_suffix_for_day(day, daynum_to_raw, "TR")
-                            if suf:
-                                label = suf  # فقط النطاق الزمني
+                    buckets = {k: [] for k in GROUP_ORDER}
+                    buckets_now = {k: [] for k in GROUP_ORDER}
 
-                    buckets.setdefault(grp, []).append({"name": name, "shift": label})
+                    for r in range(start_row, ws.max_row + 1):
+                        name = norm(ws.cell(row=r, column=emp_col).value)
+                        if not looks_like_employee_name(name):
+                            continue
 
-                    if grp == active_group:
-                        buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
+                        daynum_to_raw = {dn: norm(ws.cell(row=r, column=col).value) for dn, col in daynum_to_col.items()}
+                        raw = daynum_to_raw.get(day, "")
+                        if not looks_like_shift_code(raw):
+                            continue
 
-                # تحديد اللون للقسم
-                if dept_name == "Unassigned":
-                    dept_color = UNASSIGNED_COLOR
-                else:
-                    dept_color = DEPT_COLORS[idx % len(DEPT_COLORS)]
+                        label, grp = map_shift(raw)
 
-                open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
-                card_all = dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full)
-                dept_cards_all.append(card_all)
+                        up = norm(raw).upper()
+                        if grp == "Annual Leave":
+                            if up == "AL" or "ANNUAL LEAVE" in up or up == "LV":
+                                suf = range_suffix_for_day(day, daynum_to_raw, "AL")
+                                if suf:
+                                    label = suf
+                        elif grp == "Sick Leave":
+                            if up == "SL" or "SICK LEAVE" in up:
+                                suf = range_suffix_for_day(day, daynum_to_raw, "SL")
+                                if suf:
+                                    label = suf
+                        elif grp == "Training":
+                            if up == "TR" or "TRAINING" in up:
+                                suf = range_suffix_for_day(day, daynum_to_raw, "TR")
+                                if suf:
+                                    label = suf
 
-                # صفحة /now/ تحتوي على كل الورديات (سيتم الفلترة بـ JavaScript)
-                card_now = dept_card_html(dept_name, dept_color, buckets, open_group=active_group)
-                dept_cards_now.append(card_now)
+                        buckets.setdefault(grp, []).append({"name": name, "shift": label})
 
-                employees_total_all += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
-                # حساب فقط الوردية الحالية لـ total في /now/
-                employees_total_now += sum(len(buckets.get(g, [])) for g in [active_group, "Off Day", "Annual Leave", "Sick Leave", "Training", "Standby", "Other"])
+                        # /now page: show active shift + always-show types, filtering happens in JS
+                        if grp == active_group:
+                            buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
+                        else:
+                            if grp in ["Off Day", "Annual Leave", "Sick Leave", "Training", "Standby", "Other"]:
+                                buckets_now.setdefault(grp, []).append({"name": name, "shift": label})
 
-                depts_count += 1
+                    dept_color = UNASSIGNED_COLOR if dept_name == "Unassigned" else DEPT_COLORS[idx % len(DEPT_COLORS)]
+                    open_group_full = active_group if AUTO_OPEN_ACTIVE_SHIFT_IN_FULL else None
 
-            date_label = date_obj.strftime("%-d %B %Y") if hasattr(date_obj, "strftime") else date_obj.strftime("%d %B %Y")
+                    dept_cards_all.append(dept_card_html(dept_name, dept_color, buckets, open_group=open_group_full))
+                    dept_cards_now.append(dept_card_html(dept_name, dept_color, buckets_now, open_group=active_group))
+
+                    employees_total_all += sum(len(buckets.get(g, [])) for g in GROUP_ORDER)
+                    employees_total_now += sum(len(buckets_now.get(g, [])) for g in GROUP_ORDER)
+                    depts_count += 1
+
+                if employees_total_all == 0:
+                    notice_html = (
+                        "<div class='deptCard' style='padding:14px;border:1px dashed rgba(15,23,42,.20);background:#fff;'>"
+                        "ℹ️ لا توجد بيانات لهذا التاريخ في الروستر.</div>"
+                    )
+
             try:
                 date_label = date_obj.strftime("%-d %B %Y")
             except Exception:
@@ -1254,10 +1357,14 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                 dept_cards_html="\n".join(dept_cards_all),
                 cta_url=now_url,
                 sent_time=sent_time,
-                source_name=source_name,
-                last_updated=last_updated,
+                source_name=cached_source_name(curr_key) or source_name,
+        last_updated=last_updated,
                 is_now_page=False,
+                min_date=min_date,
+                max_date=max_date,
+                notice_html=notice_html,
             )
+
             html_now = page_shell_html(
                 date_label=date_label,
                 iso_date=iso_date,
@@ -1266,9 +1373,12 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
                 dept_cards_html="\n".join(dept_cards_now),
                 cta_url=full_url,
                 sent_time=sent_time,
-                source_name=source_name,
-                last_updated=last_updated,
+                source_name=cached_source_name(curr_key) or source_name,
+        last_updated=last_updated,
                 is_now_page=True,
+                min_date=min_date,
+                max_date=max_date,
+                notice_html=notice_html,
             )
 
             date_dir = f"docs/date/{iso_date}"
@@ -1277,13 +1387,71 @@ def generate_date_pages_for_month(wb, year: int, month: int, pages_base: str, so
 
             with open(f"{date_dir}/index.html", "w", encoding="utf-8") as f:
                 f.write(html_full)
-            
+
             with open(f"{date_dir}/now/index.html", "w", encoding="utf-8") as f:
                 f.write(html_now)
 
         except Exception as e:
             print(f"Skipping {year}-{month:02d}-{day:02d}: {e}")
             continue
+
+
+# =========================
+# Email
+# =========================
+def get_subscriber_emails():
+    """
+    يقرأ قائمة الإيميلات من Google Apps Script
+    """
+    subscriber_url = os.environ.get('SUBSCRIBE_URL', '').strip()
+    
+    if not subscriber_url:
+        return os.environ.get('MAIL_TO', '').strip()
+    
+    try:
+        print(f"📥 Fetching subscriber emails...")
+        response = requests.get(subscriber_url, timeout=10)
+        response.raise_for_status()
+        
+        email_list = response.text.strip()
+        
+        if not email_list:
+            print("⚠️ No subscribers found, using MAIL_TO")
+            return os.environ.get('MAIL_TO', '').strip()
+        
+        subscriber_count = len([e for e in email_list.split(',') if e.strip()])
+        print(f"✅ Found {subscriber_count} active subscribers")
+        
+        return email_list
+        
+    except Exception as e:
+        print(f"❌ Error fetching subscribers: {e}")
+        print("⚠️ Falling back to MAIL_TO")
+        return os.environ.get('MAIL_TO', '').strip()
+
+
+def send_email(subject: str, html: str):
+    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and MAIL_FROM):
+        return
+
+    recipient_list = get_subscriber_emails()
+    recipients = [x.strip() for x in recipient_list.split(",") if x.strip()]
+
+    if not recipients:
+        print("⚠️ No recipients found, skipping email")
+        return
+
+    msg = MIMEText(html, "html", "utf-8")
+    msg["Subject"] = subject
+    msg["From"] = MAIL_FROM
+    msg["To"] = MAIL_TO or MAIL_FROM  # ✅ لا تعرض قائمة المشتركين
+
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
+        s.starttls()
+        s.login(SMTP_USER, SMTP_PASS)
+        s.sendmail(MAIL_FROM, recipients, msg.as_string())
+
+    print(f"✅ Sent to {len(recipients)} subscribers")
 
 
 def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_dept: list, pages_base: str) -> str:
@@ -1709,6 +1877,10 @@ def send_email(subject: str, html: str):
 # =========================
 # Main
 # =========================
+
+# =========================
+# Main
+# =========================
 def main():
     if not EXCEL_URL:
         raise RuntimeError("EXCEL_URL missing")
@@ -1724,32 +1896,169 @@ def main():
             now = datetime(y, m, d, now.hour, now.minute, tzinfo=TZ)
         except Exception:
             raise RuntimeError('Invalid --date format. Use YYYY-MM-DD')
-    
+
     today_dow = (now.weekday() + 1) % 7
     today_day = now.day
-
     active_group = current_shift_key(now)
-    
-    # ← الحصول على pages_base وتنظيفه
+
+    # pages_base - cleanup
     pages_base_raw = PAGES_BASE_URL or infer_pages_base_url()
-    # إزالة أي سلاش من النهاية
     pages_base = pages_base_raw.rstrip("/")
-    # إزالة /now من النهاية إن وجدت
     if pages_base.endswith("/now"):
         pages_base = pages_base[:-4]
-    
+
+    # ─────────────────────────────────────────────────────────────
+    # FIX #1: تحميل Excel - عند الفشل نكمل بالكاش (لا نخرج)
+    # ─────────────────────────────────────────────────────────────
+    data = None
     try:
         data = download_excel(EXCEL_URL)
+        print("✅ Excel downloaded successfully")
     except Exception as e:
-        print(f"ERROR downloading Excel: {e}")
-        # Do not crash the workflow; skip processing so Actions stays green.
+        print(f"WARNING: Could not download Excel: {e}")
+        print("Will attempt to use cached rosters...")
+
+    # ─────────────────────────────────────────────────────────────
+    # FIX #2: كل هذا الكود الآن خارج الـ except - يعمل دائماً
+    # ─────────────────────────────────────────────────────────────
+
+    # قراءة اسم الملف واستخراج الشهر
+    source_name = get_source_name()
+    incoming_key = month_key_from_filename(source_name) if source_name else None
+    print(f"📄 Source file: {source_name}")
+    print(f"📅 Detected month: {incoming_key or 'unknown'}")
+
+    # FIX #3: حفظ في الكاش فقط إذا نجح التحميل
+    if data and incoming_key:
+        xlsx_path, meta_path = cache_paths(incoming_key)
+        try:
+            write_bytes(xlsx_path, data)
+            write_json(meta_path, {
+                "month_key": incoming_key,
+                "original_filename": source_name,
+                "downloaded_at": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S %Z"),
+            })
+            print(f"✅ Cached roster: {xlsx_path}")
+        except Exception as e:
+            print(f"WARNING: failed caching roster: {e}")
+    elif not incoming_key:
+        print("⚠️ Could not detect month from filename; cache skipped for this run.")
+
+    # حساب الأشهر الثلاثة
+    prev_y, prev_m = add_months(now.year, now.month, -1)
+    next_y, next_m = add_months(now.year, now.month, +1)
+
+    prev_key = f"{prev_y:04d}-{prev_m:02d}"
+    curr_key = f"{now.year:04d}-{now.month:02d}"
+    next_key = f"{next_y:04d}-{next_m:02d}"
+
+    # نطاق الـ date picker: من أول الشهر السابق إلى آخر الشهر القادم
+    min_date = f"{prev_y:04d}-{prev_m:02d}-01"
+    max_date = f"{next_y:04d}-{next_m:02d}-{calendar.monthrange(next_y, next_m)[1]:02d}"
+
+    print(f"📅 Month range: {prev_key} → {curr_key} → {next_key}")
+
+    # تحميل الكاش لكل شهر
+    wb_prev = try_load_cached_workbook(prev_key)
+    wb_curr = try_load_cached_workbook(curr_key)
+    wb_next = try_load_cached_workbook(next_key)
+
+    # FIX #4: استخدام البيانات المحملة لتعبئة الكاش الناقص - workbook واحد فقط
+    if data:
+        wb_data = load_workbook(BytesIO(data), data_only=True)
+        if wb_prev is None and incoming_key == prev_key:
+            wb_prev = wb_data
+            print(f"✅ Using downloaded data for {prev_key}")
+        elif wb_curr is None and incoming_key == curr_key:
+            wb_curr = wb_data
+            print(f"✅ Using downloaded data for {curr_key}")
+        elif wb_next is None and incoming_key == next_key:
+            wb_next = wb_data
+            print(f"✅ Using downloaded data for {next_key}")
+
+    print(f"📦 Cache status: prev={'✅' if wb_prev else '❌'} | curr={'✅' if wb_curr else '❌'} | next={'✅' if wb_next else '❌'}")
+
+    # توليد صفحات الأشهر الثلاثة
+    generate_date_pages_for_month(
+        wb_prev, prev_y, prev_m, pages_base,
+        source_name=cached_source_name(prev_key) or source_name,
+        min_date=min_date, max_date=max_date
+    )
+    generate_date_pages_for_month(
+        wb_curr, now.year, now.month, pages_base,
+        source_name=cached_source_name(curr_key) or source_name,
+        min_date=min_date, max_date=max_date
+    )
+    generate_date_pages_for_month(
+        wb_next, next_y, next_m, pages_base,
+        source_name=cached_source_name(next_key) or source_name,
+        min_date=min_date, max_date=max_date
+    )
+
+    # الصفحة الرئيسية تستخدم الشهر الحالي
+    wb = wb_curr
+
+    # ─────────────────────────────────────────────────────────────
+    # من هنا: توليد الصفحة الرئيسية docs/index.html و docs/now/
+    # ─────────────────────────────────────────────────────────────
+    if wb is None:
+        os.makedirs("docs", exist_ok=True)
+        os.makedirs("docs/now", exist_ok=True)
+
+        try:
+            date_label = now.strftime("%-d %B %Y")
+        except Exception:
+            date_label = now.strftime("%d %B %Y")
+
+        iso_date = now.strftime("%Y-%m-%d")
+        last_updated = now.strftime("%d%b%Y / %H:%M").upper()
+
+        notice_html = (
+            "<div class='deptCard' style='padding:14px;border:1px dashed rgba(15,23,42,.20);background:#fff;'>"
+            "⚠️ لا يوجد روستر للشهر الحالي محفوظ بعد. (قد يكون الروستر الجديد للشهر القادم وصل مبكرًا)</div>"
+        )
+
+        html_full = page_shell_html(
+            date_label=date_label,
+            iso_date=iso_date,
+            employees_total=0,
+            departments_total=0,
+            dept_cards_html="",
+            cta_url=f"{pages_base}/now/",
+            sent_time=now.strftime("%H:%M"),
+            source_name=cached_source_name(curr_key) or source_name,
+            last_updated=last_updated,
+            is_now_page=False,
+            min_date=min_date,
+            max_date=max_date,
+            notice_html=notice_html,
+        )
+
+        html_now = page_shell_html(
+            date_label=date_label,
+            iso_date=iso_date,
+            employees_total=0,
+            departments_total=0,
+            dept_cards_html="",
+            cta_url=f"{pages_base}/",
+            sent_time=now.strftime("%H:%M"),
+            source_name=cached_source_name(curr_key) or source_name,
+            last_updated=last_updated,
+            is_now_page=True,
+            min_date=min_date,
+            max_date=max_date,
+            notice_html=notice_html,
+        )
+
+        with open("docs/index.html", "w", encoding="utf-8") as f:
+            f.write(html_full)
+
+        with open("docs/now/index.html", "w", encoding="utf-8") as f:
+            f.write(html_now)
+
+        print("⚠️ Skipping email (no current-month roster workbook).")
         return
 
-    wb = load_workbook(BytesIO(data), data_only=True)
-    source_name = get_source_name()
-
-    # Generate static pages for each date in the current month (used by the date picker)
-    generate_date_pages_for_month(wb, now.year, now.month, pages_base, source_name=source_name)
 
     dept_cards_all = []
     dept_cards_now = []
@@ -1860,8 +2169,10 @@ def main():
         dept_cards_html="\n".join(dept_cards_all),
         cta_url=now_url,
         sent_time=sent_time,
-        source_name=source_name,
+        source_name=cached_source_name(curr_key) or source_name,
         last_updated=last_updated,
+        min_date=min_date,
+        max_date=max_date,
         is_now_page=False,
     )
     html_now = page_shell_html(
@@ -1872,8 +2183,10 @@ def main():
         dept_cards_html="\n".join(dept_cards_now),
         cta_url=full_url,
         sent_time=sent_time,
-        source_name=source_name,
+        source_name=cached_source_name(curr_key) or source_name,
         last_updated=last_updated,
+        min_date=min_date,
+        max_date=max_date,
         is_now_page=True,
     )
 
