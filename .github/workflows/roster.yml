@@ -45,7 +45,6 @@ jobs:
           def main():
               try:
                   source_url = os.getenv('SOURCE_NAME_URL')
-                  
                   if not source_url:
                       print("SOURCE_NAME_URL not found")
                       sys.exit(1)
@@ -53,7 +52,6 @@ jobs:
                   print(f"Checking: {source_url}")
                   response = requests.get(source_url, timeout=15)
                   response.raise_for_status()
-                  
                   current_filename = response.text.strip()
                   
                   if not current_filename:
@@ -69,10 +67,8 @@ jobs:
                   if Path(cache_file).exists():
                       with open(cache_file, 'r', encoding='utf-8') as f:
                           old_filename = f.read().strip()
-                      
                       if old_filename:
                           print(f"Previous file: {old_filename}")
-                          
                           if old_filename == current_filename:
                               print("No changes detected")
                               changed = False
@@ -84,36 +80,26 @@ jobs:
                   with open(cache_file, 'w', encoding='utf-8') as f:
                       f.write(current_filename)
                   
-                  print(f"Saved filename to {cache_file}")
-                  
                   # Muscat time (UTC+4)
                   muscat_tz = timezone(timedelta(hours=4))
                   now = datetime.now(muscat_tz)
                   current_hour = now.hour
                   current_minute = now.minute
-                  
                   print(f"Muscat time: {now.strftime('%H:%M')}")
                   
-                  # Mandatory update times (always update site + send email for shift times)
-                  # 05:00 - Send Morning email + update
-                  # 06:00 - Update only
-                  # 13:00 (1 PM) - Send Afternoon email + update  
-                  # 14:00 (2 PM) - Update only
-                  # 20:00 (8 PM) - Send Night email + update
-                  # 21:00 (9 PM) - Update only
-                  # 00:00 (midnight) - Daily update (new day)
-                  
+                  # ساعات التحديث الإجباري - يعمل طوال الساعة كاملة
                   mandatory_update_hours = [0, 5, 6, 13, 14, 20, 21]
+                  # ساعات إرسال الإيميل - فقط في أول 20 دقيقة
                   email_hours = [5, 13, 20]
                   
-                  is_mandatory_update = (current_hour in mandatory_update_hours) and (current_minute < 20)
+                  is_mandatory_update = (current_hour in mandatory_update_hours)
                   is_email_time = (current_hour in email_hours) and (current_minute < 20)
                   
                   should_process = changed or is_mandatory_update
                   should_send_email = changed or is_email_time
                   
                   print(f"File changed: {changed}")
-                  print(f"Mandatory update time: {is_mandatory_update}")
+                  print(f"Mandatory update hour: {is_mandatory_update}")
                   print(f"Email time: {is_email_time}")
                   print(f"Should process: {should_process}")
                   print(f"Should send email: {should_send_email}")
@@ -127,12 +113,11 @@ jobs:
                       f.write(f"old_filename={old_filename}\n")
                   
                   print("=" * 60)
-                  print(f"Results:")
-                  print(f"  File changed: {changed}")
+                  print(f"  File changed:     {changed}")
                   print(f"  Mandatory update: {is_mandatory_update}")
-                  print(f"  Email time: {is_email_time}")
-                  print(f"  Should process: {should_process}")
-                  print(f"  Should send email: {should_send_email}")
+                  print(f"  Email time:       {is_email_time}")
+                  print(f"  Should process:   {should_process}")
+                  print(f"  Should send email:{should_send_email}")
                   print("=" * 60)
                   
               except requests.exceptions.Timeout:
@@ -156,12 +141,12 @@ jobs:
           echo "========================================"
           echo "Check Report:"
           echo "========================================"
-          echo "File changed: ${{ steps.check_changes.outputs.changed }}"
-          echo "Scheduled email: ${{ steps.check_changes.outputs.is_scheduled_email }}"
-          echo "Should process: ${{ steps.check_changes.outputs.should_process }}"
+          echo "File changed:      ${{ steps.check_changes.outputs.changed }}"
+          echo "Scheduled email:   ${{ steps.check_changes.outputs.is_scheduled_email }}"
+          echo "Should process:    ${{ steps.check_changes.outputs.should_process }}"
           echo "Should send email: ${{ steps.check_changes.outputs.should_send_email }}"
-          echo "Current file: ${{ steps.check_changes.outputs.filename }}"
-          echo "Previous file: ${{ steps.check_changes.outputs.old_filename }}"
+          echo "Current file:      ${{ steps.check_changes.outputs.filename }}"
+          echo "Previous file:     ${{ steps.check_changes.outputs.old_filename }}"
           echo "========================================"
       
       - name: Generate page + send email
@@ -180,21 +165,25 @@ jobs:
           SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
         run: |
           if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
-            echo "Processing file (change detected): ${{ steps.check_changes.outputs.filename }}"
+            echo "Processing (change detected): ${{ steps.check_changes.outputs.filename }}"
           else
-            echo "Processing file (scheduled update): ${{ steps.check_changes.outputs.filename }}"
+            echo "Processing (scheduled update): ${{ steps.check_changes.outputs.filename }}"
           fi
           python generate_and_send.py
-          echo "Processing and email completed successfully"
+          echo "Done!"
       
       - name: Generate employee schedules
         if: steps.check_changes.outputs.should_process == 'true'
         env:
           EXCEL_URL: ${{ secrets.EXCEL_URL }}
         run: |
-          echo "Generating employee schedules..."
-          python generate_employee_schedules.py
-          echo "Employee schedules generated successfully"
+          if [ -f "generate_employee_schedules.py" ]; then
+            echo "Generating employee schedules..."
+            python generate_employee_schedules.py
+            echo "Done!"
+          else
+            echo "generate_employee_schedules.py not found, skipping..."
+          fi
 
       - name: Commit updated docs
         if: steps.check_changes.outputs.should_process == 'true'
@@ -211,15 +200,13 @@ jobs:
               git commit -m "Scheduled update"
             fi
             git push
-            echo "Updates pushed to GitHub"
+            echo "Pushed!"
           fi
       
       - name: Skip - No action needed
         if: steps.check_changes.outputs.should_process == 'false'
         run: |
           echo "========================================"
-          echo "No action needed (no change, no scheduled time)"
-          echo "========================================"
+          echo "No action needed"
           echo "Current file: ${{ steps.check_changes.outputs.filename }}"
-          echo "Skipping processing and email"
           echo "========================================"
