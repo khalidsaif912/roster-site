@@ -90,7 +90,7 @@ jobs:
                   # ساعات التحديث الإجباري - يعمل طوال الساعة كاملة
                   mandatory_update_hours = [0, 5, 6, 13, 14, 20, 21]
                   # ساعات إرسال الإيميل - فقط في أول 20 دقيقة
-                  email_hours = [5, 13, 20]
+                  email_hours = [5, 13, 21]
                   
                   is_mandatory_update = (current_hour in mandatory_update_hours)
                   is_email_time = (current_hour in email_hours) and (current_minute < 20)
