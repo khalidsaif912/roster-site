@@ -1027,6 +1027,16 @@
     var path = window.location.pathname || '/';
     var isNowPage = path.includes('/now');
 
+    // Allow viewing a non-today date ONCE when we just navigated from the picker
+    try {
+      var params = new URLSearchParams(window.location.search || '');
+      if (params.get('via') === 'picker') {
+        // Remove the query so that a refresh will redirect back to today
+        window.history.replaceState(null, '', path);
+        return false;
+      }
+    } catch(e) {}
+
     var dateMatch = path.match(/\/date\/(\d{4})-(\d{2})-(\d{2})\//);
     if (dateMatch) {
       var pageDate = dateMatch[1] + '-' + dateMatch[2] + '-' + dateMatch[3];
@@ -1038,18 +1048,16 @@
         String(muscatTime.getDate()).padStart(2, '0');
 
       if (pageDate !== todayStr) {
-        var isPageLoad = sessionStorage.getItem('pageLoaded');
-        if (isPageLoad) {
-          sessionStorage.removeItem('pageLoaded');
-          var basePath = path
-            .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/, '/')
-            .replace(/\/now\/.*$/, '/')
-            .replace(/\/+$/, '');
-          window.location.href = isNowPage ? basePath + '/now/' : basePath + '/';
-          return true;
-        } else {
-          sessionStorage.setItem('pageLoaded', 'true');
-        }
+        var basePath = path
+          .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/, '/')
+          .replace(/\/now\/.*$/, '/')
+          .replace(/\/+$/, '');
+
+        // Go back to TODAY (same mode: normal vs /now/)
+        var target = basePath + '/date/' + todayStr + '/';
+        if (isNowPage) target += 'now/';
+        window.location.href = target + '?via=picker';
+        return true;
       }
     }
     return false;
@@ -1075,21 +1083,21 @@
     var target = base + '/date/' + picker.value + '/';
     if (isNowPage) target += 'now/';
 
-    window.location.href = target;
+    window.location.href = target + '?via=picker';
   });
 
 })();
 
 // ═══════════════════════════════════════════════════
-// Shift Filter (All pages: today & other dates)
+// Shift Filter (NOW PAGE ONLY)
 // ═══════════════════════════════════════════════════
 (function(){
   var filterBtns = document.querySelectorAll('.shiftFilterBtn');
-  if(!filterBtns.length) return;
-
+  if(!filterBtns.length) return; // Not a /now/ page
+  
   var allShiftCards = document.querySelectorAll('.shiftCard');
-  if(!allShiftCards.length) return;
 
+  // Normalize both button values and card labels (Arabic/English/spacing)
   function normalizeShift(raw){
     if(!raw) return '';
     var t = String(raw).trim().toLowerCase();
@@ -1102,30 +1110,28 @@
     if(t === 'afternoon') return 'Afternoon';
     if(t === 'night') return 'Night';
 
-    // Arabic
+    // Arabic (supports "مناوبة الصباح" etc.)
     if(t.includes('صباح')) return 'Morning';
     if(t.includes('ظهر') || t.includes('مساء')) return 'Afternoon';
     if(t.includes('ليل')) return 'Night';
 
-    // Leave / standby etc (EN + AR)
-    if(t.includes('off day') || t === 'off' || t.includes('راحة') || t.includes('أوف')) return 'Off Day';
-    if(t.includes('annual leave') || t.includes('annual') || t.includes('سنوية') || t.includes('إجازة سنوية')) return 'Annual Leave';
-    if(t.includes('sick leave') || t.includes('sick') || t.includes('مرض') || t.includes('مرضي')) return 'Sick Leave';
+    // Leave / standby etc (Arabic + English)
+    if(t.includes('off') || t.includes('راحة') || t.includes('أوف')) return 'Off Day';
+    if(t.includes('annual') || t.includes('سنوية')) return 'Annual Leave';
+    if(t.includes('sick') || t.includes('مرض')) return 'Sick Leave';
     if(t.includes('training') || t.includes('تدريب')) return 'Training';
     if(t.includes('standby') || t.includes('ستاند') || t.includes('احتياط')) return 'Standby';
     if(t.includes('other') || t.includes('أخرى') || t.includes('اخرى')) return 'Other';
 
-    // Fallback: keep trimmed original (case preserved not needed here)
     return String(raw).trim();
   }
 
-  // Normalize button dataset values (so Arabic/English both work)
+  // Normalize button dataset values (in case data-shift is Arabic)
   filterBtns.forEach(function(btn){
-    var v = btn.dataset.shift || btn.getAttribute('data-shift') || '';
-    btn.dataset.shift = normalizeShift(v);
+    btn.dataset.shift = normalizeShift(btn.dataset.shift || btn.getAttribute('data-shift') || '');
   });
 
-  // Group shift cards by normalized shift type from label
+  // Group shift cards by normalized shift type
   var shiftGroups = {};
   allShiftCards.forEach(function(card){
     var summary = card.querySelector('.shiftSummary');
@@ -1138,78 +1144,76 @@
     if(!shiftGroups[shiftType]) shiftGroups[shiftType] = [];
     shiftGroups[shiftType].push(card);
   });
-
-  function muscatNow(){
-    var now = new Date();
-    return new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
-  }
-
-  // Determine current shift based on time (Muscat)
+  // Determine current shift based on time
   function getCurrentShift(){
-    var d = muscatNow();
-    var t = d.getHours() * 60 + d.getMinutes();
+    var now = new Date();
+    var muscatTime = new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
+    var hour = muscatTime.getHours();
+    var minute = muscatTime.getMinutes();
+    var t = hour * 60 + minute;
+    
     if(t >= 21 * 60 || t < 5 * 60) return 'Night';
     if(t >= 13 * 60) return 'Afternoon';
     return 'Morning';
   }
-
-  function todayStrMuscat(){
-    var d = muscatNow();
-    var yyyy = d.getFullYear();
-    var mm = String(d.getMonth()+1).padStart(2,'0');
-    var dd = String(d.getDate()).padStart(2,'0');
-    return yyyy + '-' + mm + '-' + dd;
-  }
-
-  function pageDateFromUrl(){
-    var m = (window.location.pathname || '').match(/\/date\/(\d{4}-\d{2}-\d{2})\//);
-    return m ? m[1] : null;
-  }
-
+  
+  // Set active shift on load - default to current shift
+  var currentShift = getCurrentShift();
+  filterBtns.forEach(function(btn){
+    if(normalizeShift(btn.dataset.shift) === currentShift){
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
   // Filter function
-  function filterShifts(selectedShiftRaw){
-    var selectedShift = normalizeShift(selectedShiftRaw);
+  function filterShifts(selectedShift){
     var totalEmployees = 0;
-
+    
     if(selectedShift === 'All'){
+      // Show all shifts
       allShiftCards.forEach(function(card){
         card.style.display = '';
-        card.removeAttribute('open');
         var count = card.querySelector('.shiftCount');
-        if(count) totalEmployees += parseInt(count.textContent, 10) || 0;
+        if(count) totalEmployees += parseInt(count.textContent) || 0;
       });
     } else {
+      // Hide all cards first
       allShiftCards.forEach(function(card){ card.style.display = 'none'; });
-
+      
+      // Show only selected shift cards and count employees
       if(shiftGroups[selectedShift]){
         shiftGroups[selectedShift].forEach(function(card){
           card.style.display = '';
+          // Auto-open the selected shift
           card.setAttribute('open', '');
+          // Count employees in this card
           var count = card.querySelector('.shiftCount');
-          if(count) totalEmployees += parseInt(count.textContent, 10) || 0;
+          if(count) totalEmployees += parseInt(count.textContent) || 0;
         });
       }
-
-      // Always show these types
+      
+      // Also show Off Day, Leave, Training, Standby in all shifts
       var alwaysShow = ['Off Day', 'Annual Leave', 'Sick Leave', 'Training', 'Standby', 'Other'];
       alwaysShow.forEach(function(type){
         if(shiftGroups[type]){
           shiftGroups[type].forEach(function(card){
             card.style.display = '';
-            card.removeAttribute('open');
+            // Count employees
             var count = card.querySelector('.shiftCount');
-            if(count) totalEmployees += parseInt(count.textContent, 10) || 0;
+            if(count) totalEmployees += parseInt(count.textContent) || 0;
           });
         }
       });
     }
-
+    
     // Update employee count in summary
     var employeeChip = document.querySelector('.summaryChip .chipVal');
     if(employeeChip){
       employeeChip.textContent = totalEmployees;
     }
-
+    
     // Update button states
     filterBtns.forEach(function(btn){
       if(normalizeShift(btn.dataset.shift) === selectedShift){
@@ -1219,21 +1223,16 @@
       }
     });
   }
-
+  
   // Add click handlers
   filterBtns.forEach(function(btn){
     btn.addEventListener('click', function(){
-      filterShifts(this.dataset.shift);
+      filterShifts(normalizeShift(this.dataset.shift));
     });
   });
-
-  // Default on load:
-  // - If page date == today (Muscat): auto show current shift
-  // - Otherwise: show all
-  var pageDate = pageDateFromUrl();
-  var initial = (pageDate && pageDate === todayStrMuscat()) ? getCurrentShift() : 'All';
-  filterShifts(initial);
-
+  
+  // Auto-filter on page load - show current shift
+  filterShifts(currentShift);
 })();
 </script>
 
