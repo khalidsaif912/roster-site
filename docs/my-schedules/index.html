@@ -137,7 +137,7 @@
     .stat-val{font-size:17px;font-weight:900;color:var(--text);line-height:1}
 
     /* ACTIONS */
-    .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+    .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
     .act-btn{
       padding:8px 6px;border:1.5px solid var(--border);background:#fff;
       border-radius:9px;font-size:11px;font-weight:800;cursor:pointer;transition:all .2s;
@@ -148,6 +148,8 @@
     .act-primary:hover{color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(30,115,255,.26)}
     .act-ics{background:#f0fdf4;border-color:#86efac;color:#166534}
     .act-ics:hover{background:#dcfce7;border-color:#4ade80;color:#166534;transform:translateY(-1px)}
+    .act-img{background:#fdf4ff;border-color:#d8b4fe;color:#7e22ce}
+    .act-img:hover{background:#f5e8ff;border-color:#c084fc;color:#7e22ce;transform:translateY(-1px)}
 
     .loading{text-align:center;padding:30px 16px;color:var(--muted)}
     .spinner{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:var(--b1);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px}
@@ -200,6 +202,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 let data=null,month=null,months=[],lang='en';
 
@@ -225,7 +228,7 @@ const T={
     notFoundSub:'ID not in the system. Please check and try again.',
     statsTitle:'STATISTICS',
     workDays:'Work',offDays:'Off',morning:'☀️',afternoon:'🌤️',night:'🌙',standby:'🧍',leaves:'Leaves',
-    pdf:'📥 PDF',share:'🔗 Share',print:'🖨️ Print',ics:'📆 ICS',
+    pdf:'📥 PDF',img:'🖼️ Image',share:'🔗 Share',print:'🖨️ Print',ics:'📆 ICS',
     days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     months:['January','February','March','April','May','June',
             'July','August','September','October','November','December'],
@@ -242,7 +245,7 @@ const T={
     notFoundSub:'الرقم غير موجود. تحقق وأعد المحاولة.',
     statsTitle:'الإحصائيات',
     workDays:'عمل',offDays:'إجازة',morning:'☀️',afternoon:'🌤️',night:'🌙',standby:'🧍',leaves:'سنوية',
-    pdf:'📥 PDF',share:'🔗 مشاركة',print:'🖨️ طباعة',ics:'📆 ICS',
+    pdf:'📥 PDF',img:'🖼️ صورة',share:'🔗 مشاركة',print:'🖨️ طباعة',ics:'📆 ICS',
     days:['الأح','الاث','الثل','الأر','الخم','الجم','السب'],
     months:['يناير','فبراير','مارس','أبريل','مايو','يونيو',
             'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
@@ -385,6 +388,7 @@ function renderSchedule(){
     <div class="actions">
       <button class="act-btn act-primary" onclick="dlPDF()">${t('pdf')}</button>
       <button class="act-btn act-ics" onclick="dlICS()">${t('ics')}</button>
+      <button class="act-btn act-img" onclick="dlIMG()">${t('img')}</button>
       <button class="act-btn" onclick="shareS()">${t('share')}</button>
       <button class="act-btn" onclick="window.print()">${t('print')}</button>
     </div>
@@ -421,6 +425,55 @@ function isToday(y,m,d){
 }
 function esc(s){
   return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── IMAGE DOWNLOAD ── */
+async function dlIMG(){
+  const calEl=document.querySelector('.calendar');
+  const empBar=document.querySelector('.emp-bar');
+  const statsEl=document.querySelector('.stats');
+  const legendEl=document.querySelector('.legend');
+
+  if(!calEl){alert('No calendar to capture.');return}
+
+  // Build a clean snapshot container
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`
+    position:fixed;left:-9999px;top:0;
+    background:#fff;padding:16px;border-radius:16px;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    width:${calEl.offsetWidth+32}px;
+  `;
+
+  // Clone elements into snapshot
+  const cloneEmp=empBar?empBar.cloneNode(true):null;
+  const cloneCal=calEl.cloneNode(true);
+  const cloneLeg=legendEl?legendEl.cloneNode(true):null;
+  const cloneSt=statsEl?statsEl.cloneNode(true):null;
+
+  if(cloneEmp){cloneEmp.style.marginBottom='10px';wrap.appendChild(cloneEmp);}
+  wrap.appendChild(cloneCal);
+  if(cloneLeg){cloneLeg.style.marginTop='8px';wrap.appendChild(cloneLeg);}
+  if(cloneSt){cloneSt.style.marginTop='8px';wrap.appendChild(cloneSt);}
+
+  document.body.appendChild(wrap);
+
+  try{
+    const canvas=await html2canvas(wrap,{
+      scale:3,
+      useCORS:true,
+      backgroundColor:'#ffffff',
+      logging:false
+    });
+    const link=document.createElement('a');
+    link.download=`schedule-${data.id}-${month}.png`;
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+  }catch(e){
+    alert('Image capture failed: '+e.message);
+  }finally{
+    document.body.removeChild(wrap);
+  }
 }
 
 /* ── ICS ── */
