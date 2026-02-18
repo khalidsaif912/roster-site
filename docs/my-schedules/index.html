@@ -40,6 +40,11 @@
       .desktop-grid{display:flex;flex-direction:column;gap:8px}
       .desktop-left,.desktop-right{display:contents}
     }
+    .mobile-only{display:block}
+    @media(min-width:700px){.mobile-only{display:none}}
+    .desktop-right .stats{display:block}
+    @media(max-width:699px){.desktop-right .stats{display:none}}
+    @media(max-width:699px){.desktop-right .legend{display:none}}
 
     .hero{
       background:linear-gradient(135deg,var(--b3),var(--b2));
@@ -332,7 +337,22 @@ async function loadSchedule(id){
     month=months[months.length-1]; // default to latest month
     renderSchedule();
   }catch{
-    document.getElementById('area').innerHTML=`
+    /* Pre-compute stats for mobile display below calendar */
+  const statsMobileHTML=`
+    <div class="stats">
+      <div class="stats-title">${t('statsTitle')}</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-lbl">${t('workDays')}</div><div class="stat-val">${stats.work}</div></div>
+        <div class="stat-box"><div class="stat-lbl">${t('offDays')}</div><div class="stat-val">${stats.off}</div></div>
+        <div class="stat-box"><div class="stat-lbl">${t('morning')}</div><div class="stat-val">${stats.morning}</div></div>
+        <div class="stat-box"><div class="stat-lbl">${t('afternoon')}</div><div class="stat-val">${stats.afternoon}</div></div>
+        <div class="stat-box"><div class="stat-lbl">${t('night')}</div><div class="stat-val">${stats.night}</div></div>
+        <div class="stat-box"><div class="stat-lbl">${t('standby')}</div><div class="stat-val">${stats.standby}</div></div>
+        <div class="stat-box"><div class="stat-lbl">${t('leaves')}</div><div class="stat-val">${stats.leaves}</div></div>
+      </div>
+    </div>`;
+
+  document.getElementById('area').innerHTML=`
       <div class="empty-state">
         <div class="empty-icon">❌</div>
         <h3>${t('notFound')}</h3>
@@ -414,21 +434,7 @@ function renderSchedule(){
       <div class="cal-body">${cells}</div>
     </div>
 
-    <div class="legend">${legHTML}</div>
-
-    <div class="stats">
-      <div class="stats-title">${t('statsTitle')}</div>
-      <div class="stats-grid">
-        <div class="stat-box"><div class="stat-lbl">${t('workDays')}</div><div class="stat-val">${stats.work}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('offDays')}</div><div class="stat-val">${stats.off}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('morning')}</div><div class="stat-val">${stats.morning}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('afternoon')}</div><div class="stat-val">${stats.afternoon}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('night')}</div><div class="stat-val">${stats.night}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('standby')}</div><div class="stat-val">${stats.standby}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('leaves')}</div><div class="stat-val">${stats.leaves}</div></div>
-      </div>
-    </div>
-
+    <div class="mobile-only">${statsMobileHTML}</div>
     </div><!-- /desktop-left -->
 
     <div class="desktop-right">
@@ -447,7 +453,7 @@ function renderSchedule(){
 
       <div class="legend">${legHTML}</div>
 
-      <div class="actions" style="grid-template-columns:1fr 1fr">
+      <div class="actions">
         <button class="act-btn act-primary" onclick="dlPDF()">${t('pdf')}</button>
         <button class="act-btn act-ics" onclick="dlICS()">${t('ics')}</button>
         <button class="act-btn act-img" onclick="dlIMG()">${t('img')}</button>
