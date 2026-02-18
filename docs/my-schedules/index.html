@@ -42,9 +42,7 @@
     }
     .mobile-only{display:block}
     @media(min-width:700px){.mobile-only{display:none}}
-    .desktop-right .stats{display:block}
-    @media(max-width:699px){.desktop-right .stats{display:none}}
-    @media(max-width:699px){.desktop-right .legend{display:none}}
+    @media(max-width:699px){.desktop-right{display:none!important}}
 
     .hero{
       background:linear-gradient(135deg,var(--b3),var(--b2));
@@ -437,7 +435,6 @@ function renderSchedule(){
 
       '<div class="desktop-right">'+
         statsHTML+
-        '<div class="legend">'+legHTML+'</div>'+
         actHTML+
       '</div>'+
 
@@ -453,13 +450,6 @@ function jumpMonth(val){
 }
 
 
-function chMonth(dir){
-  const ci=months.indexOf(month),ni=ci+dir;
-  if(ni>=0&&ni<months.length){month=months[ni];renderSchedule()}
-}
-function jumpMonth(val){
-  if(months.includes(val)){month=val;renderSchedule()}
-}
 
 function calcStats(s){
   const r={work:0,off:0,morning:0,afternoon:0,night:0,standby:0,leaves:0};
