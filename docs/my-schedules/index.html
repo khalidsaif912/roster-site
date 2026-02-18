@@ -590,37 +590,47 @@ function dlPDF(){
         doc.setDrawColor(...RULE);
       }
 
-      // ── Day number — elegant circle badge, top-right ──────
+      // ── Day number — huge, semi-transparent watermark style ─
+      // Blend shift colour into a big ghost number: draw it in
+      // the bg colour darkened slightly so it reads as a large
+      // transparent numeral sitting behind the code text.
       const numStr = String(dc);
-      const badgeR = 5.5;
-      const badgeX = cx + CW - badgeR - 2.2;
-      const badgeY = cy + badgeR + 2;
+
+      // Pick ghost colour: lighter blend of shift fg with cell bg
+      let ghostR, ghostG, ghostB;
+      if(sh){
+        // Mix fg 30% over bg → a muted, semi-visible tint
+        ghostR = Math.round(sh.bg[0]*0.55 + sh.fg[0]*0.45);
+        ghostG = Math.round(sh.bg[1]*0.55 + sh.fg[1]*0.45);
+        ghostB = Math.round(sh.bg[2]*0.55 + sh.fg[2]*0.45);
+      } else {
+        ghostR=210; ghostG=215; ghostB=225;
+      }
 
       if(isToday){
-        // Solid navy filled circle for today
-        doc.setFillColor(...NAVY);
-        doc.setDrawColor(...NAVY);
-        doc.circle(badgeX, badgeY, badgeR, 'F');
-        doc.setTextColor(...WHITE);
-      } else if(sh){
-        // White circle with coloured ring
-        doc.setFillColor(...WHITE);
-        doc.setDrawColor(...WHITE);
-        doc.circle(badgeX, badgeY, badgeR, 'F');
-        doc.setDrawColor(...sh.fg);
-        doc.setLineWidth(0.55);
-        doc.circle(badgeX, badgeY, badgeR, 'D');
-        doc.setLineWidth(0.22);
-        doc.setTextColor(...sh.fg);
-      } else {
-        doc.setFillColor(235,237,242);
-        doc.setDrawColor(235,237,242);
-        doc.circle(badgeX, badgeY, badgeR, 'F');
-        doc.setTextColor(...INK);
+        // Today: solid navy small badge top-left, ghost num still big
+        ghostR=Math.round(NAVY[0]*0.4+255*0.6);
+        ghostG=Math.round(NAVY[1]*0.4+255*0.6);
+        ghostB=Math.round(NAVY[2]*0.4+255*0.6);
       }
-      doc.setFontSize(dc > 9 ? 9 : 10);
+
+      // LARGE ghost number — anchored top-left of cell
+      const ghostSize = Math.round(CH * 0.72);  // ~72% of cell height
+      doc.setTextColor(ghostR, ghostG, ghostB);
+      doc.setFontSize(ghostSize > 38 ? 38 : ghostSize < 22 ? 22 : ghostSize);
       doc.setFont(undefined,'bold');
-      doc.text(numStr, badgeX, badgeY + 3.1, {align:'center'});
+      // Position: slight inset from top-left, baseline a bit down
+      doc.text(numStr, cx + 2.5, cy + ghostSize * 0.72, {align:'left'});
+
+      // Small crisp number top-right for clarity (when today)
+      if(isToday){
+        doc.setFillColor(...NAVY);
+        doc.roundedRect(cx+CW-10, cy+1.5, 9, 7, 1.5, 1.5, 'F');
+        doc.setTextColor(...WHITE);
+        doc.setFontSize(7); doc.setFont(undefined,'bold');
+        doc.text(numStr, cx+CW-5.5, cy+6.5, {align:'center'});
+      }
+
       doc.setDrawColor(...RULE);
 
       // Shift code — centred, very big, strong colour
