@@ -364,6 +364,13 @@ function renderSchedule(){
     return `<span class="leg-item"><span class="leg-dot" style="background:${c.strip}"></span>${T[lang].legend[g]||g}</span>`;
   }).join('');
 
+  /* Build month options OUTSIDE template literal to avoid nesting issues */
+  const monthOpts=months.map(m=>{
+    const [my,mm]=m.split('-').map(Number);
+    const label=T[lang].months[mm-1]+' '+my;
+    return '<option value="'+m+'"'+(m===month?' selected':'')+'>'+label+'</option>';
+  }).join('');
+
   document.getElementById('area').innerHTML=`
     <div class="emp-bar">
       <div class="emp-info">
@@ -372,13 +379,7 @@ function renderSchedule(){
       </div>
       <div class="month-nav">
         <button onclick="chMonth(-1)" ${!hasPrev?'disabled style="opacity:.35;cursor:default"':''}>&lt;</button>
-        <select class="month-select" onchange="jumpMonth(this.value)">
-          ${months.map((m,i)=>{
-            const [my,mm]=m.split('-').map(Number);
-            const label=T[lang].months[mm-1]+' '+my;
-            return \`<option value="\${m}" \${m===month?'selected':''}>\${label}</option>\`;
-          }).join('')}
-        </select>
+        <select class="month-select" onchange="jumpMonth(this.value)">${monthOpts}</select>
         <button onclick="chMonth(1)" ${!hasNext?'disabled style="opacity:.35;cursor:default"':''}>&gt;</button>
       </div>
     </div>
