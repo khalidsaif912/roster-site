@@ -330,12 +330,14 @@ async function loadSchedule(id){
     const res=await fetch(`../schedules/${id}.json`);
     if(!res.ok) throw new Error();
     data=await res.json();
-    months=Object.keys(data.schedules).sort(); // ascending: 2026-02 → 2026-03
+    months=Object.keys(data.schedules).sort();
     if(!months.length) throw new Error();
-    // Open on current real month if available, else latest
     const _now=new Date();
     const _cur=_now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
     month=months.includes(_cur)?_cur:months[months.length-1];
+    console.log('📅 months in JSON:', months);
+    console.log('📅 selected month:', month);
+    console.log('📅 current real month:', _cur);
     renderSchedule();
   }catch{
     document.getElementById('area').innerHTML=`
@@ -429,6 +431,9 @@ function renderSchedule(){
             '<select class="month-select" onchange="jumpMonth(this.value)">'+monthOpts+'</select>'+
             '<button onclick="chMonth(1)" '+nextDis+' style="'+nextStyle+'">&gt;</button>'+
           '</div>'+
+        '</div>'+
+        '<div style="background:#1e293b;color:#94a3b8;font-size:10px;padding:4px 8px;border-radius:6px;margin-bottom:6px;font-family:monospace">'+
+          '🗓 Months in JSON: '+months.join(' | ')+' &nbsp;|&nbsp; Showing: '+month+
         '</div>'+
         '<div class="calendar">'+
           '<div class="cal-head">'+dayHdr+'</div>'+
