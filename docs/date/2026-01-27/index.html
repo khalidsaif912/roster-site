@@ -335,7 +335,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">27JAN2026 / 00:00</strong>
     <br>Total: <strong>0 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster_March_2027_Version.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster_February_2026_RAMADAN_Version-4.xlsx</strong>
   </div>
 
 </div>
@@ -395,7 +395,7 @@
             .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/, '/')
             .replace(/\/now\/.*$/, '/')
             .replace(/\/+$/, '');
-          window.location.href = isNowPage ? basePath + '/now/' : basePath + '/';
+          window.location.href = basePath + '/date/' + todayStr + '/' + (isNowPage ? 'now/' : '');
           return true;
         } else {
           sessionStorage.setItem('pageLoaded', 'true');

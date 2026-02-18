@@ -360,7 +360,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -431,7 +431,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -519,7 +519,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -536,7 +536,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -671,7 +671,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -703,7 +703,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -851,7 +851,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -874,7 +874,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -1017,7 +1017,7 @@
             .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/, '/')
             .replace(/\/now\/.*$/, '/')
             .replace(/\/+$/, '');
-          window.location.href = isNowPage ? basePath + '/now/' : basePath + '/';
+          window.location.href = basePath + '/date/' + todayStr + '/' + (isNowPage ? 'now/' : '');
           return true;
         } else {
           sessionStorage.setItem('pageLoaded', 'true');
