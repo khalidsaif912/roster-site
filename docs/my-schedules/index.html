@@ -461,86 +461,49 @@ function dlPDF(){
   const mName=T.en.months[mo-1];
   const stats=calcStats(sched);
 
-  // Strong opaque colours — no transparency tricks
+  // ── Shift colour system ──────────────────────────────────
+  // fg = text colour (strong), bg = cell tint (very light)
   const SC={
-    Morning:        [200, 95,   0],
-    Afternoon:      [185, 50,   5],
-    Night:          [ 25, 60, 195],
-    'Off Day':      [ 90,100, 118],
-    'Annual Leave': [ 15,130,  65],
-    'Sick Leave':   [ 15,130,  65],
-    Training:       [ 15, 90, 195],
-    Standby:        [155, 15, 115],
-    Other:          [ 95,105, 120]
+    Morning:        {fg:[200, 90,  0], bg:[255,243,225]},
+    Afternoon:      {fg:[180, 45,  5], bg:[255,237,220]},
+    Night:          {fg:[ 20, 55,190], bg:[225,232,255]},
+    'Off Day':      {fg:[ 85, 95,115], bg:[240,241,245]},
+    'Annual Leave': {fg:[ 10,125, 60], bg:[220,248,232]},
+    'Sick Leave':   {fg:[ 10,125, 60], bg:[220,248,232]},
+    Training:       {fg:[ 10, 85,190], bg:[220,238,255]},
+    Standby:        {fg:[148, 10,110], bg:[250,220,242]},
+    Other:          {fg:[ 90,100,115], bg:[242,243,246]}
   };
-  const FALLBACK={
-    'Off Day':'OFF','Annual Leave':'LV','Sick Leave':'SL',
-    Training:'TR',Standby:'ST',Other:'—'
-  };
-  const LNAMES={
-    Morning:'Morning',Afternoon:'Afternoon',Night:'Night',
+  const FALLBACK={'Off Day':'OFF','Annual Leave':'LV','Sick Leave':'SL',
+    Training:'TR',Standby:'ST',Other:'—'};
+  const LNAMES={Morning:'Morning',Afternoon:'Afternoon',Night:'Night',
     'Off Day':'Day Off','Annual Leave':'Leave','Sick Leave':'Sick',
-    Training:'Training',Standby:'Standby',Other:'Other'
-  };
+    Training:'Training',Standby:'Standby',Other:'Other'};
 
-  const NAVY =[15,25,70];
+  const NAVY=[15,25,70];
   const WHITE=[255,255,255];
-  const RULE =[195,202,215];
+  const RULE=[195,202,215];
   const EMPTY=[244,245,249];
-  const INK  =[18,24,44];
-  const DIM  =[110,120,138];
+  const INK=[18,24,44];
+  const DIM=[105,115,132];
 
   // ── HEADER ───────────────────────────────────────────────
   doc.setFillColor(...NAVY);
   doc.rect(0,0,W,34,'F');
-
   doc.setTextColor(...WHITE);
   doc.setFontSize(19);doc.setFont(undefined,'bold');
   doc.text(String(data.name),ML,14);
-
   doc.setFontSize(9);doc.setFont(undefined,'normal');
   doc.setTextColor(165,188,235);
   doc.text(`${data.department}   ·   ID: ${data.id}`,ML,22);
-
-  // Month pill
   doc.setFillColor(...WHITE);
   doc.roundedRect(W-MR-58,8,58,16,3,3,'F');
   doc.setTextColor(...NAVY);
   doc.setFontSize(11);doc.setFont(undefined,'bold');
   doc.text(`${mName}  ${yr}`,W-MR-29,18,{align:'center'});
 
-  // ── STATS ────────────────────────────────────────────────
-  const SY=38,SH=20,GAP=2;
-  const SL=[
-    {l:'Work',    v:stats.work,      c:NAVY},
-    {l:'Off',     v:stats.off,       c:[90,100,118]},
-    {l:'Morning', v:stats.morning,   c:[200,95,0]},
-    {l:'Afternoon',v:stats.afternoon,c:[185,50,5]},
-    {l:'Night',   v:stats.night,     c:[25,60,195]},
-    {l:'Standby', v:stats.standby,   c:[155,15,115]},
-    {l:'Leaves',  v:stats.leaves,    c:[15,130,65]}
-  ];
-  const nS=SL.length;
-  const sW=(W-ML-MR-(nS-1)*GAP)/nS;
-
-  SL.forEach(({l,v,c},i)=>{
-    const sx=ML+i*(sW+GAP);
-    doc.setFillColor(247,248,252);
-    doc.setDrawColor(...RULE);
-    doc.setLineWidth(0.2);
-    doc.roundedRect(sx,SY,sW,SH,2,2,'FD');
-    doc.setFillColor(...c);
-    doc.roundedRect(sx,SY,sW,2.8,1,1,'F');
-    doc.setTextColor(...INK);
-    doc.setFontSize(15);doc.setFont(undefined,'bold');
-    doc.text(String(v),sx+sW/2,SY+13,{align:'center'});
-    doc.setTextColor(...DIM);
-    doc.setFontSize(5.8);doc.setFont(undefined,'normal');
-    doc.text(l,sx+sW/2,SY+18.5,{align:'center'});
-  });
-
   // ── CALENDAR ─────────────────────────────────────────────
-  const CTOP=SY+SH+5;
+  const CTOP=38;
   const DNAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const CW=(W-ML-MR)/7;
   const HH=9;
@@ -558,6 +521,7 @@ function dlPDF(){
   const now=new Date();
   const thisMo=now.getFullYear()===yr&&now.getMonth()+1===mo;
 
+  // Count rows needed
   let nRows=0;
   {let d2=1;
    for(let w=0;w<6;w++){
@@ -568,8 +532,11 @@ function dlPDF(){
    }
   }
 
-  const FOOT=16;
-  const CH=Math.floor((H-CTOP-HH-FOOT)/nRows);
+  // Stats section height at bottom: 32mm
+  const STATS_H=32;
+  const FOOT_H=10;
+  const AVAIL=H-CTOP-HH-STATS_H-FOOT_H;
+  const CH=Math.floor(AVAIL/nRows);
 
   let dc=1,row=0;
   doc.setLineWidth(0.22);
@@ -588,40 +555,42 @@ function dlPDF(){
       }
 
       const dd=sched.find(s=>s.day===dc);
-      const today=thisMo&&now.getDate()===dc;
-      const col=dd?(SC[dd.shift_group]||SC.Other):SC.Other;
+      const isToday=thisMo&&now.getDate()===dc;
+      const sh=dd?(SC[dd.shift_group]||SC.Other):null;
 
-      // White cell
-      doc.setFillColor(...WHITE);
+      // Cell background — tinted with shift colour
+      if(sh){
+        doc.setFillColor(...sh.bg);
+      } else {
+        doc.setFillColor(...WHITE);
+      }
       doc.setDrawColor(...RULE);
       doc.rect(cx,cy,CW,CH,'FD');
 
-      // Today: light-blue bg + blue border
-      if(today){
-        doc.setFillColor(228,240,255);
-        doc.rect(cx+0.12,cy+0.12,CW-0.24,CH-0.24,'F');
+      // Today: blue border overlay
+      if(isToday){
         doc.setDrawColor(25,80,220);
-        doc.setLineWidth(0.7);
-        doc.rect(cx+0.12,cy+0.12,CW-0.24,CH-0.24,'D');
+        doc.setLineWidth(0.8);
+        doc.rect(cx+0.15,cy+0.15,CW-0.3,CH-0.3,'D');
         doc.setLineWidth(0.22);
         doc.setDrawColor(...RULE);
       }
 
-      // Day number — top-right, bold dark
+      // ── Day number — TOP-RIGHT, LARGE & BOLD ─────────────
       doc.setTextColor(...INK);
-      doc.setFontSize(11);doc.setFont(undefined,'bold');
-      doc.text(String(dc),cx+CW-3.5,cy+8,{align:'right'});
+      doc.setFontSize(14);        // bigger number
+      doc.setFont(undefined,'bold');
+      doc.text(String(dc),cx+CW-3,cy+9.5,{align:'right'});
 
-      // ── Shift code: BIG, BOLD, STRONG colour, centred ──
+      // ── Shift code — BIG, BOLD, STRONG colour, centred ──
       if(dd){
         const code=dd.shift_code||(FALLBACK[dd.shift_group]||'');
         if(code){
-          // Font size based on available cell height
-          const fs=CH>=34?17:CH>=26?15:13;
-          doc.setTextColor(...col);
+          const fs=CH>=36?18:CH>=28?16:14;
+          doc.setTextColor(...sh.fg);
           doc.setFontSize(fs);
           doc.setFont(undefined,'bold');
-          doc.text(code,cx+CW/2,cy+CH*0.64,{align:'center'});
+          doc.text(code,cx+CW/2,cy+CH*0.66,{align:'center'});
         }
       }
 
@@ -631,26 +600,70 @@ function dlPDF(){
     row++;
   }
 
-  // ── LEGEND ───────────────────────────────────────────────
-  const LY=CTOP+HH+row*CH+3;
-  doc.setDrawColor(...RULE);
-  doc.setLineWidth(0.25);
-  doc.line(ML,LY,W-MR,LY);
+  // ── STATISTICS SECTION (bottom, inside a band) ───────────
+  const ST_Y=CTOP+HH+row*CH+3;
 
+  // Section label
+  doc.setTextColor(...NAVY);
+  doc.setFontSize(9);doc.setFont(undefined,'bold');
+  doc.text('STATISTICS',ML,ST_Y+5);
+
+  // 7 stat cards
+  const SL=[
+    {l:'Work Days', v:stats.work,      c:NAVY},
+    {l:'Day Off',   v:stats.off,       c:[85,95,115]},
+    {l:'Morning',   v:stats.morning,   c:[200,90,0]},
+    {l:'Afternoon', v:stats.afternoon, c:[180,45,5]},
+    {l:'Night',     v:stats.night,     c:[20,55,190]},
+    {l:'Standby',   v:stats.standby,   c:[148,10,110]},
+    {l:'Leaves',    v:stats.leaves,    c:[10,125,60]}
+  ];
+  const nSt=SL.length;
+  const GAP=2;
+  const sW=(W-ML-MR-(nSt-1)*GAP)/nSt;
+  const CARD_Y=ST_Y+8;
+  const CARD_H=20;
+
+  SL.forEach(({l,v,c},i)=>{
+    const sx=ML+i*(sW+GAP);
+    // card bg
+    doc.setFillColor(247,248,253);
+    doc.setDrawColor(...RULE);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(sx,CARD_Y,sW,CARD_H,2,2,'FD');
+    // colour bar top
+    doc.setFillColor(...c);
+    doc.roundedRect(sx,CARD_Y,sW,3,1,1,'F');
+    // big number
+    doc.setTextColor(...c);
+    doc.setFontSize(17);doc.setFont(undefined,'bold');
+    doc.text(String(v),sx+sW/2,CARD_Y+13.5,{align:'center'});
+    // label
+    doc.setTextColor(...DIM);
+    doc.setFontSize(6);doc.setFont(undefined,'bold');
+    doc.text(l,sx+sW/2,CARD_Y+19,{align:'center'});
+  });
+
+  // ── LEGEND ───────────────────────────────────────────────
+  const LY=CARD_Y+CARD_H+3;
   const used=[...new Set(sched.map(s=>s.shift_group))];
   const lStep=(W-ML-MR)/used.length;
   used.forEach((g,i)=>{
-    const c2=SC[g]||SC.Other;
+    const fg=(SC[g]||SC.Other).fg;
+    const bg=(SC[g]||SC.Other).bg;
     const lx=ML+i*lStep;
-    doc.setFillColor(...c2);
-    doc.circle(lx+2.5,LY+3.8,2,'F');
-    doc.setTextColor(...DIM);
-    doc.setFontSize(7);doc.setFont(undefined,'bold');
-    doc.text(LNAMES[g]||g,lx+6.5,LY+5.2);
+    doc.setFillColor(...bg);
+    doc.setDrawColor(...fg);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(lx,LY,lStep-2,5.5,1,1,'FD');
+    doc.setTextColor(...fg);
+    doc.setFontSize(6.5);doc.setFont(undefined,'bold');
+    doc.text(LNAMES[g]||g,lx+(lStep-2)/2,LY+3.8,{align:'center'});
   });
 
   // ── FOOTER ───────────────────────────────────────────────
   doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.25);
   doc.line(ML,H-6,W-MR,H-6);
   doc.setTextColor(...DIM);
   doc.setFontSize(7);doc.setFont(undefined,'normal');
