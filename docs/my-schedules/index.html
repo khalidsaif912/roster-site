@@ -332,27 +332,12 @@ async function loadSchedule(id){
     const res=await fetch(`../schedules/${id}.json`);
     if(!res.ok) throw new Error();
     data=await res.json();
-    months=Object.keys(data.schedules).sort(); // ascending: Jan→Mar
+    months=Object.keys(data.schedules).sort();
     if(!months.length) throw new Error();
-    month=months[months.length-1]; // default to latest month
+    month=months[months.length-1];
     renderSchedule();
   }catch{
-    /* Pre-compute stats for mobile display below calendar */
-  const statsMobileHTML=`
-    <div class="stats">
-      <div class="stats-title">${t('statsTitle')}</div>
-      <div class="stats-grid">
-        <div class="stat-box"><div class="stat-lbl">${t('workDays')}</div><div class="stat-val">${stats.work}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('offDays')}</div><div class="stat-val">${stats.off}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('morning')}</div><div class="stat-val">${stats.morning}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('afternoon')}</div><div class="stat-val">${stats.afternoon}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('night')}</div><div class="stat-val">${stats.night}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('standby')}</div><div class="stat-val">${stats.standby}</div></div>
-        <div class="stat-box"><div class="stat-lbl">${t('leaves')}</div><div class="stat-val">${stats.leaves}</div></div>
-      </div>
-    </div>`;
-
-  document.getElementById('area').innerHTML=`
+    document.getElementById('area').innerHTML=`
       <div class="empty-state">
         <div class="empty-icon">❌</div>
         <h3>${t('notFound')}</h3>
@@ -364,15 +349,13 @@ async function loadSchedule(id){
 function renderSchedule(){
   const sched=data.schedules[month];
   const [yr,mo]=month.split('-').map(Number);
-  const mName=T[lang].months[mo-1];
   const ci=months.indexOf(month);
-  const hasPrev=ci>0,hasNext=ci<months.length-1;
-
+  const hasPrev=ci>0;
+  const hasNext=ci<months.length-1;
   const firstDow=new Date(yr,mo-1,1).getDay();
   const daysInMonth=new Date(yr,mo,0).getDate();
   const stats=calcStats(sched);
 
-  /* Calendar cells: ICON + CODE only — zero text labels */
   let cells='',dc=1;
   for(let w=0;w<6;w++){
     for(let d=0;d<7;d++){
@@ -380,17 +363,13 @@ function renderSchedule(){
         cells+='<div class="cal-day empty"></div>';
       }else{
         const dd=sched.find(s=>s.day===dc);
-        const today=isToday(yr,mo,dc);
         if(dd){
           const sc=shiftClass(dd.shift_group);
-          const icon=COLORS[dd.shift_group]?.icon||'❓';
-          cells+=`<div class="cal-day ${sc}">
-            <div class="d-num">${dc}</div>
-            <div class="d-icon">${icon}</div>
-            ${dd.shift_code?`<div class="d-code">${esc(dd.shift_code)}</div>`:''}
-          </div>`;
+          const icon=COLORS[dd.shift_group]?.icon||'?';
+          const code=dd.shift_code?'<div class="d-code">'+esc(dd.shift_code)+'</div>':'';
+          cells+='<div class="cal-day '+sc+'"><div class="d-num">'+dc+'</div><div class="d-icon">'+icon+'</div>'+code+'</div>';
         }else{
-          cells+=`<div class="cal-day"><div class="d-num">${dc}</div></div>`;
+          cells+='<div class="cal-day"><div class="d-num">'+dc+'</div></div>';
         }
         dc++;
       }
@@ -398,72 +377,81 @@ function renderSchedule(){
     if(dc>daysInMonth) break;
   }
 
-  const dayHdr=T[lang].days.map(d=>`<div>${d}</div>`).join('');
+  const dayHdr=T[lang].days.map(d=>'<div>'+d+'</div>').join('');
 
-  /* Legend */
   const used=[...new Set(sched.map(s=>s.shift_group))];
   const legHTML=used.map(g=>{
     const c=COLORS[g];if(!c) return '';
-    return `<span class="leg-item"><span class="leg-dot" style="background:${c.strip}"></span>${T[lang].legend[g]||g}</span>`;
+    return '<span class="leg-item"><span class="leg-dot" style="background:'+c.strip+'"></span>'+
+           (T[lang].legend[g]||g)+'</span>';
   }).join('');
 
-  /* Build month options OUTSIDE template literal to avoid nesting issues */
   const monthOpts=months.map(m=>{
-    const [my,mm]=m.split('-').map(Number);
-    const label=T[lang].months[mm-1]+' '+my;
+    const p=m.split('-').map(Number);
+    const label=T[lang].months[p[1]-1]+' '+p[0];
     return '<option value="'+m+'"'+(m===month?' selected':'')+'>'+label+'</option>';
   }).join('');
 
-  document.getElementById('area').innerHTML=`
-    <div class="desktop-grid">
-    <div class="desktop-left">
-    <div class="emp-bar">
-      <div class="emp-info">
-        <h2>${esc(data.name)}</h2>
-        <p>📋 ${esc(data.department)} &nbsp;•&nbsp; 🆔 ${esc(data.id)}</p>
-      </div>
-      <div class="month-nav">
-        <button onclick="chMonth(-1)" ${!hasPrev?'disabled style="opacity:.35;cursor:default"':''}>&lt;</button>
-        <select class="month-select" onchange="jumpMonth(this.value)">${monthOpts}</select>
-        <button onclick="chMonth(1)" ${!hasNext?'disabled style="opacity:.35;cursor:default"':''}>&gt;</button>
-      </div>
-    </div>
+  const statsRows=[
+    [t('workDays'),stats.work],[t('offDays'),stats.off],
+    [t('morning'),stats.morning],[t('afternoon'),stats.afternoon],
+    [t('night'),stats.night],[t('standby'),stats.standby],
+    [t('leaves'),stats.leaves]
+  ].map(([l,v])=>'<div class="stat-box"><div class="stat-lbl">'+l+'</div><div class="stat-val">'+v+'</div></div>').join('');
 
-    <div class="calendar">
-      <div class="cal-head">${dayHdr}</div>
-      <div class="cal-body">${cells}</div>
-    </div>
+  const statsHTML='<div class="stats"><div class="stats-title">'+t('statsTitle')+'</div><div class="stats-grid">'+statsRows+'</div></div>';
 
-    <div class="mobile-only">${statsMobileHTML}</div>
-    </div><!-- /desktop-left -->
+  const actHTML='<div class="actions">'+
+    '<button class="act-btn act-primary" onclick="dlPDF()">'+t('pdf')+'</button>'+
+    '<button class="act-btn act-ics" onclick="dlICS()">'+t('ics')+'</button>'+
+    '<button class="act-btn act-img" onclick="dlIMG()">'+t('img')+'</button>'+
+    '<button class="act-btn" onclick="shareS()">'+t('share')+'</button>'+
+    '<button class="act-btn" onclick="window.print()">'+t('print')+'</button>'+
+    '</div>';
 
-    <div class="desktop-right">
-      <div class="stats">
-        <div class="stats-title">${t('statsTitle')}</div>
-        <div class="stats-grid" style="grid-template-columns:repeat(2,1fr)">
-          <div class="stat-box"><div class="stat-lbl">${t('workDays')}</div><div class="stat-val">${stats.work}</div></div>
-          <div class="stat-box"><div class="stat-lbl">${t('offDays')}</div><div class="stat-val">${stats.off}</div></div>
-          <div class="stat-box"><div class="stat-lbl">${t('morning')}</div><div class="stat-val">${stats.morning}</div></div>
-          <div class="stat-box"><div class="stat-lbl">${t('afternoon')}</div><div class="stat-val">${stats.afternoon}</div></div>
-          <div class="stat-box"><div class="stat-lbl">${t('night')}</div><div class="stat-val">${stats.night}</div></div>
-          <div class="stat-box"><div class="stat-lbl">${t('standby')}</div><div class="stat-val">${stats.standby}</div></div>
-          <div class="stat-box"><div class="stat-lbl">${t('leaves')}</div><div class="stat-val">${stats.leaves}</div></div>
-        </div>
-      </div>
+  const prevDis=!hasPrev?'disabled style="opacity:.35;cursor:default"':'';
+  const nextDis=!hasNext?'disabled style="opacity:.35;cursor:default"':'';
 
-      <div class="legend">${legHTML}</div>
+  document.getElementById('area').innerHTML=
+    '<div class="desktop-grid">'+
 
-      <div class="actions">
-        <button class="act-btn act-primary" onclick="dlPDF()">${t('pdf')}</button>
-        <button class="act-btn act-ics" onclick="dlICS()">${t('ics')}</button>
-        <button class="act-btn act-img" onclick="dlIMG()">${t('img')}</button>
-        <button class="act-btn" onclick="shareS()">${t('share')}</button>
-        <button class="act-btn" onclick="window.print()">${t('print')}</button>
-      </div>
-    </div><!-- /desktop-right -->
-    </div><!-- /desktop-grid -->
-  `;
+      '<div class="desktop-left">'+
+        '<div class="emp-bar">'+
+          '<div class="emp-info">'+
+            '<h2>'+esc(data.name)+'</h2>'+
+            '<p>📋 '+esc(data.department)+'&nbsp;•&nbsp; 🆔 '+esc(data.id)+'</p>'+
+          '</div>'+
+          '<div class="month-nav">'+
+            '<button onclick="chMonth(-1)" '+prevDis+'>&lt;</button>'+
+            '<select class="month-select" onchange="jumpMonth(this.value)">'+monthOpts+'</select>'+
+            '<button onclick="chMonth(1)" '+nextDis+'>&gt;</button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="calendar">'+
+          '<div class="cal-head">'+dayHdr+'</div>'+
+          '<div class="cal-body">'+cells+'</div>'+
+        '</div>'+
+        '<div class="legend">'+legHTML+'</div>'+
+        '<div class="mobile-only">'+statsHTML+actHTML+'</div>'+
+      '</div>'+
+
+      '<div class="desktop-right">'+
+        statsHTML+
+        '<div class="legend">'+legHTML+'</div>'+
+        actHTML+
+      '</div>'+
+
+    '</div>';
 }
+
+function chMonth(dir){
+  const ci=months.indexOf(month),ni=ci+dir;
+  if(ni>=0&&ni<months.length){month=months[ni];renderSchedule();}
+}
+function jumpMonth(val){
+  if(months.includes(val)){month=val;renderSchedule();}
+}
+
 
 function chMonth(dir){
   const ci=months.indexOf(month),ni=ci+dir;
