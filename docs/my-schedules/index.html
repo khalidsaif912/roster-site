@@ -88,6 +88,18 @@
     }
     .month-nav button:hover{background:rgba(255,255,255,.3)}
     .month-nav span{font-size:12px;font-weight:800;min-width:86px;text-align:center}
+    .month-select{
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.3);
+      color:#fff;border-radius:8px;
+      padding:4px 8px;
+      font-size:11px;font-weight:700;
+      cursor:pointer;
+      min-width:110px;text-align:center;
+      appearance:none;-webkit-appearance:none;
+      outline:none;
+    }
+    .month-select option{background:#1e3a8a;color:#fff;}
 
     /* CALENDAR */
     .calendar{
@@ -360,7 +372,13 @@ function renderSchedule(){
       </div>
       <div class="month-nav">
         <button onclick="chMonth(-1)" ${!hasPrev?'disabled style="opacity:.35;cursor:default"':''}>&lt;</button>
-        <span>${mName} ${yr}</span>
+        <select class="month-select" onchange="jumpMonth(this.value)">
+          ${months.map((m,i)=>{
+            const [my,mm]=m.split('-').map(Number);
+            const label=T[lang].months[mm-1]+' '+my;
+            return \`<option value="\${m}" \${m===month?'selected':''}>\${label}</option>\`;
+          }).join('')}
+        </select>
         <button onclick="chMonth(1)" ${!hasNext?'disabled style="opacity:.35;cursor:default"':''}>&gt;</button>
       </div>
     </div>
@@ -398,6 +416,9 @@ function renderSchedule(){
 function chMonth(dir){
   const ci=months.indexOf(month),ni=ci-dir;
   if(ni>=0&&ni<months.length){month=months[ni];renderSchedule()}
+}
+function jumpMonth(val){
+  if(months.includes(val)){month=val;renderSchedule()}
 }
 
 function calcStats(s){
