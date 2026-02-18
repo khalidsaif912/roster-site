@@ -407,8 +407,10 @@ function renderSchedule(){
     '<button class="act-btn" onclick="window.print()">'+t('print')+'</button>'+
     '</div>';
 
-  const prevDis=!hasPrev?'disabled style="opacity:.35;cursor:default"':'';
-  const nextDis=!hasNext?'disabled style="opacity:.35;cursor:default"':'';
+  const prevDis=!hasPrev?'disabled':'';
+  const prevStyle=!hasPrev?'opacity:.35;cursor:default':'';
+  const nextDis=!hasNext?'disabled':'';
+  const nextStyle=!hasNext?'opacity:.35;cursor:default':'';
 
   document.getElementById('area').innerHTML=
     '<div class="desktop-grid">'+
@@ -420,9 +422,9 @@ function renderSchedule(){
             '<p>📋 '+esc(data.department)+'&nbsp;•&nbsp; 🆔 '+esc(data.id)+'</p>'+
           '</div>'+
           '<div class="month-nav">'+
-            '<button onclick="chMonth(-1)" '+prevDis+'>&lt;</button>'+
+            '<button onclick="chMonth(-1)" '+prevDis+' style="'+prevStyle+'">&lt;</button>'+
             '<select class="month-select" onchange="jumpMonth(this.value)">'+monthOpts+'</select>'+
-            '<button onclick="chMonth(1)" '+nextDis+'>&gt;</button>'+
+            '<button onclick="chMonth(1)" '+nextDis+' style="'+nextStyle+'">&gt;</button>'+
           '</div>'+
         '</div>'+
         '<div class="calendar">'+
