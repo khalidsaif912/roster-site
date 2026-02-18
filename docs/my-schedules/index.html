@@ -130,8 +130,8 @@
     /* STATS */
     .stats{background:#f8fafc;border-radius:10px;border:1px solid var(--border);padding:8px;margin-bottom:8px}
     .stats-title{font-size:10px;font-weight:800;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-    .stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-    @media(max-width:360px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+    .stats-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+    @media(max-width:380px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
     .stat-box{background:#fff;border:1px solid var(--border);border-radius:7px;padding:6px 4px;text-align:center}
     .stat-lbl{font-size:9px;color:var(--muted);font-weight:700;margin-bottom:3px}
     .stat-val{font-size:17px;font-weight:900;color:var(--text);line-height:1}
@@ -224,7 +224,7 @@ const T={
     loading:'Loading...',notFound:'Employee not found',
     notFoundSub:'ID not in the system. Please check and try again.',
     statsTitle:'STATISTICS',
-    workDays:'Work',offDays:'Off',morning:'☀️',afternoon:'🌤️',night:'🌙',leaves:'Leaves',
+    workDays:'Work',offDays:'Off',morning:'☀️',afternoon:'🌤️',night:'🌙',standby:'🧍',leaves:'Leaves',
     pdf:'📥 PDF',share:'🔗 Share',print:'🖨️ Print',ics:'📆 ICS',
     days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     months:['January','February','March','April','May','June',
@@ -241,7 +241,7 @@ const T={
     loading:'جاري التحميل...',notFound:'لم يُعثر على موظف',
     notFoundSub:'الرقم غير موجود. تحقق وأعد المحاولة.',
     statsTitle:'الإحصائيات',
-    workDays:'عمل',offDays:'إجازة',morning:'☀️',afternoon:'🌤️',night:'🌙',leaves:'سنوية',
+    workDays:'عمل',offDays:'إجازة',morning:'☀️',afternoon:'🌤️',night:'🌙',standby:'🧍',leaves:'سنوية',
     pdf:'📥 PDF',share:'🔗 مشاركة',print:'🖨️ طباعة',ics:'📆 ICS',
     days:['الأح','الاث','الثل','الأر','الخم','الجم','السب'],
     months:['يناير','فبراير','مارس','أبريل','مايو','يونيو',
@@ -396,12 +396,13 @@ function chMonth(dir){
 }
 
 function calcStats(s){
-  const r={work:0,off:0,morning:0,afternoon:0,night:0,leaves:0};
+  const r={work:0,off:0,morning:0,afternoon:0,night:0,standby:0,leaves:0};
   s.forEach(d=>{
     if(d.shift_group==='Morning') r.morning++;
     else if(d.shift_group==='Afternoon') r.afternoon++;
     else if(d.shift_group==='Night') r.night++;
     else if(d.shift_group==='Off Day') r.off++;
+    else if(d.shift_group==='Standby') r.standby++;
     else if(d.shift_group==='Annual Leave'||d.shift_group==='Sick Leave') r.leaves++;
   });
   r.work=r.morning+r.afternoon+r.night;
@@ -447,109 +448,140 @@ function dlICS(){
   a.click();URL.revokeObjectURL(a.href);
 }
 
-/* ── PDF ── Clean minimal A4 ── */
+/* ── PDF ── Premium A4 Editorial Design ── */
 function dlPDF(){
   if(!window.jspdf){alert('PDF library loading, please try again.');return}
   const {jsPDF}=window.jspdf;
 
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210, H=297, M=12;
+  const W=210, H=297, M=14;
 
   const sched=data.schedules[month];
   const [yr,mo]=month.split('-').map(Number);
   const mName=T.en.months[mo-1];
   const stats=calcStats(sched);
 
-  // ── colour palette: one accent per shift type, all muted/elegant ──
-  // Each entry: [dot R,G,B]  (cells stay white, only dot + code get colour)
-  const DOT={
-    Morning:     [180,130,40],
-    Afternoon:   [180,90,40],
-    Night:       [70,60,160],
-    'Off Day':   [150,160,170],
-    'Annual Leave':[50,140,90],
-    'Sick Leave':[50,140,90],
-    Training:    [50,100,180],
-    Standby:     [160,70,120],
-    Other:       [130,130,130]
+  // ── Design tokens ──────────────────────────────────────────
+  const NAVY  =[18, 24, 48];      // header bg
+  const WHITE =[255,255,255];
+  const INK   =[22, 28, 50];      // body text
+  const SUB   =[100,110,130];     // secondary text
+  const RULE  =[220,224,232];     // borders
+  const CELL  =[252,253,255];     // off-white cell bg
+  const EMPTY =[246,247,250];     // empty cell
+
+  // shift palette — restrained, one tone per shift
+  const S={
+    Morning:     {bg:[255,249,235], fg:[154,98,12],  bar:[245,167,50]},
+    Afternoon:   {bg:[255,246,238], fg:[174,74,20],  bar:[240,110,50]},
+    Night:       {bg:[241,240,255], fg:[72,58,180],  bar:[100,85,220]},
+    'Off Day':   {bg:[244,246,250], fg:[90,104,120], bar:[160,172,188]},
+    'Annual Leave':{bg:[237,252,245],fg:[22,115,70], bar:[40,170,110]},
+    'Sick Leave':{bg:[237,252,245], fg:[22,115,70],  bar:[40,170,110]},
+    Training:    {bg:[237,247,255], fg:[30,90,190],  bar:[55,130,240]},
+    Standby:     {bg:[255,240,250], fg:[155,40,110], bar:[210,70,150]},
+    Other:       {bg:[246,247,250], fg:[110,118,130],bar:[170,178,190]}
   };
+
   const LNAMES={
     Morning:'Morning', Afternoon:'Afternoon', Night:'Night',
-    'Off Day':'Day Off','Annual Leave':'Ann. Leave','Sick Leave':'Sick',
+    'Off Day':'Day Off','Annual Leave':'Annual Leave','Sick Leave':'Sick Leave',
     Training:'Training',Standby:'Standby',Other:'Other'
   };
 
-  const INK  =[30, 35, 50];   // near-black text
-  const MUTED=[130,140,155];  // grey labels
-  const LINE =[215,220,228];  // cell borders
-  const BG   =[249,250,252];  // light grey backgrounds
+  // ═══════════════════════════════════════════════════════════
+  //  1. HEADER BAND  — full-width navy, elegant
+  // ═══════════════════════════════════════════════════════════
+  const HDR=40;
+  doc.setFillColor(...NAVY);
+  doc.rect(0,0,W,HDR,'F');
 
-  // ══════════════════════════════════════
-  //  HEADER  – white background, left rule
-  // ══════════════════════════════════════
-  // thin blue left bar
-  doc.setFillColor(43,89,255);
-  doc.rect(0,0,3,H,'F');
+  // subtle dot pattern top-right (decorative)
+  doc.setFillColor(255,255,255);
+  for(let r=0;r<3;r++) for(let c=0;c<5;c++){
+    const opacity=0.04+c*0.015;
+    doc.setFillColor(255,255,255);
+    // just draw tiny faint circles
+    if(c+r<5) doc.circle(W-M-c*7, 6+r*7, 0.8,'F');
+  }
 
-  // name
-  doc.setTextColor(...INK);
-  doc.setFontSize(22);doc.setFont(undefined,'bold');
-  doc.text(String(data.name), M, 18);
+  // Month pill — top left inside header
+  doc.setFillColor(255,255,255);
+  doc.roundedRect(M,8,42,10,2,2,'F');
+  doc.setTextColor(...NAVY);
+  doc.setFontSize(9);doc.setFont(undefined,'bold');
+  doc.text(`${mName.toUpperCase()}  ${yr}`, M+21, 14.8, {align:'center'});
 
-  // department · id
-  doc.setFontSize(10);doc.setFont(undefined,'normal');
-  doc.setTextColor(...MUTED);
-  doc.text(`${data.department}   ·   ${data.id}`, M, 25);
-
-  // month + year  – right aligned, large
+  // Name — large, white
+  doc.setTextColor(...WHITE);
   doc.setFontSize(20);doc.setFont(undefined,'bold');
-  doc.setTextColor(43,89,255);
-  doc.text(`${mName} ${yr}`, W-M, 18, {align:'right'});
+  doc.text(String(data.name), M, 33);
 
-  // thin separator line under header
-  doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.4);
-  doc.line(M, 29, W-M, 29);
+  // Department + ID — right side
+  doc.setFontSize(9);doc.setFont(undefined,'normal');
+  doc.setTextColor(180,195,230);
+  doc.text(`${data.department}`, W-M, 26, {align:'right'});
+  doc.text(`ID  ${data.id}`, W-M, 33, {align:'right'});
 
-  // ══════════════════════════════════════
-  //  STATS ROW  – 6 compact boxes
-  // ══════════════════════════════════════
-  const stY=33;
-  const stData=[
-    ['Work',stats.work], ['Off',stats.off],
-    ['Morning',stats.morning], ['Afternoon',stats.afternoon],
-    ['Night',stats.night], ['Leaves',stats.leaves]
+  // ═══════════════════════════════════════════════════════════
+  //  2. STATS ROW  — 7 cards: work+off+morning+afternoon+night+standby+leaves
+  // ═══════════════════════════════════════════════════════════
+  const stY=HDR+5;
+  const stItems=[
+    {l:'WORK',   v:stats.work,      accent:[55,130,240]},
+    {l:'OFF',    v:stats.off,       accent:[160,172,188]},
+    {l:'MORNING',v:stats.morning,   accent:[245,167,50]},
+    {l:'AFTERNOON',v:stats.afternoon,accent:[240,110,50]},
+    {l:'NIGHT',  v:stats.night,     accent:[100,85,220]},
+    {l:'STANDBY',v:stats.standby,   accent:[210,70,150]},
+    {l:'LEAVES', v:stats.leaves,    accent:[40,170,110]}
   ];
-  const stW=(W-M*2-5*2)/6;
-  stData.forEach(([lbl,val],i)=>{
-    const sx=M+i*(stW+2);
-    doc.setFillColor(...BG);
-    doc.setDrawColor(...LINE);
+  const nSt=stItems.length;
+  const stGap=2;
+  const stW=(W-M*2-(nSt-1)*stGap)/nSt;
+  const stH=20;
+
+  stItems.forEach(({l,v,accent},i)=>{
+    const sx=M+i*(stW+stGap);
+    // white card with shadow-like border
+    doc.setFillColor(...WHITE);
+    doc.setDrawColor(...RULE);
     doc.setLineWidth(0.3);
-    doc.roundedRect(sx,stY,stW,14,1.5,1.5,'FD');
+    doc.roundedRect(sx,stY,stW,stH,2,2,'FD');
+    // coloured top bar
+    doc.setFillColor(...accent);
+    doc.roundedRect(sx,stY,stW,2.5,1,1,'F');
+    // number — big
     doc.setTextColor(...INK);
-    doc.setFontSize(15);doc.setFont(undefined,'bold');
-    doc.text(String(val),sx+stW/2,stY+9,{align:'center'});
-    doc.setTextColor(...MUTED);
-    doc.setFontSize(6.5);doc.setFont(undefined,'normal');
-    doc.text(lbl,sx+stW/2,stY+13.2,{align:'center'});
+    doc.setFontSize(18);doc.setFont(undefined,'bold');
+    doc.text(String(v),sx+stW/2,stY+13,{align:'center'});
+    // label — tiny caps
+    doc.setTextColor(...SUB);
+    doc.setFontSize(5.5);doc.setFont(undefined,'bold');
+    doc.text(l,sx+stW/2,stY+18.5,{align:'center'});
   });
 
-  // ══════════════════════════════════════
-  //  CALENDAR
-  // ══════════════════════════════════════
-  const calTop=stY+18;
-  const dLabels=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const cW=(W-M*2)/7;
-  const hH=8; // day-header row height
+  // thin rule under stats
+  const ruleY=stY+stH+4;
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.3);
+  doc.line(M,ruleY,W-M,ruleY);
 
-  // Day header row – dark fill
-  doc.setFillColor(30,35,50);
+  // ═══════════════════════════════════════════════════════════
+  //  3. CALENDAR  — takes most of the page
+  // ═══════════════════════════════════════════════════════════
+  const calTop=ruleY+3;
+  const dLabels=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const cW=(W-M*2)/7;
+  const hH=9;
+
+  // Header row
+  doc.setFillColor(...NAVY);
   doc.rect(M,calTop,W-M*2,hH,'F');
   dLabels.forEach((d,i)=>{
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(8.5);doc.setFont(undefined,'bold');
-    doc.text(d, M+i*cW+cW/2, calTop+5.5, {align:'center'});
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(7.5);doc.setFont(undefined,'bold');
+    doc.text(d, M+i*cW+cW/2, calTop+6, {align:'center'});
   });
 
   const firstDow=new Date(yr,mo-1,1).getDay();
@@ -557,7 +589,7 @@ function dlPDF(){
   const todayD=new Date();
   const sameMonth=todayD.getFullYear()===yr&&todayD.getMonth()+1===mo;
 
-  // count weeks
+  // count weeks used
   let nRows=0;
   {let d2=1;
    for(let w=0;w<6;w++){
@@ -568,65 +600,74 @@ function dlPDF(){
    }
   }
 
-  const calH=H-M-calTop-hH-10; // leave 10mm for footer
-  const cH=Math.floor(calH/nRows);
+  // Footer reserve + legend space
+  const footerH=14;
+  const calBodyH=H-calTop-hH-footerH;
+  const cH=Math.floor(calBodyH/nRows);
 
   let dc=1,row=0;
-  doc.setLineWidth(0.25);
 
   for(let w=0;w<6;w++){
     for(let d=0;d<7;d++){
       const x=M+d*cW;
       const y=calTop+hH+row*cH;
-      const empty=(w===0&&d<firstDow)||dc>dim;
+      const isEmpty=(w===0&&d<firstDow)||dc>dim;
 
-      if(empty){
-        doc.setFillColor(245,246,249);
-        doc.setDrawColor(...LINE);
+      if(isEmpty){
+        doc.setFillColor(...EMPTY);
+        doc.setDrawColor(...RULE);
+        doc.setLineWidth(0.2);
         doc.rect(x,y,cW,cH,'FD');
       } else {
         const dd=sched.find(s=>s.day===dc);
         const isToday=sameMonth&&todayD.getDate()===dc;
+        const sh=S[dd?.shift_group]||S.Other;
 
-        // white cell
-        doc.setFillColor(255,255,255);
-        doc.setDrawColor(...LINE);
+        // cell fill — very light tint of shift colour
+        doc.setFillColor(...(dd ? sh.bg : WHITE));
+        doc.setDrawColor(...RULE);
+        doc.setLineWidth(0.2);
         doc.rect(x,y,cW,cH,'FD');
 
-        // today: subtle blue background
+        // today ring
         if(isToday){
-          doc.setFillColor(237,244,255);
-          doc.rect(x+0.15,y+0.15,cW-0.3,cH-0.3,'F');
           doc.setDrawColor(43,89,255);
-          doc.setLineWidth(0.5);
-          doc.rect(x+0.15,y+0.15,cW-0.3,cH-0.3,'D');
-          doc.setLineWidth(0.25);
-          doc.setDrawColor(...LINE);
+          doc.setLineWidth(0.7);
+          doc.rect(x+0.35,y+0.35,cW-0.7,cH-0.7,'D');
+          doc.setLineWidth(0.2);
         }
 
-        // day number – top-left
-        doc.setTextColor(...INK);
-        doc.setFontSize(12);doc.setFont(undefined,'bold');
-        doc.text(String(dc), x+3.5, y+8);
-
+        // left colour bar
         if(dd){
-          const col=DOT[dd.shift_group]||[130,130,130];
+          doc.setFillColor(...sh.bar);
+          doc.rect(x,y,2.5,cH,'F');
+        }
+
+        // Day number — top right, big
+        doc.setTextColor(...INK);
+        doc.setFontSize(14);doc.setFont(undefined,'bold');
+        doc.text(String(dc), x+cW-4, y+10, {align:'right'});
+
+        // Shift label pill — centred, bottom area
+        if(dd){
           const lbl=LNAMES[dd.shift_group]||dd.shift_group;
+          const pillW=cW-10;
+          const pillH=6.5;
+          const pillX=x+5;
+          const pillY=y+cH-pillH-3;
 
-          // small filled dot centre-top
-          doc.setFillColor(...col);
-          doc.circle(x+cW/2, y+cH*0.42, 2.2, 'F');
+          doc.setFillColor(...sh.bar);
+          doc.roundedRect(pillX,pillY,pillW,pillH,1.5,1.5,'F');
 
-          // shift label – bottom centre, grey small
-          doc.setTextColor(...col);
-          doc.setFontSize(6.5);doc.setFont(undefined,'bold');
-          doc.text(lbl, x+cW/2, y+cH-3.5, {align:'center'});
+          doc.setTextColor(...WHITE);
+          doc.setFontSize(6);doc.setFont(undefined,'bold');
+          doc.text(lbl, pillX+pillW/2, pillY+4.5, {align:'center'});
 
-          // shift code above label if exists
+          // shift code above pill, if exists
           if(dd.shift_code){
-            doc.setTextColor(...MUTED);
-            doc.setFontSize(7);doc.setFont(undefined,'bold');
-            doc.text(dd.shift_code, x+cW/2, y+cH-8, {align:'center'});
+            doc.setTextColor(...sh.fg);
+            doc.setFontSize(7.5);doc.setFont(undefined,'bold');
+            doc.text(dd.shift_code, x+cW/2, pillY-1.5, {align:'center'});
           }
         }
         dc++;
@@ -636,32 +677,38 @@ function dlPDF(){
     row++;
   }
 
-  // ══════════════════════════════════════
-  //  LEGEND  – one row at bottom
-  // ══════════════════════════════════════
-  const legY=calTop+hH+row*cH+3;
+  // ═══════════════════════════════════════════════════════════
+  //  4. LEGEND + FOOTER
+  // ═══════════════════════════════════════════════════════════
+  const legY=calTop+hH+row*cH+2;
+
+  // legend rule
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.25);
+  doc.line(M,legY,W-M,legY);
+
   const used=[...new Set(sched.map(s=>s.shift_group))];
-  const gap=(W-M*2)/used.length;
+  const legGap=(W-M*2)/used.length;
   used.forEach((g,i)=>{
-    const col=DOT[g]||[130,130,130];
-    const lx=M+i*gap;
-    doc.setFillColor(...col);
-    doc.circle(lx+2, legY+1.5, 1.5, 'F');
-    doc.setTextColor(...MUTED);
-    doc.setFontSize(7);doc.setFont(undefined,'normal');
-    doc.text(LNAMES[g]||g, lx+5.5, legY+2.5);
+    const sh2=S[g]||S.Other;
+    const lx=M+i*legGap;
+    doc.setFillColor(...sh2.bar);
+    doc.roundedRect(lx, legY+2.5, 6, 3.5, 0.8, 0.8, 'F');
+    doc.setTextColor(...SUB);
+    doc.setFontSize(6.5);doc.setFont(undefined,'normal');
+    doc.text(LNAMES[g]||g, lx+7.5, legY+5.5);
   });
 
-  // ══════════════════════════════════════
-  //  FOOTER
-  // ══════════════════════════════════════
-  doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.3);
-  doc.line(M, H-8, W-M, H-8);
-  doc.setTextColor(...MUTED);
+  // footer line
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.25);
+  doc.line(M,H-8,W-M,H-8);
+  doc.setFillColor(...NAVY);
+  doc.rect(M,H-8,6,3.5,'F'); // small navy accent
+  doc.setTextColor(...SUB);
   doc.setFontSize(7);doc.setFont(undefined,'normal');
-  doc.text('My Schedule', M, H-4);
-  doc.text(`${mName} ${yr}  ·  ID ${data.id}`, W-M, H-4, {align:'right'});
+  doc.text(`Generated · My Schedule`, M+8, H-5.2);
+  doc.text(`${mName} ${yr}  ·  ${data.id}`, W-M, H-5.2, {align:'right'});
 
   doc.save(`schedule-${data.id}-${month}.pdf`);
 }
