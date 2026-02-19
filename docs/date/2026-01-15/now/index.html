@@ -89,8 +89,30 @@
       margin-top:14px;
       z-index:1;
     }
-    .header .dateTag {
+
+    /* dateTag يحتوي الـ input بداخله */
+    .datePickerWrapper {
+      margin-top:14px;
       display:inline-block;
+    }
+    #datePicker {
+      position:absolute;
+      top:0; left:0; right:0; bottom:0;
+      width:100%; height:100%;
+      opacity:0;
+      cursor:pointer;
+      font-size:16px;
+      border:none;
+      margin:0; padding:0;
+      z-index:10;
+      -webkit-appearance:none;
+      box-sizing:border-box;
+    }
+    .header .dateTag {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
       background:rgba(255,255,255,.18);
       padding:5px 18px;
       border-radius:10px;
@@ -103,37 +125,11 @@
       -webkit-tap-highlight-color:transparent;
       user-select:none;
       -webkit-user-select:none;
+      overflow:hidden;
     }
     .header .dateTag:hover {
       background:rgba(255,255,255,.25);
       transform:translateY(-1px);
-    }
-    /* الـ input شفاف فوق كامل الـ wrapper */
-    #datePicker {
-      position:absolute;
-      top:0; left:0;
-      width:100%;
-      height:100%;
-      opacity:0;
-      cursor:pointer;
-      font-size:16px;
-      border:none;
-      margin:0; padding:0;
-      z-index:5;
-      -webkit-appearance:none;
-      box-sizing:border-box;
-    }
-    .datePickerWrapper {
-      position:relative;
-      display:inline-block;
-      margin-top:14px;
-      z-index:1;
-    }
-    .datePickerWrapper .dateTag {
-      display:block;
-      position:relative;
-      z-index:1;
-      pointer-events:none;
     }
 
     /* ═══════ SUMMARY BAR ═══════ */
@@ -404,7 +400,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">15JAN2026 / 00:00</strong>
     <br>Total: <strong>0 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster-February_2026RAMADAN-Version4.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster-February_2026RAMADAN-Version_4.xlsx</strong>
   </div>
 
 </div>
