@@ -83,36 +83,14 @@
     }
 
     /* Date Picker Wrapper */
+    /* Date Picker */
     .datePickerWrapper {
+      margin-top:14px;
+      display:inline-block;
       position:relative;
-      display:inline-block;
-      margin-top:14px;
-      z-index:1;
-    }
-
-    /* dateTag يحتوي الـ input بداخله */
-    .datePickerWrapper {
-      margin-top:14px;
-      display:inline-block;
-    }
-    #datePicker {
-      position:absolute;
-      top:0; left:0; right:0; bottom:0;
-      width:100%; height:100%;
-      opacity:0;
-      cursor:pointer;
-      font-size:16px;
-      border:none;
-      margin:0; padding:0;
-      z-index:10;
-      -webkit-appearance:none;
-      box-sizing:border-box;
     }
     .header .dateTag {
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
+      display:inline-block;
       background:rgba(255,255,255,.18);
       padding:5px 18px;
       border-radius:10px;
@@ -125,11 +103,94 @@
       -webkit-tap-highlight-color:transparent;
       user-select:none;
       -webkit-user-select:none;
-      overflow:hidden;
     }
     .header .dateTag:hover {
       background:rgba(255,255,255,.25);
       transform:translateY(-1px);
+    }
+    /* Custom calendar popup */
+    .calPopup {
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      padding:20px;
+      z-index:9999;
+      min-width:300px;
+      font-family:'Segoe UI',system-ui,sans-serif;
+    }
+    .calPopup.open { display:block; }
+    .calOverlay {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.4);
+      z-index:9998;
+    }
+    .calOverlay.open { display:block; }
+    .calHeader {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .calHeader button {
+      background:none;
+      border:none;
+      font-size:20px;
+      cursor:pointer;
+      color:#1e40af;
+      padding:4px 10px;
+      border-radius:8px;
+    }
+    .calHeader button:hover { background:#f1f5f9; }
+    .calMonthYear {
+      font-weight:700;
+      font-size:15px;
+      color:#0f172a;
+    }
+    .calGrid {
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:4px;
+      text-align:center;
+    }
+    .calDayName {
+      font-size:11px;
+      font-weight:700;
+      color:#94a3b8;
+      padding:4px 0;
+    }
+    .calDay {
+      padding:7px 4px;
+      border-radius:8px;
+      font-size:13px;
+      cursor:pointer;
+      color:#0f172a;
+      border:none;
+      background:none;
+    }
+    .calDay:hover { background:#dbeafe; color:#1e40af; }
+    .calDay.today { background:#1e40af; color:#fff; font-weight:700; }
+    .calDay.selected { background:#0ea5e9; color:#fff; font-weight:700; }
+    .calDay.other-month { color:#cbd5e1; }
+    .calDay:disabled { color:#e2e8f0; cursor:default; }
+    .calClose {
+      text-align:center;
+      margin-top:14px;
+    }
+    .calClose button {
+      background:#f1f5f9;
+      border:none;
+      padding:8px 24px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:13px;
+      color:#64748b;
     }
 
     /* ═══════ SUMMARY BAR ═══════ */
@@ -347,8 +408,18 @@
     <button class="langToggle" id="langToggle" onclick="toggleLang()">ع</button>
     <h1 id="pageTitle">📋 Duty Roster</h1>
     <div class="datePickerWrapper">
-      <button class="dateTag" id="dateTag" type="button">📅 22 January 2026</button>
-      <input id="datePicker" type="date" value="2026-01-22" min="2026-01-01" max="2026-03-31" />
+      <button class="dateTag" id="dateTag" type="button" onclick="openCalPopup()">📅 22 January 2026</button>
+    </div>
+    <!-- Custom Calendar Popup -->
+    <div class="calOverlay" id="calOverlay" onclick="closeCalPopup()"></div>
+    <div class="calPopup" id="calPopup">
+      <div class="calHeader">
+        <button onclick="calPrevMonth()">&#8249;</button>
+        <span class="calMonthYear" id="calMonthYear"></span>
+        <button onclick="calNextMonth()">&#8250;</button>
+      </div>
+      <div class="calGrid" id="calGrid"></div>
+      <div class="calClose"><button onclick="closeCalPopup()">✕ Close</button></div>
     </div>
   </div>
 
@@ -383,7 +454,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">22JAN2026 / 00:00</strong>
     <br>Total: <strong>0 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster-February_2026RAMADAN-Version_4.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>Export New Roster-February_2026RAMADAN-Versio=4.xlsx</strong>
   </div>
 
 </div>
@@ -393,14 +464,8 @@
   var picker = document.getElementById('datePicker');
   if(!picker) return;
 
-  // label[for] يفتح الـ input تلقائياً على كل المتصفحات
-  window.openDatePicker = function() {
-    if (typeof picker.showPicker === 'function') {
-      try { picker.showPicker(); } catch(e) { picker.focus(); }
-    } else {
-      picker.focus();
-    }
-  };
+  // Custom calendar - no input type=date needed
+  window.openDatePicker = function() { openCalPopup(); };
 
   // ═══════════════════════════════════════════════════
   // التحقق من التاريخ وإعادة التوجيه للـ today
@@ -574,6 +639,122 @@
   
   // Auto-filter on page load - show current shift
   filterShifts(currentShift);
+})();
+
+// ═══════════════════════════════════════════════════
+// Custom Calendar Popup
+// ═══════════════════════════════════════════════════
+(function() {
+  var CAL_MIN = '2026-01-01';
+  var CAL_MAX = '2026-03-31';
+  var CAL_CURRENT = '2026-01-22';
+
+  var MONTHS_EN = ['January','February','March','April','May','June',
+                   'July','August','September','October','November','December'];
+
+  var calYear, calMonth;
+  var todayMus = (function(){
+    var n=new Date();
+    var m=new Date(n.getTime()+(4*3600000)+(n.getTimezoneOffset()*60000));
+    return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  })();
+
+  function parseDate(s){
+    if(!s) return null;
+    var p=s.split('-');
+    return {y:+p[0],m:+p[1]-1,d:+p[2]};
+  }
+
+  function isoStr(y,m,d){
+    return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  }
+
+  function renderCal(){
+    var grid=document.getElementById('calGrid');
+    var title=document.getElementById('calMonthYear');
+    if(!grid||!title) return;
+    title.textContent=MONTHS_EN[calMonth]+' '+calYear;
+
+    var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var html=days.map(function(d){return '<div class="calDayName">'+d+'</div>';}).join('');
+
+    var first=new Date(calYear,calMonth,1).getDay();
+    var total=new Date(calYear,calMonth+1,0).getDate();
+    var prevTotal=new Date(calYear,calMonth,0).getDate();
+
+    // prev month padding
+    for(var i=first-1;i>=0;i--){
+      html+='<button class="calDay other-month" disabled>'+(prevTotal-i)+'</button>';
+    }
+
+    var minD=parseDate(CAL_MIN);
+    var maxD=parseDate(CAL_MAX);
+    var selD=parseDate(CAL_CURRENT);
+    var todD=parseDate(todayMus);
+
+    for(var d=1;d<=total;d++){
+      var iso=isoStr(calYear,calMonth,d);
+      var cls='calDay';
+      var dis='';
+
+      if(selD&&selD.y===calYear&&selD.m===calMonth&&selD.d===d) cls+=' selected';
+      else if(todD&&todD.y===calYear&&todD.m===calMonth&&todD.d===d) cls+=' today';
+
+      if((minD&&(calYear<minD.y||(calYear===minD.y&&calMonth<minD.m)||(calYear===minD.y&&calMonth===minD.m&&d<minD.d)))||
+         (maxD&&(calYear>maxD.y||(calYear===maxD.y&&calMonth>maxD.m)||(calYear===maxD.y&&calMonth===maxD.m&&d>maxD.d)))){
+        dis='disabled';
+        cls+=' other-month';
+      }
+
+      html+='<button class="'+cls+'" '+dis+' onclick="calSelectDay(''+iso+'')">'+d+'</button>';
+    }
+
+    // next month padding
+    var remaining=(7-((first+total)%7))%7;
+    for(var n=1;n<=remaining;n++){
+      html+='<button class="calDay other-month" disabled>'+n+'</button>';
+    }
+
+    grid.innerHTML=html;
+  }
+
+  window.openCalPopup=function(){
+    var d=parseDate(CAL_CURRENT)||parseDate(todayMus)||{y:new Date().getFullYear(),m:new Date().getMonth(),d:1};
+    calYear=d.y; calMonth=d.m;
+    renderCal();
+    document.getElementById('calPopup').classList.add('open');
+    document.getElementById('calOverlay').classList.add('open');
+  };
+
+  window.closeCalPopup=function(){
+    document.getElementById('calPopup').classList.remove('open');
+    document.getElementById('calOverlay').classList.remove('open');
+  };
+
+  window.calPrevMonth=function(){
+    calMonth--;
+    if(calMonth<0){calMonth=11;calYear--;}
+    renderCal();
+  };
+
+  window.calNextMonth=function(){
+    calMonth++;
+    if(calMonth>11){calMonth=0;calYear++;}
+    renderCal();
+  };
+
+  window.calSelectDay=function(iso){
+    sessionStorage.removeItem('pageLoaded');
+    var path=window.location.pathname||'/';
+    var isNow=path.includes('/now');
+    var base=path
+      .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/')
+      .replace(/\/now\/.*$/,'/')
+      .replace(/\/+$/,'');
+    var target=base+'/date/'+iso+'/';
+    if(isNow) target+='now/';
+    window.location.href=target;
+  };
 })();
 
 // ═══════════════════════════════════════════════════
