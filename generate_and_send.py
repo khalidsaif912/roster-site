@@ -790,18 +790,21 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
       transform:translateY(-1px);
     }}
     /* الـ input مخفي تماماً - لا يُرى ولا يُضغط عليه */
-    #datePicker {{
-      position:absolute;
-      top:100%;
-      left:50%;
-      transform:translateX(-50%);
-      width:1px;
-      height:1px;
-      opacity:0;
-      pointer-events:none;
-      font-size:16px;
-      border:none;
-    }}
+#datePicker {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 16px;   /* مهم جداً لمنع zoom على iOS */
+  border: none;
+  /* ← أضف هذا: */
+  -webkit-appearance: none;
+}
+
 
     /* ═══════ SUMMARY BAR ═══════ */
     .summaryBar {{ 
