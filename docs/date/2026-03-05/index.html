@@ -362,7 +362,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -450,7 +450,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -538,7 +538,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -555,7 +555,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -684,7 +684,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -716,7 +716,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -881,7 +881,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5" open>
+    <details class="shiftCard" style="border:1px solid #f9731644; background:#ffedd5">
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
         <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
@@ -901,7 +901,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -1004,10 +1004,20 @@ window.openDatePicker = function() {
   var picker = document.getElementById('datePicker');
   if (!picker) return;
 
-  picker.style.position = 'fixed';
-  picker.style.top = '50%';
-  picker.style.left = '50%';
-  picker.style.transform = 'translate(-50%, -50%)';
+  var btn = document.getElementById('dateTag');
+  if (btn) {
+    var rect = btn.getBoundingClientRect();
+    picker.style.position = 'fixed';
+    picker.style.top  = (rect.bottom + 6) + 'px';
+    picker.style.left = (rect.left + rect.width / 2) + 'px';
+    picker.style.transform = 'translateX(-50%)';
+  } else {
+    picker.style.position = 'fixed';
+    picker.style.top = '50%';
+    picker.style.left = '50%';
+    picker.style.transform = 'translate(-50%, -50%)';
+  }
+
   picker.style.width = '1px';
   picker.style.height = '1px';
   picker.style.opacity = '0';
