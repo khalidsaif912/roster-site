@@ -354,7 +354,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">02JAN2026 / 00:00</strong>
     <br>Total: <strong>0 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>February 2026 RAMADAN Version 4.xlsx.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>February 2026 RAMADAN Version-4.xlsx.xlsx</strong>
   </div>
 
 </div>
@@ -544,9 +544,7 @@ window.openDatePicker = function() {
         if(shiftGroups[type]){
           shiftGroups[type].forEach(function(card){
             card.style.display = '';
-            // Count employees
-            var count = card.querySelector('.shiftCount');
-            if(count) totalEmployees += parseInt(count.textContent) || 0;
+            // لا تحسب Off Day/Leave في عداد الفترة المختارة
           });
         }
       });
@@ -599,14 +597,14 @@ var T = {
   ar: {
     title:'📋 جدول المناوبات', langBtn:'EN',
     employees:'الموظفون', departments:'الأقسام', total:'المجموع',
-    morning:'صباحي', afternoon:'مسائي', night:'ليلي',
+    morning:'صباح', afternoon:'ظهر', night:'ليل',
     offday:'إجازة', annualLeave:'إجازة سنوية', sickLeave:'إجازة مرضية',
     training:'تدريب', standby:'احتياط', other:'أخرى',
     from:'من', to:'إلى',
     viewFull:'📋 عرض جدول المناوبات الكامل', subscribe:'📩 اشتراك',
     officers:'الضباط', supervisors:'المشرفون', loadControl:'مراقبة الحمولة',
     exportChecker:'مدقق الصادرات', exportOps:'مشغلو الصادرات', unassigned:'غير مُعيَّن',
-    morning2:'صباحي', afternoon2:'مسائي', night2:'ليلي', allShifts:'الكل',
+    morning2:'صباح', afternoon2:'ظهر', night2:'ليل', allShifts:'الكل',
   }
 };
 
