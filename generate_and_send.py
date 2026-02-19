@@ -1084,39 +1084,43 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
   // ═══════════════════════════════════════════════════
   // فتح الـ date picker - يعمل على Desktop + iOS + Android
   // ═══════════════════════════════════════════════════
-  window.openDatePicker = function() {{
-    // نجعله مرئياً مؤقتاً بجانب الزر (ضروري لـ iOS Safari)
-    picker.style.pointerEvents = 'auto';
-    picker.style.opacity = '0';
-    picker.style.width = '1px';
-    picker.style.height = '1px';
+window.openDatePicker = function() {
+  var picker = document.getElementById('datePicker');
+  if (!picker) return;
 
-    // showPicker() - يعمل في Chrome/Edge/Safari/iOS الحديث
-    if (typeof picker.showPicker === 'function') {{
-      try {{
-        picker.showPicker();
-        return;
-      }} catch(e) {{
-        // إذا فشل showPicker نُكمل بالـ fallback
-      }}
-    }}
+  picker.style.position = 'fixed';
+  picker.style.top = '0';
+  picker.style.left = '0';
+  picker.style.width = '100%';
+  picker.style.height = '100%';
+  picker.style.opacity = '0';
+  picker.style.pointerEvents = 'auto';
+  picker.style.zIndex = '9999';
 
-    // Fallback: focus + click للمتصفحات القديمة
-    picker.style.position = 'fixed';
-    picker.style.top = '50%';
+  picker.focus();
+
+  if (typeof picker.showPicker === 'function') {
+    try { picker.showPicker(); } catch(e) {}
+  } else {
+    picker.click();
+  }
+
+  function restore() {
+    picker.style.position = 'absolute';
+    picker.style.top = '100%';
     picker.style.left = '50%';
     picker.style.width = '1px';
     picker.style.height = '1px';
-    picker.focus();
-    picker.click();
+    picker.style.opacity = '0';
+    picker.style.pointerEvents = 'none';
+    picker.style.zIndex = '';
+    picker.removeEventListener('change', restore);
+    picker.removeEventListener('blur', restore);
+  }
 
-    // نُعيد الوضع الأصلي بعد لحظة
-    setTimeout(function(){{
-      picker.style.position = 'absolute';
-      picker.style.top = '100%';
-      picker.style.left = '50%';
-    }}, 500);
-  }};
+  picker.addEventListener('change', restore);
+  picker.addEventListener('blur', restore);
+};
 
   // ═══════════════════════════════════════════════════
   // التحقق من التاريخ وإعادة التوجيه للـ today
