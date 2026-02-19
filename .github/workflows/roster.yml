@@ -176,10 +176,11 @@ jobs:
         if: steps.check_changes.outputs.should_process == 'true'
         env:
           EXCEL_URL: ${{ secrets.EXCEL_URL }}
+          ROSTER_FILENAME: ${{ steps.check_changes.outputs.filename }}
         run: |
           if [ -f "generate_employee_schedules.py" ]; then
             echo "Generating employee schedules..."
-            python generate_employee_schedules.py
+            python generate_employee_schedules.py --filename "$ROSTER_FILENAME"
             echo "Done!"
           else
             echo "generate_employee_schedules.py not found, skipping..."
