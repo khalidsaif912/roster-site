@@ -955,82 +955,249 @@
         </div>`;
     }
 
-    /* IMAGE DOWNLOAD */
+    /* IMAGE DOWNLOAD — pure Canvas, no cloneNode, no html2canvas */
     async function dlIMG(){
-      if(!window.html2canvas){alert('Image library loading, please try again.');return;}
-      const calEl=document.querySelector('.cal-card');
-      if(!calEl){alert('No calendar to capture.');return;}
       const sched=data.schedules[month]||[];
       const [yr,mo]=month.split('-').map(Number);
       const mName=`${T[lang].months[mo-1]} ${yr}`;
       const stats=calcStats(sched);
-      const used=[...new Set(sched.map(s=>s.shift_group))];
-      const W=Math.max(Math.min(calEl.offsetWidth,1000),360);
+      const isAr=lang==='ar';
 
-      const wrap=document.createElement('div');
-      wrap.dir=(lang==='ar'?'rtl':'ltr');
-      wrap.style.cssText=`position:fixed;left:-9999px;top:0;width:${W}px;background:#0d1117;font-family:'Sora',system-ui,sans-serif;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);`;
+      // ── palette ──
+      const BG='#0d1117', SURF='#161b22', SURF2='#1c2330', SURF3='#21262d';
+      const INK='#e6edf3', MUTED='#8b949e', DIM='#484f58';
+      const BORDER='rgba(255,255,255,0.08)', BORDER2='rgba(255,255,255,0.13)';
+      const ACCENT='#58a6ff';
+      const SHIFT_THEME={
+        Morning:      {bg:'#1a140a',fg:'#d29922',tag:'rgba(210,153,34,.18)',tagBorder:'rgba(210,153,34,.35)'},
+        Afternoon:    {bg:'#1a0f07',fg:'#db6d28',tag:'rgba(219,109,40,.18)',tagBorder:'rgba(219,109,40,.35)'},
+        Night:        {bg:'#110d1f',fg:'#bc8cff',tag:'rgba(188,140,255,.18)',tagBorder:'rgba(188,140,255,.35)'},
+        'Off Day':    {bg:'#0f1117',fg:'#8b949e',tag:'rgba(139,148,158,.18)',tagBorder:'rgba(139,148,158,.35)'},
+        'Annual Leave':{bg:'#0a1410',fg:'#3fb950',tag:'rgba(63,185,80,.18)',tagBorder:'rgba(63,185,80,.35)'},
+        'Sick Leave': {bg:'#0a1410',fg:'#3fb950',tag:'rgba(63,185,80,.18)',tagBorder:'rgba(63,185,80,.35)'},
+        Training:     {bg:'#0a1020',fg:'#58a6ff',tag:'rgba(88,166,255,.18)',tagBorder:'rgba(88,166,255,.35)'},
+        Standby:      {bg:'#1a0d14',fg:'#ff7b72',tag:'rgba(255,123,114,.18)',tagBorder:'rgba(255,123,114,.35)'},
+        Other:        {bg:'#111318',fg:'#8b949e',tag:'rgba(139,148,158,.18)',tagBorder:'rgba(139,148,158,.35)'},
+      };
+      const STAT_COLORS={work:ACCENT,off:'#8b949e',morning:'#d29922',afternoon:'#db6d28',night:'#bc8cff',standby:'#ff7b72',leaves:'#3fb950'};
+      const FALLBACK={'Off Day':'OFF','Annual Leave':'LV','Sick Leave':'SL',Training:'TR',Standby:'ST',Other:'—'};
+
+      // ── layout constants (logical px, will be scaled ×3) ──
+      const SC=3; // canvas scale for retina
+      const W=420;
+      const PAD=14;
+      const HDR_H=70;
+      const CAL_PAD=10;
+      const DAY_LBL_H=32;
+      const firstDow=new Date(yr,mo-1,1).getDay();
+      const dim=new Date(yr,mo,0).getDate();
+      const nRows=Math.ceil((firstDow+dim)/7);
+      const CELL_W=Math.floor((W-PAD*2)/7);
+      const CELL_H=Math.round(CELL_W*1.05);
+      const CAL_H=DAY_LBL_H+nRows*CELL_H;
+      const STATS_PAD=12;
+      const STAT_COLS=4, STAT_ROWS=2;
+      const STAT_GAP=8;
+      const STAT_W=Math.floor((W-PAD*2-(STAT_COLS-1)*STAT_GAP)/STAT_COLS);
+      const STAT_H=62;
+      const STATS_SECTION_H=STATS_PAD*2+24+(STAT_ROWS*(STAT_H+STAT_GAP)-STAT_GAP);
+      const TOTAL_H=HDR_H+CAL_PAD+CAL_H+CAL_PAD+STATS_SECTION_H+PAD;
+
+      const canvas=document.createElement('canvas');
+      canvas.width=W*SC; canvas.height=TOTAL_H*SC;
+      const ctx=canvas.getContext('2d');
+      ctx.scale(SC,SC);
+
+      // helper: rounded rect
+      function rr(x,y,w,h,r){
+        ctx.beginPath();
+        ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+        ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+        ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+        ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+        ctx.closePath();
+      }
+      function fillRR(x,y,w,h,r,color){ctx.fillStyle=color;rr(x,y,w,h,r);ctx.fill();}
+      function strokeRR(x,y,w,h,r,color,lw=0.5){ctx.strokeStyle=color;ctx.lineWidth=lw;rr(x,y,w,h,r);ctx.stroke();}
+
+      // ── BG ──
+      ctx.fillStyle=BG; ctx.fillRect(0,0,W,TOTAL_H);
+
+      // ── HEADER ──
+      // Dark surface
+      fillRR(0,0,W,HDR_H,0,SURF2);
+      // Blue accent bottom strip
+      ctx.fillStyle=ACCENT; ctx.fillRect(0,HDR_H-2,W,2);
+
+      // Avatar circle
+      const AV=40, AVX=PAD, AVY=(HDR_H-AV)/2;
       const initials=(data.name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-      const hdr=document.createElement('div');
-      hdr.style.cssText=`background:linear-gradient(135deg,#0d1117,#161b22);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);`;
-      hdr.innerHTML=`
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1f6feb,#388bfd);display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px;flex:0 0 auto">${esc(initials)}</div>
-          <div style="min-width:0">
-            <div style="color:#e6edf3;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:${Math.max(200,W-280)}px">${esc(data.name)}</div>
-            <div style="color:#8b949e;font-size:11px;font-weight:500;margin-top:3px">📋 ${esc(data.department)} · 🆔 ${esc(data.id)}</div>
-          </div>
-        </div>
-        <div style="background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.2);color:#58a6ff;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;white-space:nowrap">${esc(mName)}</div>`;
-      wrap.appendChild(hdr);
+      const grad=ctx.createLinearGradient(AVX,AVY,AVX+AV,AVY+AV);
+      grad.addColorStop(0,'#1f6feb'); grad.addColorStop(1,'#388bfd');
+      fillRR(AVX,AVY,AV,AV,10,grad);
+      ctx.fillStyle='#fff';
+      ctx.font=`700 ${14}px Sora,Arial`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(initials,AVX+AV/2,AVY+AV/2);
 
-      const calWrap=document.createElement('div');
-      calWrap.style.cssText='padding:12px;background:#0d1117;';
-      const calClone=calEl.cloneNode(true);
-      calClone.style.cssText='border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:none;';
-      calWrap.appendChild(calClone);
-      wrap.appendChild(calWrap);
+      // Name
+      const TXT_X=isAr?W-PAD:PAD+AV+10;
+      const align=isAr?'right':'left';
+      ctx.textAlign=align;ctx.textBaseline='alphabetic';
+      ctx.fillStyle=INK;
+      ctx.font=`700 17px Sora,Arial`;
+      ctx.fillText(data.name||'', TXT_X, 24);
+      // Dept
+      ctx.fillStyle=MUTED; ctx.font=`500 10.5px Sora,Arial`;
+      ctx.fillText(data.department||'', TXT_X, 39);
+      // ID
+      ctx.fillStyle='#6a8fce'; ctx.font=`500 10px Sora,Arial`;
+      ctx.fillText(`ID  ${data.id||''}`, TXT_X, 53);
 
-      const leg=document.createElement('div');
-      leg.style.cssText='padding:0 12px 10px;background:#0d1117;display:flex;flex-wrap:wrap;gap:6px;';
-      used.forEach(g=>{
-        const c=COLORS[g];if(!c)return;
-        const item=document.createElement('span');
-        item.style.cssText='display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:4px 8px;font-size:11px;font-weight:500;color:#8b949e;white-space:nowrap';
-        item.innerHTML=`<span style="width:8px;height:8px;border-radius:3px;background:${c.dot};display:inline-block;flex:0 0 auto"></span>${esc(T[lang].legend[g]||g)}`;
-        leg.appendChild(item);
+      // Month + Year top-right (or top-left in RTL)
+      const MX=isAr?PAD:W-PAD;
+      const mAlign=isAr?'left':'right';
+      ctx.textAlign=mAlign;
+      ctx.fillStyle=INK; ctx.font=`800 18px Sora,Arial`;
+      ctx.fillText(T[lang].months[mo-1]||mName, MX, 30);
+      ctx.fillStyle=MUTED; ctx.font=`500 11px Sora,Arial`;
+      ctx.fillText(String(yr), MX, 48);
+
+      // ── CALENDAR ──
+      let cy=HDR_H+CAL_PAD;
+      // Calendar bg card
+      fillRR(PAD,cy,W-PAD*2,DAY_LBL_H+nRows*CELL_H,12,SURF);
+      strokeRR(PAD,cy,W-PAD*2,DAY_LBL_H+nRows*CELL_H,12,BORDER2);
+
+      // Day labels
+      const dayNames=T[lang].days; // 7 names Sun→Sat
+      const dayLblY=cy;
+      fillRR(PAD,dayLblY,W-PAD*2,DAY_LBL_H,12,SURF2);
+      // mask bottom corners of header
+      ctx.fillStyle=SURF2;
+      ctx.fillRect(PAD,dayLblY+DAY_LBL_H-12,W-PAD*2,12);
+      ctx.fillStyle=SURF2;
+
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=MUTED; ctx.font=`700 9.5px Sora,Arial`;
+      for(let d=0;d<7;d++){
+        const lx=PAD+d*CELL_W+CELL_W/2;
+        ctx.fillText(dayNames[d], lx, dayLblY+DAY_LBL_H/2);
+      }
+
+      // Cells
+      const cellsY=cy+DAY_LBL_H;
+      const now=new Date();
+      let dc=1;
+      for(let w=0;w<nRows;w++){
+        for(let d=0;d<7;d++){
+          const cx2=PAD+d*CELL_W;
+          const cy2=cellsY+w*CELL_H;
+          const isEmpty=(w===0&&d<firstDow)||dc>dim;
+
+          if(isEmpty){
+            ctx.fillStyle='rgba(13,17,23,0.5)';
+            ctx.fillRect(cx2,cy2,CELL_W,CELL_H);
+          } else {
+            const dd=sched.find(s=>s.day===dc);
+            const th=dd?(SHIFT_THEME[dd.shift_group]||SHIFT_THEME.Other):null;
+            // Cell bg
+            ctx.fillStyle=th?th.bg:SURF;
+            ctx.fillRect(cx2,cy2,CELL_W,CELL_H);
+
+            // Today highlight
+            const isToday=(now.getFullYear()===yr&&(now.getMonth()+1)===mo&&now.getDate()===dc);
+            if(isToday){
+              ctx.fillStyle='rgba(31,111,235,0.15)';
+              ctx.fillRect(cx2,cy2,CELL_W,CELL_H);
+              ctx.fillStyle=ACCENT;ctx.fillRect(cx2,cy2,CELL_W,2);
+            }
+
+            // Day number — ghost large
+            const ghostSize=Math.min(CELL_H*0.55,28);
+            ctx.font=`800 ${ghostSize}px Sora,Arial`;
+            ctx.textAlign='left';ctx.textBaseline='top';
+            ctx.fillStyle=th?`${th.fg}28`:'rgba(139,148,158,0.2)';
+            ctx.fillText(String(dc), cx2+3, cy2+2);
+
+            // Day number — small readable
+            ctx.font=`700 9px Sora,Arial`;
+            ctx.fillStyle=isToday?ACCENT:(th?th.fg:MUTED);
+            ctx.fillStyle=isToday?ACCENT:INK;
+            ctx.textAlign='left';ctx.textBaseline='top';
+            ctx.fillText(String(dc), cx2+4, cy2+4);
+
+            // Shift code tag
+            if(dd){
+              const code=dd.shift_code||(FALLBACK[dd.shift_group]||'');
+              if(code){
+                const tagH=17, tagMargin=4;
+                const tagY=cy2+CELL_H-tagH-tagMargin;
+                const maxTagW=CELL_W-8;
+                ctx.font=`700 9px Sora,Arial`;
+                const tw=ctx.measureText(code).width;
+                const tagW=Math.min(tw+10,maxTagW);
+                const tagX=cx2+(CELL_W-tagW)/2;
+                fillRR(tagX,tagY,tagW,tagH,4,th.tag);
+                strokeRR(tagX,tagY,tagW,tagH,4,th.tagBorder,0.6);
+                ctx.fillStyle=th.fg;
+                ctx.font=`700 8.5px Sora,Arial`;
+                ctx.textAlign='center';ctx.textBaseline='middle';
+                ctx.fillText(code,tagX+tagW/2,tagY+tagH/2);
+              }
+            }
+            dc++;
+          }
+          // Cell border
+          ctx.strokeStyle=BORDER;ctx.lineWidth=0.5;
+          ctx.strokeRect(cx2+0.25,cy2+0.25,CELL_W-0.5,CELL_H-0.5);
+        }
+      }
+
+      // ── STATS ──
+      const statsY=HDR_H+CAL_PAD+DAY_LBL_H+nRows*CELL_H+CAL_PAD;
+      fillRR(PAD,statsY,W-PAD*2,STATS_SECTION_H,12,SURF);
+      strokeRR(PAD,statsY,W-PAD*2,STATS_SECTION_H,12,BORDER2);
+
+      ctx.textAlign=isAr?'right':'left';
+      ctx.textBaseline='alphabetic';
+      ctx.fillStyle=DIM; ctx.font=`700 9px Sora,Arial`;
+      ctx.fillText(t('statsTitle').toUpperCase(), isAr?W-PAD-8:PAD+8, statsY+STATS_PAD+10);
+
+      const statItems=STAT_META;
+      statItems.forEach((m,i)=>{
+        const col=i%STAT_COLS, row=Math.floor(i/STAT_COLS);
+        const sx=PAD+8+col*(STAT_W+STAT_GAP);
+        const sy=statsY+STATS_PAD+20+row*(STAT_H+STAT_GAP);
+        const clr=STAT_COLORS[m.k];
+
+        fillRR(sx,sy,STAT_W,STAT_H,8,SURF2);
+        strokeRR(sx,sy,STAT_W,STAT_H,8,BORDER,0.5);
+        // top color bar
+        fillRR(sx,sy,STAT_W,3,8,clr);
+        ctx.fillStyle=SURF2; ctx.fillRect(sx,sy+2,STAT_W,4); // fix bottom of top bar
+        fillRR(sx,sy,STAT_W,4,0,clr); // solid top
+
+        // Emoji
+        ctx.font=`14px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(m.icon,sx+STAT_W/2,sy+20);
+
+        // Value
+        ctx.fillStyle=clr; ctx.font=`800 20px Sora,Arial`;
+        ctx.textAlign='center';ctx.textBaseline='alphabetic';
+        ctx.fillText(String(stats[m.k]),sx+STAT_W/2,sy+44);
+
+        // Label
+        ctx.fillStyle=MUTED; ctx.font=`600 8px Sora,Arial`;
+        const lbl=isAr?m.label_ar:m.label_en;
+        ctx.fillText(lbl,sx+STAT_W/2,sy+57);
       });
-      wrap.appendChild(leg);
 
-      const stWrap=document.createElement('div');
-      stWrap.style.cssText='background:#161b22;padding:12px;border-top:1px solid rgba(255,255,255,.08);';
-      const stTitle=document.createElement('div');
-      stTitle.style.cssText='font-size:10px;font-weight:700;color:#484f58;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px';
-      stTitle.textContent=t('statsTitle');
-      stWrap.appendChild(stTitle);
-      const stRow=document.createElement('div');
-      stRow.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
-      const CARD_COLORS={work:'#58a6ff',off:'#8b949e',morning:'#d29922',afternoon:'#db6d28',night:'#bc8cff',standby:'#ff7b72',leaves:'#3fb950'};
-      STAT_META.forEach(m=>{
-        const clr=CARD_COLORS[m.k];
-        const box=document.createElement('div');
-        box.style.cssText=`flex:1;min-width:120px;background:#1c2330;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 8px;text-align:center;border-top:2px solid ${clr};`;
-        box.innerHTML=`<div style="font-size:20px;font-weight:800;color:${clr};line-height:1;font-family:'DM Mono',monospace">${stats[m.k]}</div>
-                       <div style="font-size:9px;font-weight:600;color:#8b949e;margin-top:5px">${esc(lang==='ar'?m.label_ar:m.label_en)}</div>`;
-        stRow.appendChild(box);
-      });
-      stWrap.appendChild(stRow);
-      wrap.appendChild(stWrap);
-
-      document.body.appendChild(wrap);
-      try{
-        const canvas=await html2canvas(wrap,{scale:3,useCORS:true,backgroundColor:'#0d1117',logging:false});
-        const a=document.createElement('a');
-        a.download=`schedule-${data.id}-${month}-${lang}.png`;
-        a.href=canvas.toDataURL('image/png');
-        a.click();
-      }catch(e){alert('Image capture failed: '+e.message);}
-      finally{document.body.removeChild(wrap);}
+      // ── DOWNLOAD ──
+      const a=document.createElement('a');
+      a.download=`schedule-${data.id}-${month}-${lang}.png`;
+      a.href=canvas.toDataURL('image/png');
+      a.click();
     }
 
     /* ICS */
