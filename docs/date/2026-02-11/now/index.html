@@ -121,7 +121,11 @@
       align-items:stretch;
       gap:12px; 
       margin-top:14px;
-      flex-wrap:nowrap; /* منع الانتقال لصف ثاني */
+      flex-wrap:wrap;
+    }
+    a.summaryChip:hover {
+      transform:translateY(-3px);
+      box-shadow:0 8px 20px rgba(15,23,42,.12);
     }
     .summaryChip {
       background:#fff;
@@ -347,6 +351,10 @@
       <div class="chipVal" style="color:#059669;">5</div>
       <div class="chipLabel" data-key="departments">Departments</div>
     </div>
+    <a href="https://khalidsaif912.github.io/roster-site//my-schedules/index.html" class="summaryChip" style="cursor:pointer;text-decoration:none;">
+      <div class="chipVal">🗓️</div>
+      <div class="chipLabel">My Schedule</div>
+    </a>
     
     <button class="summaryChip shiftFilterBtn morning" data-shift="Morning" style="cursor:pointer;">
       <div class="chipVal">☀️</div>
