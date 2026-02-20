@@ -955,61 +955,78 @@
         </div>`;
     }
 
-    /* IMAGE DOWNLOAD — pure Canvas, no cloneNode, no html2canvas */
+    /* IMAGE DOWNLOAD — pure Canvas v2 */
     async function dlIMG(){
       const sched=data.schedules[month]||[];
       const [yr,mo]=month.split('-').map(Number);
-      const mName=`${T[lang].months[mo-1]} ${yr}`;
       const stats=calcStats(sched);
       const isAr=lang==='ar';
 
-      // ── palette ──
-      const BG='#0d1117', SURF='#161b22', SURF2='#1c2330', SURF3='#21262d';
-      const INK='#e6edf3', MUTED='#8b949e', DIM='#484f58';
-      const BORDER='rgba(255,255,255,0.08)', BORDER2='rgba(255,255,255,0.13)';
+      // ── Palette ──
+      const BG='#0d1117', SURF='#161b22', SURF2='#1c2330';
+      const INK='#e6edf3', MUTED='#8b949e', DIM='#3d444d';
+      const BORDER='rgba(255,255,255,0.09)', BORDER2='rgba(255,255,255,0.15)';
       const ACCENT='#58a6ff';
+
       const SHIFT_THEME={
-        Morning:      {bg:'#1a140a',fg:'#d29922',tag:'rgba(210,153,34,.18)',tagBorder:'rgba(210,153,34,.35)'},
-        Afternoon:    {bg:'#1a0f07',fg:'#db6d28',tag:'rgba(219,109,40,.18)',tagBorder:'rgba(219,109,40,.35)'},
-        Night:        {bg:'#110d1f',fg:'#bc8cff',tag:'rgba(188,140,255,.18)',tagBorder:'rgba(188,140,255,.35)'},
-        'Off Day':    {bg:'#0f1117',fg:'#8b949e',tag:'rgba(139,148,158,.18)',tagBorder:'rgba(139,148,158,.35)'},
-        'Annual Leave':{bg:'#0a1410',fg:'#3fb950',tag:'rgba(63,185,80,.18)',tagBorder:'rgba(63,185,80,.35)'},
-        'Sick Leave': {bg:'#0a1410',fg:'#3fb950',tag:'rgba(63,185,80,.18)',tagBorder:'rgba(63,185,80,.35)'},
-        Training:     {bg:'#0a1020',fg:'#58a6ff',tag:'rgba(88,166,255,.18)',tagBorder:'rgba(88,166,255,.35)'},
-        Standby:      {bg:'#1a0d14',fg:'#ff7b72',tag:'rgba(255,123,114,.18)',tagBorder:'rgba(255,123,114,.35)'},
-        Other:        {bg:'#111318',fg:'#8b949e',tag:'rgba(139,148,158,.18)',tagBorder:'rgba(139,148,158,.35)'},
+        Morning:       {bg:'#1f1500',fg:'#e3a217',tagBg:'rgba(227,162,23,.22)',tagBd:'rgba(227,162,23,.5)'},
+        Afternoon:     {bg:'#1f0e00',fg:'#e8722a',tagBg:'rgba(232,114,42,.22)',tagBd:'rgba(232,114,42,.5)'},
+        Night:         {bg:'#100b20',fg:'#c084fc',tagBg:'rgba(192,132,252,.22)',tagBd:'rgba(192,132,252,.5)'},
+        'Off Day':     {bg:'#0e1015',fg:'#94a3b8',tagBg:'rgba(148,163,184,.18)',tagBd:'rgba(148,163,184,.4)'},
+        'Annual Leave':{bg:'#061410',fg:'#4ade80',tagBg:'rgba(74,222,128,.18)',tagBd:'rgba(74,222,128,.45)'},
+        'Sick Leave':  {bg:'#061410',fg:'#4ade80',tagBg:'rgba(74,222,128,.18)',tagBd:'rgba(74,222,128,.45)'},
+        Training:      {bg:'#070e1f',fg:'#60a5fa',tagBg:'rgba(96,165,250,.18)',tagBd:'rgba(96,165,250,.45)'},
+        Standby:       {bg:'#1a0910',fg:'#fb7185',tagBg:'rgba(251,113,133,.18)',tagBd:'rgba(251,113,133,.45)'},
+        Other:         {bg:'#0f1115',fg:'#94a3b8',tagBg:'rgba(148,163,184,.18)',tagBd:'rgba(148,163,184,.4)'},
       };
-      const STAT_COLORS={work:ACCENT,off:'#8b949e',morning:'#d29922',afternoon:'#db6d28',night:'#bc8cff',standby:'#ff7b72',leaves:'#3fb950'};
+
+      const STAT_COLORS={work:ACCENT,off:'#94a3b8',morning:'#e3a217',afternoon:'#e8722a',night:'#c084fc',standby:'#fb7185',leaves:'#4ade80'};
       const FALLBACK={'Off Day':'OFF','Annual Leave':'LV','Sick Leave':'SL',Training:'TR',Standby:'ST',Other:'—'};
 
-      // ── layout constants (logical px, will be scaled ×3) ──
-      const SC=3; // canvas scale for retina
-      const W=420;
-      const PAD=14;
-      const HDR_H=70;
-      const CAL_PAD=10;
-      const DAY_LBL_H=32;
+      // Short Arabic day names for the calendar header
+      const DAY_SHORT_AR=['أحد','اثن','ثلا','أرب','خمس','جمع','سبت'];
+      const DAY_SHORT_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const dayShort=isAr?DAY_SHORT_AR:DAY_SHORT_EN;
+
+      // ── Layout ──
+      const SC=3;
+      const W=560;
+      const PAD=16;
+      const INNER=W-PAD*2;
+
+      // Header
+      const HDR_H=82;
+
+      // Calendar
+      const CAL_GAP=12;
+      const DAY_LBL_H=34;
       const firstDow=new Date(yr,mo-1,1).getDay();
       const dim=new Date(yr,mo,0).getDate();
       const nRows=Math.ceil((firstDow+dim)/7);
-      const CELL_W=Math.floor((W-PAD*2)/7);
-      const CELL_H=Math.round(CELL_W*1.05);
-      const CAL_H=DAY_LBL_H+nRows*CELL_H;
-      const STATS_PAD=12;
-      const STAT_COLS=4, STAT_ROWS=2;
+      const CELL_W=Math.floor(INNER/7);
+      const CELL_H=74;
+      const CAL_CARD_H=DAY_LBL_H+nRows*CELL_H;
+
+      // Stats
+      const STATS_GAP=12;
+      const STAT_COLS=4;
       const STAT_GAP=8;
-      const STAT_W=Math.floor((W-PAD*2-(STAT_COLS-1)*STAT_GAP)/STAT_COLS);
-      const STAT_H=62;
-      const STATS_SECTION_H=STATS_PAD*2+24+(STAT_ROWS*(STAT_H+STAT_GAP)-STAT_GAP);
-      const TOTAL_H=HDR_H+CAL_PAD+CAL_H+CAL_PAD+STATS_SECTION_H+PAD;
+      const STAT_CARD_W=Math.floor((INNER-(STAT_COLS-1)*STAT_GAP)/STAT_COLS);
+      const STAT_CARD_H=80;
+      const STAT_ROWS=Math.ceil(STAT_META.length/STAT_COLS);
+      const STATS_INNER_H=26+STAT_ROWS*(STAT_CARD_H+STAT_GAP)-STAT_GAP+16;
+      const STATS_CARD_H=STATS_INNER_H;
+
+      const TOTAL_H=HDR_H+CAL_GAP+CAL_CARD_H+STATS_GAP+STATS_CARD_H+PAD;
 
       const canvas=document.createElement('canvas');
       canvas.width=W*SC; canvas.height=TOTAL_H*SC;
       const ctx=canvas.getContext('2d');
       ctx.scale(SC,SC);
 
-      // helper: rounded rect
+      // ── Helpers ──
       function rr(x,y,w,h,r){
+        if(r<=0){ctx.rect(x,y,w,h);return;}
         ctx.beginPath();
         ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
         ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
@@ -1017,183 +1034,201 @@
         ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
         ctx.closePath();
       }
-      function fillRR(x,y,w,h,r,color){ctx.fillStyle=color;rr(x,y,w,h,r);ctx.fill();}
-      function strokeRR(x,y,w,h,r,color,lw=0.5){ctx.strokeStyle=color;ctx.lineWidth=lw;rr(x,y,w,h,r);ctx.stroke();}
+      function fillRR(x,y,w,h,r,c){ctx.fillStyle=c;rr(x,y,w,h,r);ctx.fill();}
+      function strokeRR(x,y,w,h,r,c,lw){ctx.lineWidth=lw||0.6;ctx.strokeStyle=c;rr(x,y,w,h,r);ctx.stroke();}
+      function clipRR(x,y,w,h,r){ctx.save();rr(x,y,w,h,r);ctx.clip();}
 
-      // ── BG ──
-      ctx.fillStyle=BG; ctx.fillRect(0,0,W,TOTAL_H);
+      // ── Background ──
+      ctx.fillStyle=BG;ctx.fillRect(0,0,W,TOTAL_H);
 
-      // ── HEADER ──
-      // Dark surface
+      // ══ HEADER CARD ══
       fillRR(0,0,W,HDR_H,0,SURF2);
-      // Blue accent bottom strip
-      ctx.fillStyle=ACCENT; ctx.fillRect(0,HDR_H-2,W,2);
+      // Accent bottom line
+      ctx.fillStyle=ACCENT;ctx.fillRect(0,HDR_H-2,W,2);
 
-      // Avatar circle
-      const AV=40, AVX=PAD, AVY=(HDR_H-AV)/2;
-      const initials=(data.name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-      const grad=ctx.createLinearGradient(AVX,AVY,AVX+AV,AVY+AV);
-      grad.addColorStop(0,'#1f6feb'); grad.addColorStop(1,'#388bfd');
-      fillRR(AVX,AVY,AV,AV,10,grad);
-      ctx.fillStyle='#fff';
-      ctx.font=`700 ${14}px Sora,Arial`;
+      // Avatar
+      const AV=48, AVY=(HDR_H-AV)/2;
+      const AVX=isAr?W-PAD-AV:PAD;
+      const initials=(data.name||'?').split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+      const avGrad=ctx.createLinearGradient(AVX,AVY,AVX+AV,AVY+AV);
+      avGrad.addColorStop(0,'#1f6feb');avGrad.addColorStop(1,'#58a6ff');
+      fillRR(AVX,AVY,AV,AV,12,avGrad);
+      ctx.fillStyle='#fff';ctx.font=`800 16px Arial`;
       ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(initials,AVX+AV/2,AVY+AV/2);
+      ctx.fillText(initials,AVX+AV/2,AVY+AV/2+1);
+
+      // Text block (opposite side from avatar)
+      const TX=isAr?W-PAD-AV-12:PAD+AV+12;
+      const tAlign=isAr?'right':'left';
+      ctx.textAlign=tAlign;ctx.textBaseline='alphabetic';
 
       // Name
-      const TXT_X=isAr?W-PAD:PAD+AV+10;
-      const align=isAr?'right':'left';
-      ctx.textAlign=align;ctx.textBaseline='alphabetic';
-      ctx.fillStyle=INK;
-      ctx.font=`700 17px Sora,Arial`;
-      ctx.fillText(data.name||'', TXT_X, 24);
-      // Dept
-      ctx.fillStyle=MUTED; ctx.font=`500 10.5px Sora,Arial`;
-      ctx.fillText(data.department||'', TXT_X, 39);
-      // ID
-      ctx.fillStyle='#6a8fce'; ctx.font=`500 10px Sora,Arial`;
-      ctx.fillText(`ID  ${data.id||''}`, TXT_X, 53);
+      ctx.fillStyle=INK;ctx.font=`700 20px Arial`;
+      ctx.fillText(String(data.name||''),TX,HDR_H*0.38);
 
-      // Month + Year top-right (or top-left in RTL)
+      // Department
+      ctx.fillStyle=MUTED;ctx.font=`400 12px Arial`;
+      ctx.fillText(String(data.department||''),TX,HDR_H*0.38+20);
+
+      // ID badge pill
+      const idTxt=`ID  ${data.id||''}`;
+      ctx.font=`700 11px Arial`;
+      const idW=ctx.measureText(idTxt).width+16;
+      const idX=isAr?W-PAD-AV-12-idW:PAD+AV+12;
+      const idY=HDR_H*0.38+34;
+      fillRR(idX,idY-13,idW,18,5,'rgba(88,166,255,0.15)');
+      strokeRR(idX,idY-13,idW,18,5,'rgba(88,166,255,0.35)',0.5);
+      ctx.fillStyle=ACCENT;ctx.textAlign='left';
+      ctx.fillText(idTxt,idX+8,idY);
+
+      // Month + Year  (right side if LTR, left if RTL — opposite text block)
       const MX=isAr?PAD:W-PAD;
-      const mAlign=isAr?'left':'right';
-      ctx.textAlign=mAlign;
-      ctx.fillStyle=INK; ctx.font=`800 18px Sora,Arial`;
-      ctx.fillText(T[lang].months[mo-1]||mName, MX, 30);
-      ctx.fillStyle=MUTED; ctx.font=`500 11px Sora,Arial`;
-      ctx.fillText(String(yr), MX, 48);
+      ctx.textAlign=isAr?'left':'right';
+      ctx.fillStyle=INK;ctx.font=`800 22px Arial`;
+      ctx.fillText(T[lang].months[mo-1]||'',MX,32);
+      ctx.fillStyle=MUTED;ctx.font=`400 13px Arial`;
+      ctx.fillText(String(yr),MX,52);
 
-      // ── CALENDAR ──
-      let cy=HDR_H+CAL_PAD;
-      // Calendar bg card
-      fillRR(PAD,cy,W-PAD*2,DAY_LBL_H+nRows*CELL_H,12,SURF);
-      strokeRR(PAD,cy,W-PAD*2,DAY_LBL_H+nRows*CELL_H,12,BORDER2);
+      // ══ CALENDAR CARD ══
+      const calY=HDR_H+CAL_GAP;
+      clipRR(PAD,calY,INNER,CAL_CARD_H,14);
+      fillRR(PAD,calY,INNER,CAL_CARD_H,14,SURF);
+      ctx.restore();
+      strokeRR(PAD,calY,INNER,CAL_CARD_H,14,BORDER2,0.7);
 
-      // Day labels
-      const dayNames=T[lang].days; // 7 names Sun→Sat
-      const dayLblY=cy;
-      fillRR(PAD,dayLblY,W-PAD*2,DAY_LBL_H,12,SURF2);
-      // mask bottom corners of header
+      // Day label row
+      clipRR(PAD,calY,INNER,DAY_LBL_H,14);
+      fillRR(PAD,calY,INNER,DAY_LBL_H,0,SURF2);
+      // cover bottom corners
       ctx.fillStyle=SURF2;
-      ctx.fillRect(PAD,dayLblY+DAY_LBL_H-12,W-PAD*2,12);
-      ctx.fillStyle=SURF2;
+      ctx.fillRect(PAD,calY+DAY_LBL_H-14,INNER,14);
+      ctx.restore();
 
       ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillStyle=MUTED; ctx.font=`700 9.5px Sora,Arial`;
       for(let d=0;d<7;d++){
         const lx=PAD+d*CELL_W+CELL_W/2;
-        ctx.fillText(dayNames[d], lx, dayLblY+DAY_LBL_H/2);
+        ctx.fillStyle=MUTED;ctx.font=`700 11px Arial`;
+        ctx.fillText(dayShort[d],lx,calY+DAY_LBL_H/2);
       }
 
-      // Cells
-      const cellsY=cy+DAY_LBL_H;
+      // Separator line
+      ctx.strokeStyle=BORDER;ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(PAD,calY+DAY_LBL_H);ctx.lineTo(PAD+INNER,calY+DAY_LBL_H);ctx.stroke();
+
+      // ── Cells ──
+      const cellsY=calY+DAY_LBL_H;
       const now=new Date();
       let dc=1;
+
       for(let w=0;w<nRows;w++){
         for(let d=0;d<7;d++){
-          const cx2=PAD+d*CELL_W;
+          const cx=PAD+d*CELL_W;
           const cy2=cellsY+w*CELL_H;
           const isEmpty=(w===0&&d<firstDow)||dc>dim;
 
           if(isEmpty){
-            ctx.fillStyle='rgba(13,17,23,0.5)';
-            ctx.fillRect(cx2,cy2,CELL_W,CELL_H);
+            ctx.fillStyle='rgba(10,12,16,0.7)';
+            ctx.fillRect(cx,cy2,CELL_W,CELL_H);
           } else {
             const dd=sched.find(s=>s.day===dc);
             const th=dd?(SHIFT_THEME[dd.shift_group]||SHIFT_THEME.Other):null;
+            const isToday=(now.getFullYear()===yr&&(now.getMonth()+1)===mo&&now.getDate()===dc);
+
             // Cell bg
             ctx.fillStyle=th?th.bg:SURF;
-            ctx.fillRect(cx2,cy2,CELL_W,CELL_H);
+            ctx.fillRect(cx,cy2,CELL_W,CELL_H);
 
-            // Today highlight
-            const isToday=(now.getFullYear()===yr&&(now.getMonth()+1)===mo&&now.getDate()===dc);
             if(isToday){
-              ctx.fillStyle='rgba(31,111,235,0.15)';
-              ctx.fillRect(cx2,cy2,CELL_W,CELL_H);
-              ctx.fillStyle=ACCENT;ctx.fillRect(cx2,cy2,CELL_W,2);
+              ctx.fillStyle='rgba(31,111,235,0.18)';
+              ctx.fillRect(cx,cy2,CELL_W,CELL_H);
+              ctx.fillStyle=ACCENT;ctx.fillRect(cx,cy2,CELL_W,2.5);
             }
 
-            // Day number — ghost large
-            const ghostSize=Math.min(CELL_H*0.55,28);
-            ctx.font=`800 ${ghostSize}px Sora,Arial`;
+            // Ghost number (big, faint)
+            const gSize=Math.min(CELL_H*0.62,38);
+            ctx.save();
+            ctx.font=`800 ${gSize}px Arial`;
             ctx.textAlign='left';ctx.textBaseline='top';
-            ctx.fillStyle=th?`${th.fg}28`:'rgba(139,148,158,0.2)';
-            ctx.fillText(String(dc), cx2+3, cy2+2);
+            ctx.fillStyle=th?th.fg+'30':'rgba(255,255,255,0.07)';
+            ctx.fillText(String(dc),cx+4,cy2+2);
+            ctx.restore();
 
-            // Day number — small readable
-            ctx.font=`700 9px Sora,Arial`;
+            // Day number (small, readable, top-left)
+            ctx.font=`700 11px Arial`;
+            ctx.textAlign='left';ctx.textBaseline='top';
             ctx.fillStyle=isToday?ACCENT:(th?th.fg:MUTED);
-            ctx.fillStyle=isToday?ACCENT:INK;
-            ctx.textAlign='left';ctx.textBaseline='top';
-            ctx.fillText(String(dc), cx2+4, cy2+4);
+            ctx.fillText(String(dc),cx+5,cy2+5);
 
-            // Shift code tag
+            // Shift tag (centered bottom)
             if(dd){
               const code=dd.shift_code||(FALLBACK[dd.shift_group]||'');
               if(code){
-                const tagH=17, tagMargin=4;
+                const tagH=20;
+                const tagMargin=6;
                 const tagY=cy2+CELL_H-tagH-tagMargin;
-                const maxTagW=CELL_W-8;
-                ctx.font=`700 9px Sora,Arial`;
+                ctx.font=`700 10px Arial`;
                 const tw=ctx.measureText(code).width;
-                const tagW=Math.min(tw+10,maxTagW);
-                const tagX=cx2+(CELL_W-tagW)/2;
-                fillRR(tagX,tagY,tagW,tagH,4,th.tag);
-                strokeRR(tagX,tagY,tagW,tagH,4,th.tagBorder,0.6);
+                const tagW=Math.min(tw+14,CELL_W-8);
+                const tagX=cx+(CELL_W-tagW)/2;
+                fillRR(tagX,tagY,tagW,tagH,5,th.tagBg);
+                strokeRR(tagX,tagY,tagW,tagH,5,th.tagBd,0.7);
                 ctx.fillStyle=th.fg;
-                ctx.font=`700 8.5px Sora,Arial`;
+                ctx.font=`700 10px Arial`;
                 ctx.textAlign='center';ctx.textBaseline='middle';
                 ctx.fillText(code,tagX+tagW/2,tagY+tagH/2);
               }
             }
             dc++;
           }
-          // Cell border
+
+          // Grid lines
           ctx.strokeStyle=BORDER;ctx.lineWidth=0.5;
-          ctx.strokeRect(cx2+0.25,cy2+0.25,CELL_W-0.5,CELL_H-0.5);
+          ctx.strokeRect(cx+0.25,cy2+0.25,CELL_W-0.5,CELL_H-0.5);
         }
       }
 
-      // ── STATS ──
-      const statsY=HDR_H+CAL_PAD+DAY_LBL_H+nRows*CELL_H+CAL_PAD;
-      fillRR(PAD,statsY,W-PAD*2,STATS_SECTION_H,12,SURF);
-      strokeRR(PAD,statsY,W-PAD*2,STATS_SECTION_H,12,BORDER2);
+      // ══ STATS CARD ══
+      const stCardY=calY+CAL_CARD_H+STATS_GAP;
+      fillRR(PAD,stCardY,INNER,STATS_CARD_H,14,SURF);
+      strokeRR(PAD,stCardY,INNER,STATS_CARD_H,14,BORDER2,0.7);
 
-      ctx.textAlign=isAr?'right':'left';
-      ctx.textBaseline='alphabetic';
-      ctx.fillStyle=DIM; ctx.font=`700 9px Sora,Arial`;
-      ctx.fillText(t('statsTitle').toUpperCase(), isAr?W-PAD-8:PAD+8, statsY+STATS_PAD+10);
+      // Section label
+      ctx.textAlign=isAr?'right':'left';ctx.textBaseline='alphabetic';
+      ctx.fillStyle=DIM;ctx.font=`700 10px Arial`;
+      ctx.fillText((isAr?'الإحصائيات':'STATISTICS'),isAr?PAD+INNER-10:PAD+10,stCardY+20);
 
-      const statItems=STAT_META;
-      statItems.forEach((m,i)=>{
-        const col=i%STAT_COLS, row=Math.floor(i/STAT_COLS);
-        const sx=PAD+8+col*(STAT_W+STAT_GAP);
-        const sy=statsY+STATS_PAD+20+row*(STAT_H+STAT_GAP);
+      // Stat cards
+      STAT_META.forEach((m,i)=>{
+        const col=i%STAT_COLS;
+        const row=Math.floor(i/STAT_COLS);
+        const sx=PAD+col*(STAT_CARD_W+STAT_GAP);
+        const sy=stCardY+28+row*(STAT_CARD_H+STAT_GAP);
         const clr=STAT_COLORS[m.k];
 
-        fillRR(sx,sy,STAT_W,STAT_H,8,SURF2);
-        strokeRR(sx,sy,STAT_W,STAT_H,8,BORDER,0.5);
-        // top color bar
-        fillRR(sx,sy,STAT_W,3,8,clr);
-        ctx.fillStyle=SURF2; ctx.fillRect(sx,sy+2,STAT_W,4); // fix bottom of top bar
-        fillRR(sx,sy,STAT_W,4,0,clr); // solid top
+        fillRR(sx,sy,STAT_CARD_W,STAT_CARD_H,10,SURF2);
+        strokeRR(sx,sy,STAT_CARD_W,STAT_CARD_H,10,BORDER,0.5);
 
-        // Emoji
-        ctx.font=`14px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(m.icon,sx+STAT_W/2,sy+20);
+        // Top color accent bar
+        clipRR(sx,sy,STAT_CARD_W,STAT_CARD_H,10);
+        ctx.fillStyle=clr;ctx.fillRect(sx,sy,STAT_CARD_W,3.5);
+        ctx.restore();
 
-        // Value
-        ctx.fillStyle=clr; ctx.font=`800 20px Sora,Arial`;
+        // Emoji icon
+        ctx.font=`18px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(m.icon,sx+STAT_CARD_W/2,sy+22);
+
+        // Number value
+        ctx.fillStyle=clr;ctx.font=`800 26px Arial`;
         ctx.textAlign='center';ctx.textBaseline='alphabetic';
-        ctx.fillText(String(stats[m.k]),sx+STAT_W/2,sy+44);
+        ctx.fillText(String(stats[m.k]),sx+STAT_CARD_W/2,sy+58);
 
         // Label
-        ctx.fillStyle=MUTED; ctx.font=`600 8px Sora,Arial`;
+        ctx.fillStyle=MUTED;ctx.font=`500 9.5px Arial`;
         const lbl=isAr?m.label_ar:m.label_en;
-        ctx.fillText(lbl,sx+STAT_W/2,sy+57);
+        ctx.fillText(lbl,sx+STAT_CARD_W/2,sy+72);
       });
 
-      // ── DOWNLOAD ──
+      // ── Download ──
       const a=document.createElement('a');
       a.download=`schedule-${data.id}-${month}-${lang}.png`;
       a.href=canvas.toDataURL('image/png');
