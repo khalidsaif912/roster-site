@@ -89,24 +89,15 @@
 
     /* ── SEARCH SECTION ── */
     .search-section{
-      padding:20px 16px 0;
+      padding:14px 16px 0;
       max-width:700px;margin:0 auto;
     }
     .search-hero{
       background:var(--surface);
       border:1px solid var(--border);
       border-radius:var(--r-lg);
-      padding:14px;
+      padding:12px;
       position:relative;
-      overflow:hidden;
-    }
-    .search-hero::before{
-      content:'';
-      position:absolute;
-      top:-60px;right:-60px;
-      width:200px;height:200px;
-      background:radial-gradient(circle,rgba(56,139,253,.12),transparent 70%);
-      pointer-events:none;
     }
     .tips-pill{
       width:36px;height:36px;
@@ -200,38 +191,38 @@
     .emp-banner{
       background:var(--surface);
       border:1px solid var(--border);
-      border-radius:var(--r-lg);
-      padding:16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      border-radius:var(--r);
+      padding:10px 12px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
     }
-    .emp-left{display:flex;align-items:center;gap:12px;min-width:0}
+    .emp-left{display:flex;align-items:center;gap:10px;min-width:0}
     .emp-avatar{
-      width:50px;height:50px;border-radius:14px;
+      width:38px;height:38px;border-radius:10px;
       background:linear-gradient(135deg,#1f6feb,#58a6ff);
       display:grid;place-items:center;
-      color:#fff;font-weight:800;font-size:17px;
+      color:#fff;font-weight:800;font-size:13px;
       flex:0 0 auto;
-      box-shadow:0 4px 14px rgba(31,111,235,.3);
     }
-    .emp-name{font-size:16px;font-weight:700;color:var(--ink);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .emp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+    .emp-name{font-size:14px;font-weight:700;color:var(--ink);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .emp-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
     .emp-tag{
-      display:inline-flex;align-items:center;gap:5px;
-      background:rgba(255,255,255,.05);
+      display:inline-flex;align-items:center;gap:4px;
+      background:rgba(255,255,255,.04);
       border:1px solid var(--border);
-      border-radius:6px;
-      padding:3px 8px;
-      font-size:11px;color:var(--muted);font-weight:500;
+      border-radius:5px;
+      padding:2px 6px;
+      font-size:10px;color:var(--muted);font-weight:500;
       font-family:'DM Mono',monospace;
     }
     .change-btn{
-      height:34px;padding:0 12px;
+      width:32px;height:32px;
       background:transparent;
       border:1px solid var(--border2);
       color:var(--muted);
       border-radius:8px;
-      font-size:12px;font-weight:600;
-      white-space:nowrap;flex:0 0 auto;
+      font-size:15px;
+      display:grid;place-items:center;
+      flex:0 0 auto;
       transition:all .15s;
     }
     .change-btn:hover{background:rgba(255,255,255,.07);color:var(--ink)}
@@ -281,7 +272,7 @@
       border-bottom:1px solid var(--border);
     }
     .cal-head div{
-      padding:10px 2px;
+      padding:9px 2px;
       text-align:center;
       font-size:10px;font-weight:700;
       color:var(--muted);
@@ -289,39 +280,41 @@
       text-transform:uppercase;
     }
     .cal-body{
-      display:grid;grid-template-columns:repeat(7,1fr);
-      gap:1px;
-      background:var(--border);
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
     }
     .day{
       background:var(--surface);
-      min-height:70px;
-      padding:7px 5px;
+      min-height:64px;
+      padding:6px 4px;
       display:flex;flex-direction:column;justify-content:space-between;
       position:relative;
       transition:background .1s;
       cursor:default;
+      border-right:1px solid var(--border);
+      border-bottom:1px solid var(--border);
     }
-    @media(max-width:380px){.day{min-height:60px;padding:5px 3px}}
-    .day.empty{background:var(--bg);cursor:default}
+    .day:nth-child(7n){border-right:none}
+    @media(max-width:380px){.day{min-height:52px;padding:4px 3px}}
+    .day.empty{background:rgba(13,17,23,.6);cursor:default}
     .day-top{display:flex;align-items:center;justify-content:space-between;width:100%}
-    .dnum{font-size:12px;font-weight:700;color:var(--muted);font-family:'DM Mono',monospace}
+    .dnum{font-size:11px;font-weight:700;color:var(--muted);font-family:'DM Mono',monospace}
     .day:not(.empty) .dnum{color:var(--ink)}
-    .day-ico{font-size:14px;line-height:1}
+    .day-ico{font-size:13px;line-height:1}
     .day-tag{
-      margin-top:4px;
-      font-size:9.5px;font-weight:700;
-      border-radius:5px;
-      padding:3px 5px;
+      margin-top:3px;
+      font-size:9px;font-weight:700;
+      border-radius:4px;
+      padding:2px 4px;
       border:1px solid transparent;
       text-align:center;
-      letter-spacing:.2px;
+      letter-spacing:.15px;
       line-height:1.2;
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
       max-width:100%;
     }
     /* Today */
-    .day.today{background:rgba(31,111,235,.08)!important}
+    .day.today{background:rgba(31,111,235,.1)!important}
     .day.today .dnum{color:var(--accent)!important;font-weight:800}
     .day.today::before{
       content:'';
@@ -842,8 +835,8 @@
       const savedId=localStorage.getItem('savedEmpId');
       const isMyId=savedId===data.id;
       const changeBtn=isMyId
-        ?`<button class="change-btn" onclick="changeMyId()">✏️ ${t('changeId')}</button>`
-        :(!savedId?'':!isMyId?`<button class="change-btn" onclick="setAsMyId()">📌 ${t('setAsMyId')}</button>`:'');
+        ?`<button class="change-btn" onclick="changeMyId()" title="${t('changeId')}">✏️</button>`
+        :(!savedId?'':!isMyId?`<button class="change-btn" onclick="setAsMyId()" title="${t('setAsMyId')}">📌</button>`:'');
 
       const initials=(data.name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 
