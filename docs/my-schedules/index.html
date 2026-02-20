@@ -114,13 +114,14 @@
 
     .search-form{display:flex;gap:8px;align-items:center}
     .search-input{
-      flex:1;
+      width:130px;
+      flex:0 0 130px;
       background:var(--surface3);
       border:1px solid var(--border2);
       color:var(--ink);
       border-radius:10px;
-      padding:9px 14px;
-      font-size:15px;
+      padding:9px 12px;
+      font-size:14px;
       font-weight:500;
       outline:none;
       transition:border-color .15s,box-shadow .15s;
@@ -564,8 +565,8 @@
         <div class="search-form">
           <input class="search-input" id="empId" inputmode="numeric" autocomplete="off"
                  placeholder="e.g. 12345" pattern="[0-9]+" required/>
-          <button class="tips-pill" type="button" onclick="openTips()" id="tipsBtn" aria-label="Tips">❔</button>
           <button class="search-btn" type="submit" id="sbtn">📅 View</button>
+          <button class="tips-pill" type="button" onclick="openTips()" id="tipsBtn" aria-label="Tips">❔</button>
         </div>
       </form>
 
