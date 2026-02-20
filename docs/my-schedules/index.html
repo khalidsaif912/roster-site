@@ -783,7 +783,35 @@
       .day-tag{font-size:10px}
     }
 
-  </style>
+  
+/* ───── Employee banner layout fix ───── */
+
+/* Hide avatar / initials box */
+.emp-avatar,
+.avatar,
+.emp-initials,
+[class*="avatar"]{
+  display:none !important;
+}
+
+/* Make banner content in one row */
+.emp-banner{
+  display:flex !important;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+/* Remove extra spacing */
+.emp-banner h2{
+  margin:0;
+}
+
+.emp-banner button{
+  margin:0;
+}
+
+</style>
 </head>
 <body>
 
