@@ -277,7 +277,7 @@
     /* ── STATS ROW — 7 cards in one row on desktop ── */
     .stats-row{
       display:grid;
-      grid-template-columns:repeat(7,1fr);
+      grid-template-columns:repeat(7,minmax(0,1fr));
       gap:10px;
     }
     @media(max-width:700px){.stats-row{grid-template-columns:repeat(4,1fr)}}
@@ -321,7 +321,7 @@
       overflow:hidden;
     }
     .cal-head{
-      display:grid;grid-template-columns:repeat(7,1fr);
+      display:grid;grid-template-columns:repeat(7,minmax(0,1fr));
       background:var(--surface2);
       border-bottom:1px solid var(--border);
     }
@@ -335,10 +335,11 @@
     }
     .cal-body{
       display:grid;
-      grid-template-columns:repeat(7,1fr);
+      grid-template-columns:repeat(7,minmax(0,1fr));
     }
     .day{
       background:var(--surface);
+      min-width:0;
       min-height:80px;
       padding:8px 6px;
       display:flex;flex-direction:column;justify-content:space-between;
@@ -774,6 +775,13 @@
 
     /* Toast */
     .toast-card{border-radius:22px}
+
+  
+    @media(max-width:420px){
+      .cal-head div{font-size:11px;padding:12px 2px}
+      .day{min-height:74px;padding:7px 5px}
+      .day-tag{font-size:10px}
+    }
 
   </style>
 </head>
