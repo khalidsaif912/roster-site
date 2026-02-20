@@ -59,6 +59,19 @@
     body.ar { direction:rtl; font-family:'Segoe UI',Tahoma,Arial,sans-serif; }
     .empRow, .empName, .empStatus { direction:ltr !important; unicode-bidi:embed; text-align:left !important; }
 
+    /* رسالة الترحيب */
+    .welcomeMsg {
+      position:absolute; top:14px; left:16px; z-index:10;
+      background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25);
+      border-radius:20px; padding:4px 10px;
+      color:#fff; font-size:11px; font-weight:700;
+      display:none; align-items:center; gap:5px;
+      max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      cursor:pointer; transition:all .25s;
+    }
+    .welcomeMsg:hover { background:rgba(255,255,255,.28); }
+    .welcomeMsg.visible { display:flex; }
+
     /* Date Picker Wrapper */
     .datePickerWrapper {
       position:relative;
@@ -320,6 +333,7 @@
   <!-- ════ HEADER ════ -->
   <div class="header">
     <button class="langToggle" id="langToggle" onclick="toggleLang()">ع</button>
+    <div class="welcomeMsg" id="welcomeMsg" onclick="goToMySchedule()" title="انقر للذهاب لجدولك"></div>
     <h1 id="pageTitle">📋 Duty Roster</h1>
     <div class="datePickerWrapper">
       <button class="dateTag" id="dateTag" onclick="openDatePicker()" type="button">📅 11 February 2026</button>
@@ -339,7 +353,7 @@
       <div class="chipVal" style="color:#059669;">5</div>
       <div class="chipLabel" data-key="departments">Departments</div>
     </div>
-    <a href="https://khalidsaif912.github.io/roster-site//my-schedules/index.html" class="summaryChip" style="cursor:pointer;text-decoration:none;">
+    <a href="https://khalidsaif912.github.io/roster-site/my-schedules/index.html" id="myScheduleBtn" class="summaryChip" style="cursor:pointer;text-decoration:none;" onclick="goToMySchedule(event)">
       <div class="chipVal">🗓️</div>
       <div class="chipLabel" data-key="mySchedule">My Schedule</div>
     </a>
@@ -995,7 +1009,7 @@
   <div class="footer">
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">11FEB2026 / 00:00</strong>
     <br>Total: <strong>80 employees</strong>
-     &nbsp;·&nbsp; Source: <strong>February 2026- RAMADAN Version-4.xlsx.xlsx</strong>
+     &nbsp;·&nbsp; Source: <strong>February 2026- RAMADAN Version_4.xlsx.xlsx</strong>
   </div>
 
 </div>
@@ -1325,6 +1339,34 @@ function applyLang(lang) {
 }
 function toggleLang() { applyLang(LANG==='en'?'ar':'en'); }
 applyLang(LANG);
+
+// ═══════════════════════════════════════════════════
+// رسالة الترحيب — تقرأ اسم الموظف من schedules JSON
+// ═══════════════════════════════════════════════════
+(function() {
+  var empId = localStorage.getItem('savedEmpId');
+  if (!empId) return;
+  // استخدام مسار مطلق يعمل من أي صفحة
+  var origin = location.origin;
+  var base = location.pathname.includes('/roster-site/') ? origin + '/roster-site/' : origin + '/';
+  fetch(base + 'schedules/' + empId + '.json')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) {
+      if (!d || !d.name) return;
+      var firstName = d.name.split(' ')[0];
+      var msg = document.getElementById('welcomeMsg');
+      if (msg) {
+        msg.textContent = '👋 ' + firstName;
+        msg.classList.add('visible');
+      }
+    }).catch(function() {});
+})();
+
+function goToMySchedule() {
+  var id = localStorage.getItem('savedEmpId');
+  var base = 'https://khalidsaif912.github.io/roster-site/my-schedules/index.html';
+  location.href = id ? base + '?emp=' + encodeURIComponent(id) : base;
+}
 </script>
 
 </body>
