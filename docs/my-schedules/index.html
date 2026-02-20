@@ -72,9 +72,9 @@
     body.light .topbar{background:rgba(245,247,250,.92)}
     .topbar-inner{
       display:flex;align-items:center;justify-content:space-between;
-      padding:12px 16px;
+      padding:12px 24px;
       gap:12px;
-      max-width:700px;margin:0 auto;
+      max-width:1400px;margin:0 auto;
     }
     .brand{display:flex;align-items:center;gap:10px;min-width:0}
     .brand-icon{
@@ -106,8 +106,8 @@
 
     /* ── SEARCH SECTION ── */
     .search-section{
-      padding:14px 16px 0;
-      max-width:700px;margin:0 auto;
+      padding:16px 24px 0;
+      max-width:1400px;margin:0 auto;
     }
     .search-hero{
       background:var(--surface);
@@ -202,34 +202,61 @@
     .mnav-label{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;font-family:'DM Mono',monospace}
 
     /* ── MAIN CONTENT ── */
-    .main{padding:12px 16px calc(24px + var(--safe-bot));max-width:700px;margin:0 auto}
-    .stack{display:flex;flex-direction:column;gap:10px}
+    .main{
+      padding:20px 24px calc(32px + var(--safe-bot));
+      max-width:1400px;
+      margin:0 auto;
+    }
+    .stack{display:flex;flex-direction:column;gap:14px}
+
+    /* ── DESKTOP LAYOUT: sidebar + calendar ── */
+    @media(min-width:900px){
+      .stack{flex-direction:row;align-items:flex-start;gap:20px}
+      .col-left{flex:0 0 280px;display:flex;flex-direction:column;gap:14px;position:sticky;top:80px}
+      .col-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+      /* on mobile everything stacks */
+    }
+    @media(max-width:899px){
+      .col-left,.col-right{display:contents}
+    }
 
     /* ── EMPLOYEE BANNER ── */
     .emp-banner{
       background:var(--surface);
       border:1px solid var(--border);
-      border-radius:var(--r);
-      padding:10px 12px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      border-radius:var(--r-lg);
+      padding:18px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
     }
-    .emp-left{display:flex;align-items:center;gap:10px;min-width:0}
+    @media(min-width:900px){
+      .emp-banner{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:14px;
+        padding:20px;
+      }
+    }
+    .emp-left{display:flex;align-items:center;gap:12px;min-width:0}
+    @media(min-width:900px){.emp-left{gap:14px}}
     .emp-avatar{
-      width:38px;height:38px;border-radius:10px;
+      width:44px;height:44px;border-radius:12px;
       background:linear-gradient(135deg,#1f6feb,#58a6ff);
       display:grid;place-items:center;
-      color:#fff;font-weight:800;font-size:13px;
+      color:#fff;font-weight:800;font-size:16px;
       flex:0 0 auto;
+      box-shadow:0 4px 14px rgba(31,111,235,.35);
     }
-    .emp-name{font-size:14px;font-weight:700;color:var(--ink);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .emp-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+    @media(min-width:900px){.emp-avatar{width:56px;height:56px;font-size:20px;border-radius:16px}}
+    .emp-name{font-size:15px;font-weight:700;color:var(--ink);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    @media(min-width:900px){.emp-name{font-size:17px;white-space:normal}}
+    .emp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
     .emp-tag{
       display:inline-flex;align-items:center;gap:4px;
       background:rgba(255,255,255,.04);
       border:1px solid var(--border);
-      border-radius:5px;
-      padding:2px 6px;
-      font-size:10px;color:var(--muted);font-weight:500;
+      border-radius:6px;
+      padding:3px 8px;
+      font-size:11px;color:var(--muted);font-weight:500;
       font-family:'DM Mono',monospace;
     }
     .change-btn{
@@ -244,6 +271,10 @@
       transition:all .15s;
     }
     .change-btn:hover{background:rgba(255,255,255,.07);color:var(--ink)}
+    @media(min-width:900px){
+      .emp-banner-actions{display:flex;gap:8px;width:100%}
+      .emp-banner-actions .change-btn{width:auto;padding:0 12px;font-size:12px;font-weight:600}
+    }
 
     /* ── STATS ROW ── */
     .stats-row{
@@ -251,20 +282,25 @@
       grid-template-columns:repeat(4,1fr);
       gap:8px;
     }
+    @media(min-width:900px){
+      /* In desktop sidebar: 2 columns */
+      .col-left .stats-row{grid-template-columns:repeat(2,1fr);gap:10px}
+    }
     @media(max-width:380px){.stats-row{grid-template-columns:repeat(2,1fr)}}
     .stat-card{
       background:var(--surface);
       border:1px solid var(--border);
       border-radius:var(--r);
-      padding:12px 10px;
+      padding:14px 10px;
       text-align:center;
       position:relative;
       overflow:hidden;
+      transition:border-color .15s, transform .1s;
     }
+    .stat-card:hover{border-color:var(--border2);transform:translateY(-1px)}
     .stat-card::after{
       content:'';
-      position:absolute;top:0;left:0;right:0;height:2px;
-      border-radius:99px;
+      position:absolute;top:0;left:0;right:0;height:2.5px;
     }
     .stat-card.c-blue::after{background:linear-gradient(90deg,#1f6feb,#58a6ff)}
     .stat-card.c-gray::after{background:linear-gradient(90deg,#484f58,#8b949e)}
@@ -273,7 +309,13 @@
     .stat-card.c-purple::after{background:linear-gradient(90deg,#7c3aed,#bc8cff)}
     .stat-card.c-pink::after{background:linear-gradient(90deg,#be185d,#ff7b72)}
     .stat-card.c-green::after{background:linear-gradient(90deg,#15803d,#3fb950)}
-    .stat-ico{font-size:16px;margin-bottom:4px;display:block}
+    .stat-ico{font-size:18px;margin-bottom:4px;display:block}
+    @media(min-width:900px){
+      .col-left .stat-card{padding:16px 12px}
+      .col-left .stat-ico{font-size:22px;margin-bottom:6px}
+      .col-left .stat-val{font-size:30px}
+      .col-left .stat-lbl{font-size:11px}
+    }
     .stat-val{font-size:22px;font-weight:800;color:var(--ink);font-family:'DM Mono',monospace;line-height:1}
     .stat-lbl{font-size:10px;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.2}
 
@@ -290,12 +332,15 @@
       border-bottom:1px solid var(--border);
     }
     .cal-head div{
-      padding:9px 2px;
+      padding:12px 2px;
       text-align:center;
-      font-size:10px;font-weight:700;
+      font-size:11px;font-weight:700;
       color:var(--muted);
       letter-spacing:.3px;
       text-transform:uppercase;
+    }
+    @media(min-width:900px){
+      .cal-head div{padding:16px 4px;font-size:12px;letter-spacing:.5px}
     }
     .cal-body{
       display:grid;
@@ -312,13 +357,19 @@
       border-right:1px solid var(--border);
       border-bottom:1px solid var(--border);
     }
+    @media(min-width:900px){
+      .day{min-height:110px;padding:10px 8px;}
+    }
     .day:nth-child(7n){border-right:none}
     @media(max-width:380px){.day{min-height:52px;padding:4px 3px}}
     .day.empty{background:rgba(13,17,23,.6);cursor:default}
+    body.light .day.empty{background:rgba(240,242,245,.7)}
     .day-top{display:flex;align-items:center;justify-content:space-between;width:100%}
     .dnum{font-size:11px;font-weight:700;color:var(--muted);font-family:'DM Mono',monospace}
+    @media(min-width:900px){.dnum{font-size:14px}}
     .day:not(.empty) .dnum{color:var(--ink)}
     .day-ico{font-size:13px;line-height:1}
+    @media(min-width:900px){.day-ico{font-size:18px}}
     .day-tag{
       margin-top:3px;
       font-size:9px;font-weight:700;
@@ -331,6 +382,25 @@
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
       max-width:100%;
     }
+    @media(min-width:900px){
+      .day-tag{font-size:11px;padding:4px 6px;border-radius:6px;margin-top:auto}
+    }
+    /* Ghost shift code in day cells - desktop */
+    @media(min-width:900px){
+      .day-ghost{
+        position:absolute;
+        inset:0;
+        display:flex;align-items:center;justify-content:center;
+        font-size:clamp(20px,3.5vw,42px);
+        font-weight:900;
+        opacity:.18;
+        pointer-events:none;
+        letter-spacing:-1px;
+        line-height:1;
+        font-family:'DM Mono',monospace;
+      }
+    }
+    @media(max-width:899px){.day-ghost{display:none}}
     /* Today */
     .day.today{background:rgba(31,111,235,.1)!important}
     .day.today .dnum{color:var(--accent)!important;font-weight:800}
@@ -404,6 +474,10 @@
       grid-template-columns:1fr 1fr;
       gap:8px;
     }
+    @media(min-width:900px){
+      .actions-grid{grid-template-columns:1fr;gap:8px}
+      .action-btn.primary{grid-column:span 1}
+    }
     .action-btn{
       display:flex;align-items:center;gap:10px;
       background:var(--surface3);
@@ -414,8 +488,10 @@
       font-size:13px;font-weight:600;
       transition:all .15s;
       text-align:left;
+      cursor:pointer;
     }
-    .action-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:var(--ink)}
+    .action-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:var(--ink);transform:translateX(2px)}
+    body.ar .action-btn:hover{transform:translateX(-2px)}
     .action-btn:active{transform:scale(.98)}
     .action-btn.primary{
       background:linear-gradient(135deg,rgba(31,111,235,.2),rgba(56,139,253,.1));
@@ -423,6 +499,7 @@
       color:var(--accent);
       grid-column:span 2;
     }
+    @media(min-width:900px){.action-btn.primary{grid-column:span 1}}
     .action-btn.primary:hover{background:linear-gradient(135deg,rgba(31,111,235,.3),rgba(56,139,253,.2));border-color:rgba(56,139,253,.5)}
     .action-ico{font-size:18px;flex:0 0 auto}
 
@@ -892,11 +969,14 @@
             const icon=dd?(COLORS[dd.shift_group]?.icon||''):'';
             const code=dd&&dd.shift_code?`<div class="day-tag">${esc(dd.shift_code)}</div>`:'';
             const isToday=(now.getFullYear()===yr&&(now.getMonth()+1)===mo&&now.getDate()===dc);
+            const ghostCode = dd && (dd.shift_code || (dd.shift_group==='Off Day'?'OFF':dd.shift_group==='Annual Leave'?'LV':dd.shift_group==='Sick Leave'?'SL':dd.shift_group==='Training'?'TR':dd.shift_group==='Standby'?'ST':'')) || '';
+            const ghostEl = ghostCode ? `<span class="day-ghost" style="color:currentColor">${esc(ghostCode)}</span>` : '';
             cells+=`<div class="day ${sc} ${isToday?'today':''}">
               <div class="day-top">
                 <span class="dnum">${dc}</span>
                 <span class="day-ico">${icon}</span>
               </div>
+              ${ghostEl}
               ${code}
             </div>`;
             dc++;
@@ -918,39 +998,43 @@
         </div>`).join('');
 
       document.getElementById('area').innerHTML=`
-        <!-- Employee Banner -->
-        <div class="emp-banner">
-          <div class="emp-left">
-            <div class="emp-avatar">${esc(initials)}</div>
-            <div style="min-width:0">
-              <div class="emp-name">${esc(data.name)}</div>
-              <div class="emp-tags">
-                <span class="emp-tag">📋 ${esc(data.department)}</span>
-                <span class="emp-tag">🆔 ${esc(data.id)}</span>
+        <div class="col-left">
+          <!-- Employee Banner -->
+          <div class="emp-banner">
+            <div class="emp-left">
+              <div class="emp-avatar">${esc(initials)}</div>
+              <div style="min-width:0">
+                <div class="emp-name">${esc(data.name)}</div>
+                <div class="emp-tags">
+                  <span class="emp-tag">📋 ${esc(data.department)}</span>
+                  <span class="emp-tag">🆔 ${esc(data.id)}</span>
+                </div>
               </div>
             </div>
+            ${changeBtn}
           </div>
-          ${changeBtn}
+
+          <!-- Stats -->
+          <div class="stats-row">${statsHTML}</div>
+
+          <!-- Actions -->
+          <div class="actions-card">
+            <div class="section-label">${t('actionsTitle')}</div>
+            <div class="actions-grid">
+              <button class="action-btn primary" onclick="dlPDF()"><span class="action-ico">📄</span>${t('pdf')}</button>
+              <button class="action-btn" onclick="dlIMG()"><span class="action-ico">🖼️</span>${t('img')}</button>
+              <button class="action-btn" onclick="dlICS()"><span class="action-ico">📆</span>${t('ics')}</button>
+              <button class="action-btn" onclick="shareS()"><span class="action-ico">🔗</span>${t('share')}</button>
+              <button class="action-btn" onclick="window.print()"><span class="action-ico">🖨️</span>${t('print')}</button>
+            </div>
+          </div>
         </div>
 
-        <!-- Calendar -->
-        <div class="cal-card">
-          <div class="cal-head">${dayHdr}</div>
-          <div class="cal-body">${cells}</div>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats-row">${statsHTML}</div>
-
-        <!-- Actions -->
-        <div class="actions-card">
-          <div class="section-label">${t('actionsTitle')}</div>
-          <div class="actions-grid">
-            <button class="action-btn primary" onclick="dlPDF()"><span class="action-ico">📄</span>${t('pdf')}</button>
-            <button class="action-btn" onclick="dlIMG()"><span class="action-ico">🖼️</span>${t('img')}</button>
-            <button class="action-btn" onclick="dlICS()"><span class="action-ico">📆</span>${t('ics')}</button>
-            <button class="action-btn" onclick="shareS()"><span class="action-ico">🔗</span>${t('share')}</button>
-            <button class="action-btn" onclick="window.print()"><span class="action-ico">🖨️</span>${t('print')}</button>
+        <div class="col-right">
+          <!-- Calendar -->
+          <div class="cal-card">
+            <div class="cal-head">${dayHdr}</div>
+            <div class="cal-body">${cells}</div>
           </div>
         </div>`;
     }
@@ -1144,13 +1228,13 @@
               ctx.fillStyle=ACCENT;ctx.fillRect(cx,cy2,CELL_W,2.5);
             }
 
-            // Ghost number (big, faint)
-            const gSize=Math.min(CELL_H*0.62,38);
+            // Ghost number (big, faint) — day number
+            const gSize=Math.min(CELL_H*0.55,34);
             ctx.save();
             ctx.font=`800 ${gSize}px Arial`;
             ctx.textAlign='left';ctx.textBaseline='top';
-            ctx.fillStyle=th?th.fg+'30':'rgba(255,255,255,0.07)';
-            ctx.fillText(String(dc),cx+4,cy2+2);
+            ctx.fillStyle=th?th.fg+'22':'rgba(255,255,255,0.06)';
+            ctx.fillText(String(dc),cx+3,cy2+1);
             ctx.restore();
 
             // Day number (small, readable, top-left)
@@ -1159,16 +1243,29 @@
             ctx.fillStyle=isToday?ACCENT:(th?th.fg:MUTED);
             ctx.fillText(String(dc),cx+5,cy2+5);
 
-            // Shift tag (centered bottom)
+            // Shift code — HUGE ghost filling the cell center
             if(dd){
               const code=dd.shift_code||(FALLBACK[dd.shift_group]||'');
               if(code){
-                const tagH=20;
-                const tagMargin=6;
+                // Big ghost code — measure to fit
+                ctx.save();
+                ctx.textAlign='center';ctx.textBaseline='middle';
+                let bigFS=Math.min(CELL_H*0.52, CELL_W*0.75);
+                ctx.font=`900 ${bigFS}px Arial`;
+                // Scale down if too wide
+                const tw=ctx.measureText(code).width;
+                if(tw>CELL_W-6){ bigFS=bigFS*(CELL_W-6)/tw; }
+                ctx.font=`900 ${bigFS}px Arial`;
+                ctx.fillStyle=th?th.fg+'2e':'rgba(255,255,255,0.08)';
+                ctx.fillText(code, cx+CELL_W/2, cy2+CELL_H*0.55);
+                ctx.restore();
+
+                // Small readable tag at bottom
+                const tagH=20, tagMargin=6;
                 const tagY=cy2+CELL_H-tagH-tagMargin;
                 ctx.font=`700 10px Arial`;
-                const tw=ctx.measureText(code).width;
-                const tagW=Math.min(tw+14,CELL_W-8);
+                const stw=ctx.measureText(code).width;
+                const tagW=Math.min(stw+14,CELL_W-8);
                 const tagX=cx+(CELL_W-tagW)/2;
                 fillRR(tagX,tagY,tagW,tagH,5,th.tagBg);
                 strokeRR(tagX,tagY,tagW,tagH,5,th.tagBd,0.7);
@@ -1213,17 +1310,29 @@
         ctx.fillStyle=clr;ctx.fillRect(sx,sy,STAT_CARD_W,3.5);
         ctx.restore();
 
-        // Emoji icon
-        ctx.font=`18px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(m.icon,sx+STAT_CARD_W/2,sy+22);
+        // Ghost number — huge, faint, filling the card
+        ctx.save();
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        let gfs=Math.min(STAT_CARD_H*0.75, STAT_CARD_W*0.85);
+        ctx.font=`900 ${gfs}px Arial`;
+        const gtw=ctx.measureText(String(stats[m.k])).width;
+        if(gtw>STAT_CARD_W-4){ gfs=gfs*(STAT_CARD_W-4)/gtw; }
+        ctx.font=`900 ${gfs}px Arial`;
+        ctx.fillStyle=clr+'28';
+        ctx.fillText(String(stats[m.k]),sx+STAT_CARD_W/2,sy+STAT_CARD_H*0.54);
+        ctx.restore();
 
-        // Number value
-        ctx.fillStyle=clr;ctx.font=`800 26px Arial`;
+        // Emoji icon
+        ctx.font=`16px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(m.icon,sx+STAT_CARD_W/2,sy+20);
+
+        // Number value (on top of ghost)
+        ctx.fillStyle=clr;ctx.font=`800 24px Arial`;
         ctx.textAlign='center';ctx.textBaseline='alphabetic';
         ctx.fillText(String(stats[m.k]),sx+STAT_CARD_W/2,sy+58);
 
         // Label
-        ctx.fillStyle=MUTED;ctx.font=`500 9.5px Arial`;
+        ctx.fillStyle=MUTED;ctx.font=`500 9px Arial`;
         const lbl=isAr?m.label_ar:m.label_en;
         ctx.fillText(lbl,sx+STAT_CARD_W/2,sy+72);
       });
