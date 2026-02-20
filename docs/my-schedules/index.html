@@ -32,6 +32,18 @@
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bot: env(safe-area-inset-bottom, 0px);
     }
+    body.light{
+      --bg:#f5f7fa;
+      --surface:#ffffff;
+      --surface2:#f0f2f5;
+      --surface3:#e8ebf0;
+      --border:rgba(0,0,0,.08);
+      --border2:rgba(0,0,0,.13);
+      --ink:#1a1f2e;
+      --muted:#6b7280;
+      --dim:#9ca3af;
+      --accent:#1d6fd4;
+    }
 
     html{background:var(--bg); color:var(--ink); font-size:15px; scroll-behavior:smooth}
     body{
@@ -40,6 +52,7 @@
       min-height:100dvh;
       -webkit-font-smoothing:antialiased;
       overflow-x:hidden;
+      transition:background .2s, color .2s;
     }
     body.ar{direction:rtl}
     a{color:var(--accent);text-decoration:none}
@@ -50,11 +63,13 @@
     .topbar{
       position:sticky;top:0;z-index:100;
       padding-top:var(--safe-top);
-      background:rgba(13,17,23,.9);
+      background:rgba(13,17,23,.92);
       backdrop-filter:blur(20px) saturate(180%);
       -webkit-backdrop-filter:blur(20px) saturate(180%);
       border-bottom:1px solid var(--border);
+      transition:background .2s;
     }
+    body.light .topbar{background:rgba(245,247,250,.92)}
     .topbar-inner{
       display:flex;align-items:center;justify-content:space-between;
       padding:12px 16px;
@@ -85,7 +100,9 @@
       white-space:nowrap;
     }
     .ghost-btn:hover{background:rgba(255,255,255,.1);color:var(--ink);border-color:rgba(255,255,255,.2)}
+    body.light .ghost-btn:hover{background:rgba(0,0,0,.07);border-color:rgba(0,0,0,.18)}
     .ghost-btn:active{transform:scale(.97)}
+    .theme-btn{width:34px;padding:0;font-size:15px;}
 
     /* ── SEARCH SECTION ── */
     .search-section{
@@ -331,6 +348,17 @@
     .s-training{background:#0a1020}
     .s-standby{background:#1a0d14}
     .s-other{background:#111318}
+    /* Light mode shift backgrounds */
+    body.light .s-morning{background:#fffbf0}
+    body.light .s-afternoon{background:#fff7f0}
+    body.light .s-night{background:#f5f3ff}
+    body.light .s-off{background:#f8fafc}
+    body.light .s-leave{background:#f0fdf4}
+    body.light .s-training{background:#eff6ff}
+    body.light .s-standby{background:#fdf2f8}
+    body.light .s-other{background:#f9fafb}
+    body.light .day{background:var(--surface)}
+    body.light .day.empty{background:rgba(245,247,250,.7)}
     /* Tags */
     .s-morning .day-tag{color:#d29922;background:rgba(210,153,34,.1);border-color:rgba(210,153,34,.2)}
     .s-afternoon .day-tag{color:#db6d28;background:rgba(219,109,40,.1);border-color:rgba(219,109,40,.2)}
@@ -552,8 +580,9 @@
         </div>
       </div>
       <div class="top-btns">
-        <button class="ghost-btn" onclick="toggleLang()" id="langBtn">العربية</button>
-        <button class="ghost-btn" onclick="goBack()" id="backBtn">← Back</button>
+        <button class="ghost-btn theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">🌙</button>
+        <button class="ghost-btn" onclick="toggleLang()" id="langBtn">English</button>
+        <button class="ghost-btn" onclick="goBack()" id="backBtn">رجوع →</button>
       </div>
     </div>
   </header>
@@ -632,7 +661,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
-    let data=null, month=null, months=[], lang='en';
+    let data=null, month=null, months=[], lang='ar', theme='dark';
 
     const COLORS={
       Morning:       {icon:'☀️', dot:'#d29922'},
@@ -720,6 +749,11 @@
       if(data) renderSchedule();
     }
 
+    function toggleTheme(){
+      theme=(theme==='dark'?'light':'dark');
+      document.body.classList.toggle('light', theme==='light');
+      document.getElementById('themeBtn').textContent=(theme==='dark'?'🌙':'☀️');
+    }
     function toggleLang(){ lang=(lang==='en'?'ar':'en'); applyLangUI(); }
 
     function goBack(){
