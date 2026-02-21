@@ -138,18 +138,20 @@
       animation:avatarPop .2s cubic-bezier(.22,1,.36,1);
     }
     .search-change-btn{
-      width:28px;height:28px;
-      background:transparent;
-      border:1px solid var(--border2);
-      color:var(--muted);
-      border-radius:7px;
-      font-size:13px;
+      width:36px;height:36px;
+      background:linear-gradient(135deg,#1f6feb,#58a6ff);
+      border:none;
+      color:#fff;
+      border-radius:10px;
+      font-size:15px;
       display:grid;place-items:center;
       flex:0 0 auto;
-      transition:all .15s;
+      transition:filter .15s, transform .1s;
       cursor:pointer;
+      box-shadow:0 3px 10px rgba(31,111,235,.4);
     }
-    .search-change-btn:hover{background:rgba(255,255,255,.08);color:var(--ink)}
+    .search-change-btn:hover{filter:brightness(1.15)}
+    .search-change-btn:active{transform:scale(.95)}
     @keyframes avatarPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
     .search-input{
       width:130px;flex:0 0 130px;
@@ -1108,7 +1110,6 @@
               <div class="month-popup" id="monthPopup">${popupHTML}</div>
             </div>
             <button class="mnav-arrow" onclick="chMonth(1)" ${!hasNext?'disabled':''} aria-label="Next">›</button>
-            ${changeBtn}
           </div>
         </div>
 
