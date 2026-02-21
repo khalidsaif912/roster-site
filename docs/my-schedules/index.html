@@ -918,6 +918,10 @@
       background: rgba(0,0,0,.04)!important;
     }
 
+
+    /* ── Export helpers ── */
+    .export-area{display:flex;flex-direction:column;gap:12px}
+
 </style>
 </head>
 <body>
@@ -1327,7 +1331,8 @@
 
       document.getElementById('area').innerHTML=`
         
-                <!-- Employee Banner -->
+                <div id="exportArea" class="export-area">
+<!-- Employee Banner -->
         <div class="emp-banner">
           <div class="emp-info" style="min-width:0;flex:1">
             <div class="emp-name">${esc(data.name)}</div>
@@ -1351,6 +1356,7 @@
           <div class="cal-head">${dayHdr}</div>
           <div class="cal-body">${cells}</div>
         </div>
+</div>
 
         <!-- Actions -->
         <div class="actions-card">
@@ -1378,18 +1384,53 @@
         </div>`;
     }
 
-    /* IMAGE DOWNLOAD — snapshot of UI (matches calendar style) */
-    async function dlIMG(){
-      const element = document.querySelector('.main'); // export what user sees
+    /* IMAGE / PDF EXPORT (captures UI exactly) */
+async function captureExportCanvas(){
+      const source = document.getElementById('exportArea') || document.querySelector('.main');
+      if(!source) throw new Error('export area not found');
 
-      // Hide UI that you don't want in export (optional hooks)
-      // e.g., document.querySelector('.actions-card')?.classList.add('no-export');
+      // Clone to an offscreen container sized like a mobile portrait card
+      const clone = source.cloneNode(true);
 
-      const canvas = await html2canvas(element, {
+      const wrap = document.createElement('div');
+      wrap.style.position = 'fixed';
+      wrap.style.left = '-9999px';
+      wrap.style.top = '0';
+      wrap.style.width = '420px';           // portrait mobile-friendly width
+      wrap.style.padding = '16px';
+      wrap.style.boxSizing = 'border-box';
+
+      // Match current page background (keeps glass + shadows consistent)
+      const bg = getComputedStyle(document.body).backgroundColor || '#0d1117';
+      wrap.style.background = bg;
+
+      wrap.appendChild(clone);
+      document.body.appendChild(wrap);
+
+      // Wait for layout
+      await new Promise(requestAnimationFrame);
+
+      const canvas = await html2canvas(wrap, {
         scale: 3,
         backgroundColor: null,
         useCORS: true
       });
+
+      document.body.removeChild(wrap);
+      return canvas;
+    }
+    async function dlIMG(){
+      try{
+        const canvas = await captureExportCanvas();
+        const link = document.createElement('a');
+        link.download = `schedule-${data.id}-${month}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }catch(e){
+        alert(lang==='ar'?'تعذر حفظ الصورة.':'Image export failed.');
+        console.error(e);
+      }
+    });
 
       const link = document.createElement('a');
       link.download = `schedule-${data.id}-${month}.png`;
@@ -1421,13 +1462,40 @@
 
     /* PDF */
     async function dlPDF(){
-      const element = document.querySelector('.main'); // export what user sees
+      try{
+        const canvas = await captureExportCanvas();
+        const imgData = canvas.toDataURL('image/png');
 
-      const canvas = await html2canvas(element, {
-        scale: 3,
-        backgroundColor: '#ffffff', // keep PDF background white
-        useCORS: true
-      });
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+
+        const pageW = 210;
+        const pageH = 297;
+        const margin = 10;
+
+        const imgW = pageW - margin*2;
+        const imgH = (canvas.height * imgW) / canvas.width;
+
+        let y = margin;
+        let remaining = imgH;
+
+        // Add first page
+        pdf.addImage(imgData, 'PNG', margin, y, imgW, imgH);
+
+        // If content is taller than one page, add extra pages by shifting image up
+        while(remaining > (pageH - margin*2)){
+          remaining -= (pageH - margin*2);
+          pdf.addPage();
+          const shiftY = margin - (imgH - remaining);
+          pdf.addImage(imgData, 'PNG', margin, shiftY, imgW, imgH);
+        }
+
+        pdf.save(`schedule-${data.id}-${month}.pdf`);
+      }catch(e){
+        alert(lang==='ar'?'تعذر حفظ PDF.':'PDF export failed.');
+        console.error(e);
+      }
+    });
 
       const imgData = canvas.toDataURL('image/png');
 
