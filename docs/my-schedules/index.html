@@ -122,6 +122,19 @@
     }
     .tips-pill:hover{background:rgba(255,255,255,.1);color:var(--ink)}
     .search-form{display:flex;gap:8px;align-items:center}
+    .search-avatar{
+      width:36px;height:36px;
+      border-radius:10px;
+      background:linear-gradient(135deg,#1f6feb,#58a6ff);
+      display:grid;place-items:center;
+      color:#fff;font-weight:800;font-size:13px;
+      flex:0 0 auto;
+      box-shadow:0 3px 10px rgba(31,111,235,.4);
+      letter-spacing:-.5px;
+      font-family:'Sora',system-ui,sans-serif;
+      animation:avatarPop .2s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes avatarPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
     .search-input{
       width:130px;flex:0 0 130px;
       background:var(--surface3);
@@ -681,6 +694,7 @@
   <section class="search-section">
     <form id="searchForm">
       <div class="search-form">
+        <div class="search-avatar" id="searchAvatar" style="display:none"></div>
         <input class="search-input" id="empId" inputmode="numeric" autocomplete="off"
                placeholder="e.g. 12345" pattern="[0-9]+" required/>
         <button class="search-btn" type="submit" id="sbtn">📅 View</button>
@@ -839,6 +853,8 @@
     function toggleLang(){ lang=(lang==='en'?'ar':'en'); applyLangUI(); }
 
     function goBack(){
+      const avatarEl=document.getElementById('searchAvatar');
+      if(avatarEl){avatarEl.style.display='none';avatarEl.textContent='';}
       const base=location.pathname.includes('/roster-site/')?'/roster-site/':'/';
       if(document.referrer&&document.referrer.includes(location.host)) history.back();
       else location.href=base;
@@ -874,6 +890,8 @@
         month=months.includes(cur)?cur:months[months.length-1];
         renderSchedule();
       }catch(err){
+        const avatarEl=document.getElementById('searchAvatar');
+        if(avatarEl){avatarEl.style.display='none';avatarEl.textContent='';}
         document.getElementById('area').innerHTML=`
           <div class="state-view">
             <span class="state-emoji">❌</span>
@@ -1010,12 +1028,15 @@
           <div class="stat-lbl">${lang==='ar'?m.label_ar:m.label_en}</div>
         </div>`).join('');
 
+      // Show avatar next to search input
+      const avatarEl=document.getElementById('searchAvatar');
+      if(avatarEl){avatarEl.textContent=initials;avatarEl.style.display='grid';}
+
       document.getElementById('area').innerHTML=`
-        <!-- Employee Banner -->
+        <!-- Employee Banner — no avatar here -->
         <div class="emp-banner">
-          <div class="emp-left">
-            <div class="emp-avatar">${esc(initials)}</div>
-            <div style="min-width:0">
+          <div class="emp-left" style="min-width:0">
+            <div>
               <div class="emp-name">${esc(data.name)}</div>
               <div class="emp-tags">
                 <span class="emp-tag">📋 ${esc(data.department)}</span>
