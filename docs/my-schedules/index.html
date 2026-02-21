@@ -682,26 +682,25 @@
       gap:10px;
     }
     .action-btn{
-      display:flex;align-items:center;justify-content:center;gap:9px;
-      background:var(--surface3);
-      border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      background:linear-gradient(135deg,rgba(31,111,235,.18),rgba(56,139,253,.10));
+      border:1px solid rgba(56,139,253,.35);
       border-radius:10px;
-      padding:12px 14px;
-      color:#c9d1d9;
-      font-size:13px;font-weight:600;
+      padding:12px 10px;
+      color:#58a6ff;
+      font-size:13px;font-weight:700;
       transition:all .15s;
       cursor:pointer;
+      min-height:48px;
     }
-    .action-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:#fff}
+    .action-btn:hover{
+      background:linear-gradient(135deg,rgba(31,111,235,.30),rgba(56,139,253,.20));
+      border-color:rgba(56,139,253,.6);
+      color:#79b8ff;
+      transform:translateY(-1px);
+    }
     .action-btn:active{transform:scale(.98)}
-    .action-btn.primary{
-      background:linear-gradient(135deg,rgba(31,111,235,.2),rgba(56,139,253,.1));
-      border-color:rgba(56,139,253,.4);
-      color:#58a6ff;
-      font-weight:700;
-    }
-    .action-btn.primary:hover{background:linear-gradient(135deg,rgba(31,111,235,.32),rgba(56,139,253,.22));border-color:rgba(56,139,253,.65);color:#79b8ff}
-    .action-ico{font-size:17px;flex:0 0 auto}
+    .action-ico{font-size:16px;flex:0 0 auto}
 
     /* ── STATS MODAL ── */
     .stats-modal-overlay{
@@ -1034,21 +1033,14 @@
     /* action-btn — كل الأزرار نفس اللون الأزرق */
     .action-btn{
       color: #58a6ff !important;
-      font-weight: 600 !important;
+      font-weight: 700 !important;
+      background: linear-gradient(135deg,rgba(31,111,235,.18),rgba(56,139,253,.10)) !important;
+      border: 1px solid rgba(56,139,253,.35) !important;
     }
     .action-btn:hover{
       color: #79b8ff !important;
-    }
-    .action-btn.primary{
-      background: linear-gradient(135deg,rgba(31,111,235,.22),rgba(56,139,253,.12)) !important;
-      border: 1px solid rgba(56,139,253,.45) !important;
-      color: #58a6ff !important;
-      font-weight: 700 !important;
-    }
-    .action-btn.primary:hover{
-      background: linear-gradient(135deg,rgba(31,111,235,.35),rgba(56,139,253,.25)) !important;
-      border-color: rgba(56,139,253,.7) !important;
-      color: #79b8ff !important;
+      background: linear-gradient(135deg,rgba(31,111,235,.30),rgba(56,139,253,.20)) !important;
+      border-color: rgba(56,139,253,.6) !important;
     }
 
 
@@ -1399,7 +1391,7 @@
           <button class="search-change-btn" type="button" id="searchChangeBtn" style="display:none"></button>
         </div>
         <div class="id-input">
-          <span class="id-prefix">ID</span>
+          <span class="id-prefix">SN</span>
           <input class="search-input" id="empId" inputmode="numeric" autocomplete="off"
                  placeholder="e.g. 12345" pattern="[0-9]+" required/>
         </div>
@@ -1897,9 +1889,9 @@
         <!-- Actions -->
         <div class="actions-card">
           <div class="actions-grid">
-            <button class="action-btn primary" onclick="dlPDF()"><span class="action-ico">📄</span>PDF</button>
-            <button class="action-btn primary" onclick="dlIMG()"><span class="action-ico">🖼️</span>${lang==='ar'?'صورة':'Image'}</button>
-            <button class="action-btn primary" onclick="openStatsModal()"><span class="action-ico">📊</span>${lang==='ar'?'إحصائيات':'Stats'}</button>
+            <button class="action-btn" onclick="dlPDF()"><span class="action-ico">📄</span>PDF</button>
+            <button class="action-btn" onclick="dlIMG()"><span class="action-ico">🖼️</span>${lang==='ar'?'صورة':'Image'}</button>
+            <button class="action-btn" onclick="openStatsModal()"><span class="action-ico">📊</span>${lang==='ar'?'إحصائيات':'Stats'}</button>
           </div>
           <div class="actions-grid" style="margin-top:8px">
             <button class="action-btn" onclick="dlICS()"><span class="action-ico">📆</span>ICS</button>
