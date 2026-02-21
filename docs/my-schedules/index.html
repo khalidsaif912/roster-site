@@ -510,11 +510,6 @@
       padding:14px;
       display:flex;flex-direction:column;gap:8px;
     }
-    .actions-top-row{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
     .actions-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -542,7 +537,49 @@
     .action-btn.primary:hover{background:linear-gradient(135deg,rgba(31,111,235,.28),rgba(56,139,253,.18));border-color:rgba(56,139,253,.55)}
     .action-ico{font-size:17px;flex:0 0 auto}
 
-    /* ── STATE VIEWS ── */
+    /* ── STATS MODAL ── */
+    .stats-modal-overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.6);
+      backdrop-filter:blur(4px);
+      z-index:500;
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
+      animation:fadeIn .15s ease;
+    }
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .stats-modal{
+      background:var(--surface);
+      border:1px solid var(--border2);
+      border-radius:var(--r-lg);
+      width:100%;max-width:560px;
+      box-shadow:0 24px 64px rgba(0,0,0,.5);
+      animation:popIn .2s cubic-bezier(.22,1,.36,1);
+      overflow:hidden;
+    }
+    .stats-modal-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      font-size:14px;font-weight:700;color:var(--ink);
+    }
+    .stats-modal-close{
+      width:28px;height:28px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border2);
+      border-radius:7px;
+      color:var(--muted);font-size:12px;
+      display:grid;place-items:center;
+      cursor:pointer;transition:all .15s;
+    }
+    .stats-modal-close:hover{background:rgba(255,255,255,.12);color:var(--ink)}
+    .stats-modal-body{
+      padding:16px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+    }
+    @media(max-width:400px){.stats-modal-body{grid-template-columns:repeat(2,1fr)}}
     .state-view{
       background:var(--surface);
       border:1px solid var(--border);
@@ -818,7 +855,7 @@
         notFoundSub:'ID not in the system. Please check and try again.',
         e1:'Search your schedule',e2:'Enter your Employee ID above to view your monthly roster.',
         statsTitle:'Statistics',legendTitle:'Legend',actionsTitle:'Downloads',
-        pdf:'Download PDF',img:'Download Image',ics:'Export ICS',share:'Share Link',print:'Print',
+        pdf:'PDF',img:'صورة',ics:'ICS',share:'مشاركة',print:'طباعة',stats:'إحصائيات',
         changeId:'Change ID',setAsMyId:'Set as My ID',dept:'Dept',id:'ID',
         days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
         months:['January','February','March','April','May','June','July','August','September','October','November','December'],
@@ -835,7 +872,7 @@
         notFoundSub:'الرقم غير موجود في النظام. تحقق وأعد المحاولة.',
         e1:'ابحث عن جدولك',e2:'أدخل رقمك الوظيفي أعلاه لعرض مناوباتك الشهرية.',
         statsTitle:'الإحصائيات',legendTitle:'الدليل',actionsTitle:'التحميل',
-        pdf:'تحميل PDF',img:'تحميل صورة',ics:'تصدير ICS',share:'مشاركة الرابط',print:'طباعة',
+        pdf:'PDF',img:'صورة',ics:'ICS',share:'مشاركة',print:'طباعة',stats:'إحصائيات',
         changeId:'تغيير الرقم',setAsMyId:'احفظ كرقمي',dept:'القسم',id:'الرقم',
         days:['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
         months:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
@@ -896,8 +933,7 @@
 
     function openTips(){ document.getElementById('tipsModal').classList.add('open'); }
     function closeTips(){ document.getElementById('tipsModal').classList.remove('open'); }
-    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeTips(); });
-
+    
     document.getElementById('searchForm').addEventListener('submit',async(e)=>{
       e.preventDefault();
       const id=document.getElementById('empId').value.trim();
@@ -977,6 +1013,16 @@
       return {Morning:'s-morning',Afternoon:'s-afternoon',Night:'s-night','Off Day':'s-off','Annual Leave':'s-leave','Sick Leave':'s-leave',Training:'s-training',Standby:'s-standby',Other:'s-other'}[g]||'s-other';
     }
 
+    function openStatsModal(){
+      const el=document.getElementById('statsModalOverlay');
+      if(el){el.style.display='flex';}
+    }
+    function closeStatsModal(){
+      const el=document.getElementById('statsModalOverlay');
+      if(el){el.style.display='none';}
+    }
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){closeTips();closeStatsModal();closeMonthPicker();} });
+
     function chMonth(dir){ const ci=months.indexOf(month),ni=ci+dir; if(ni>=0&&ni<months.length){month=months[ni];renderSchedule();} }
     function jumpMonth(val){ if(months.includes(val)){month=val;renderSchedule();} }
     function toggleMonthPicker(){
@@ -1002,16 +1048,13 @@
       const now=new Date();
 
       // Month picker popup data
-      const mLabel=`${T[lang].months[mo-1]} ${yr}`;
-      const years=[...new Set(months.map(m=>m.split('-')[0]))];
-      const popupHTML=years.map(y=>`
-        <div class="mp-year">${y}</div>
-        <div class="month-popup-grid">
-          ${months.filter(m=>m.startsWith(y)).map(m=>{
-            const mm=parseInt(m.split('-')[1]);
-            return '<div class="mp-item '+(m===month?'active':'')+'" onclick="jumpMonth(\'' +m+ '\');closeMonthPicker()">'+T[lang].months[mm-1].slice(0,3)+'</div>';
-          }).join('')}
-        </div>`).join('');
+      const mLabel=T[lang].months[mo-1];
+      const popupHTML='<div class="month-popup-grid">'+
+        months.map(m=>{
+          const mm=parseInt(m.split('-')[1]);
+          return '<div class="mp-item '+(m===month?'active':'')+'" onclick="jumpMonth(&quot;'+m+'&quot;);closeMonthPicker()">'+T[lang].months[mm-1]+'</div>';
+        }).join('')+
+        '</div>';
 
       const savedId=localStorage.getItem('savedEmpId');
       const isMyId=savedId===data.id;
@@ -1083,18 +1126,16 @@
       }
 
       document.getElementById('area').innerHTML=`
-        <!-- Employee Banner — no avatar here -->
+        <!-- Employee Banner -->
         <div class="emp-banner">
-          <div class="emp-left" style="min-width:0">
-            <div>
-              <div class="emp-name">${esc(data.name)}</div>
-              <div class="emp-tags">
-                <span class="emp-tag">📋 ${esc(data.department)}</span>
-                <span class="emp-tag">🆔 ${esc(data.id)}</span>
-              </div>
+          <div style="min-width:0;flex:1">
+            <div class="emp-name">${esc(data.name)}</div>
+            <div class="emp-tags">
+              <span class="emp-tag">🆔 ${esc(data.id)}</span>
+              <span class="emp-tag">📋 ${esc(data.department)}</span>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto">
+          <div style="display:flex;align-items:center;gap:5px;flex:0 0 auto">
             <button class="mnav-arrow" onclick="chMonth(-1)" ${!hasPrev?'disabled':''} aria-label="Prev">‹</button>
             <div style="position:relative">
               <button class="month-picker-btn" id="mpBtn" onclick="toggleMonthPicker()">
@@ -1112,20 +1153,28 @@
           <div class="cal-body">${cells}</div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-row">${statsHTML}</div>
-
         <!-- Actions -->
         <div class="actions-card">
-          <div class="section-label">${t('actionsTitle')}</div>
-          <div class="actions-top-row">
-            <button class="action-btn primary" onclick="dlPDF()"><span class="action-ico">📄</span>${t('pdf')}</button>
-            <button class="action-btn primary" onclick="dlIMG()"><span class="action-ico">🖼️</span>${t('img')}</button>
-          </div>
           <div class="actions-grid">
-            <button class="action-btn" onclick="dlICS()"><span class="action-ico">📆</span>${t('ics')}</button>
-            <button class="action-btn" onclick="shareS()"><span class="action-ico">🔗</span>${t('share')}</button>
-            <button class="action-btn" onclick="window.print()"><span class="action-ico">🖨️</span>${t('print')}</button>
+            <button class="action-btn primary" onclick="dlPDF()"><span class="action-ico">📄</span>PDF</button>
+            <button class="action-btn primary" onclick="dlIMG()"><span class="action-ico">🖼️</span>${lang==='ar'?'صورة':'Image'}</button>
+            <button class="action-btn primary" onclick="openStatsModal()"><span class="action-ico">📊</span>${lang==='ar'?'إحصائيات':'Stats'}</button>
+          </div>
+          <div class="actions-grid" style="margin-top:8px">
+            <button class="action-btn" onclick="dlICS()"><span class="action-ico">📆</span>ICS</button>
+            <button class="action-btn" onclick="shareS()"><span class="action-ico">🔗</span>${lang==='ar'?'مشاركة':'Share'}</button>
+            <button class="action-btn" onclick="window.print()"><span class="action-ico">🖨️</span>${lang==='ar'?'طباعة':'Print'}</button>
+          </div>
+        </div>
+
+        <!-- Stats Modal -->
+        <div class="stats-modal-overlay" id="statsModalOverlay" onclick="closeStatsModal()" style="display:none">
+          <div class="stats-modal" onclick="event.stopPropagation()">
+            <div class="stats-modal-head">
+              <span>${lang==='ar'?'الإحصائيات':'Statistics'}</span>
+              <button onclick="closeStatsModal()" class="stats-modal-close">✕</button>
+            </div>
+            <div class="stats-modal-body">${statsHTML}</div>
           </div>
         </div>`;
     }
