@@ -718,7 +718,28 @@
       .topbar,.search-section,.toast-container,.modal,.actions-card,.legend-card{display:none!important}
       body{background:#fff;color:#000}
     }
-  </style>
+  
+    .emp-banner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .emp-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .emp-info{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+</style>
 </head>
 <body>
 
@@ -1126,24 +1147,39 @@
       }
 
       document.getElementById('area').innerHTML=`
+        
         <!-- Employee Banner -->
         <div class="emp-banner">
-          <div style="min-width:0;flex:1">
-            <div class="emp-name">${esc(data.name)}</div>
-            <div class="emp-tags">
-              <span class="emp-tag">🆔 ${esc(data.id)}</span>
-              <span class="emp-tag">📋 ${esc(data.department)}</span>
+          <div class="emp-left">
+            <div class="emp-avatar">${initials}</div>
+            <div class="emp-info" style="min-width:0">
+              <div class="emp-name">${esc(data.name)}</div>
+              <div class="emp-tags">
+                <span class="emp-tag">🆔 ${esc(data.id)}</span>
+                <span class="emp-tag">📋 ${esc(data.department)}</span>
+              </div>
             </div>
           </div>
+
+          <div style="position:relative">
+            <button class="month-picker-btn" id="mpBtn" onclick="toggleMonthPicker()">
+              ${esc(mLabel)} <span class="mpb-arrow">▼</span>
+            </button>
+            <div class="month-popup" id="monthPopup">
+              ${popupHTML}
+            </div>
+          </div>
+        </div>
+
           <div style="display:flex;align-items:center;gap:5px;flex:0 0 auto">
-            <button class="mnav-arrow" onclick="chMonth(-1)" ${!hasPrev?'disabled':''} aria-label="Prev">‹</button>
+            
             <div style="position:relative">
               <button class="month-picker-btn" id="mpBtn" onclick="toggleMonthPicker()">
                 ${esc(mLabel)} <span class="mpb-arrow">▼</span>
               </button>
               <div class="month-popup" id="monthPopup">${popupHTML}</div>
             </div>
-            <button class="mnav-arrow" onclick="chMonth(1)" ${!hasNext?'disabled':''} aria-label="Next">›</button>
+            
           </div>
         </div>
 
