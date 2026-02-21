@@ -1141,6 +1141,40 @@
       font-family:'Sora',system-ui,sans-serif;
     }
 
+
+    /* ── Tips modal: mobile-friendly sizing ── */
+    .modal-sheet{
+      max-height:85dvh;
+      display:flex;
+      flex-direction:column;
+    }
+    .modal-body{
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      padding:18px 20px;
+    }
+    .modal-head{
+      padding:18px 20px 14px;
+    }
+    .modal-title{font-size:18px}
+    .modal-sub{font-size:13px}
+    .tip{
+      padding:14px 14px;
+      border-radius:14px;
+    }
+    .tip-text{font-size:13px;line-height:1.7}
+    .modal-foot{
+      position:sticky;
+      bottom:0;
+      background:linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.22));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top:1px solid var(--border);
+    }
+    body.light .modal-foot{
+      background:linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.75));
+    }
+
 </style>
 </head>
 <body>
@@ -1184,8 +1218,7 @@
                  placeholder="e.g. 12345" pattern="[0-9]+" required/>
         </div>
         <button class="search-btn" type="submit" id="sbtn">📅 View</button>
-        <button class="tips-pill" type="button" onclick="openTips()" id="tipsBtn" aria-label="Tips">❔</button>
-      </div>
+</div>
     </form>
   </section>
 
@@ -1202,6 +1235,33 @@
 
   <!-- TOAST -->
   <div class="toast-container" id="toastMount" style="display:none"></div>
+
+
+  <!-- ID ACTION MODAL -->
+  <div class="modal" id="idActionModal" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" onclick="closeIdActionModal()"></div>
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="idActionTitle">Action</div>
+          <div class="modal-sub" id="idActionSub">Confirm</div>
+        </div>
+        <button class="modal-close" onclick="closeIdActionModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-intro">
+          <div class="modal-intro-title" id="idActionIntroTitle">Confirm</div>
+          <div class="modal-intro-desc" id="idActionIntroDesc">—</div>
+        </div>
+      </div>
+      <div class="modal-foot" style="gap:10px;justify-content:space-between">
+        <button class="tbtn" style="flex:1;height:42px" onclick="closeIdActionModal()" id="idActionCancel">Cancel</button>
+        <button class="tbtn primary" style="flex:1;height:42px" onclick="confirmIdAction()" id="idActionOk">OK</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- TIPS MODAL -->
   <div class="modal" id="tipsModal" role="dialog" aria-modal="true">
@@ -1293,7 +1353,14 @@
         days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
         months:['January','February','March','April','May','June','July','August','September','October','November','December'],
         legend:{Morning:'Morning',Afternoon:'Afternoon',Night:'Night','Off Day':'Day Off','Annual Leave':'Annual Leave','Sick Leave':'Sick Leave',Training:'Training',Standby:'Standby',Other:'Other'},
-        saveTitle:'Save your ID?',saveSub:'Open your schedule faster next time.',saveYes:'✅ Save',saveNo:'Not now'
+        saveTitle:'Save your ID?',saveSub:'Open your schedule faster next time.',saveYes:'✅ Save',saveNo:'Not now',
+        idActTitle:'Employee ID',
+        idActChange:'Change saved ID?',
+        idActChangeSub:'This will remove the saved ID from this device.',
+        idActPin:'Set as My ID?',
+        idActPinSub:'Save this ID on this device for faster access.',
+        cancel:'Cancel',
+        ok:'OK'
       },
       ar:{
         title:'جدولي',sub:'أدخل رقمك الوظيفي',
@@ -1310,7 +1377,14 @@
         days:['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
         months:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
         legend:{Morning:'صباحي',Afternoon:'مسائي',Night:'ليلي','Off Day':'إجازة','Annual Leave':'سنوية','Sick Leave':'مرضية',Training:'تدريب',Standby:'احتياطي',Other:'أخرى'},
-        saveTitle:'هل تريد حفظ الرقم؟',saveSub:'لفتح الجدول بسرعة في المرات القادمة.',saveYes:'✅ احفظ',saveNo:'ليس الآن'
+        saveTitle:'هل تريد حفظ الرقم؟',saveSub:'لفتح الجدول بسرعة في المرات القادمة.',saveYes:'✅ احفظ',saveNo:'ليس الآن',
+        idActTitle:'الرقم الوظيفي',
+        idActChange:'تغيير الرقم المحفوظ؟',
+        idActChangeSub:'سيتم حذف الرقم المحفوظ من هذا الجهاز.',
+        idActPin:'تعيين كرقمي؟',
+        idActPinSub:'سيتم حفظ هذا الرقم على هذا الجهاز لفتح الجدول بسرعة.',
+        cancel:'إلغاء',
+        ok:'موافق'
       }
     };
 
@@ -1430,8 +1504,48 @@
     }
     function confirmSave(id){ localStorage.setItem('savedEmpId',id); dismissToast(); if(data) renderSchedule(); }
     function dismissToast(){ const m=document.getElementById('toastMount'); m.innerHTML=''; m.style.display='none'; }
-    function changeMyId(){ if(confirm(lang==='ar'?'هل تريد تغيير الرقم المحفوظ؟':'Change your saved Employee ID?')){ localStorage.removeItem('savedEmpId'); if(data) renderSchedule(); } }
-    function setAsMyId(){ if(data&&data.id){ localStorage.setItem('savedEmpId',data.id); if(data) renderSchedule(); } }
+    function changeMyId(){ openIdActionModal('change'); } }
+    
+    // ── Styled ID actions (instead of browser confirm) ──
+    let _pendingIdAction=null;
+    function openIdActionModal(kind){
+      _pendingIdAction=kind; // 'change' | 'pin'
+      const m=document.getElementById('idActionModal');
+      if(!m) return;
+      document.getElementById('idActionTitle').textContent=t('idActTitle');
+      const titleEl=document.getElementById('idActionIntroTitle');
+      const descEl=document.getElementById('idActionIntroDesc');
+      if(kind==='change'){
+        titleEl.textContent=t('idActChange');
+        descEl.textContent=t('idActChangeSub');
+      }else{
+        titleEl.textContent=t('idActPin');
+        descEl.textContent=t('idActPinSub');
+      }
+      document.getElementById('idActionCancel').textContent=t('cancel');
+      document.getElementById('idActionOk').textContent=t('ok');
+      m.classList.add('open');
+    }
+    function closeIdActionModal(){
+      const m=document.getElementById('idActionModal');
+      if(m) m.classList.remove('open');
+      _pendingIdAction=null;
+    }
+    function confirmIdAction(){
+      if(_pendingIdAction==='change'){
+        localStorage.removeItem('savedEmpId');
+        closeIdActionModal();
+        if(data) renderSchedule();
+      }else if(_pendingIdAction==='pin'){
+        if(data&&data.id){ localStorage.setItem('savedEmpId',data.id); }
+        closeIdActionModal();
+        if(data) renderSchedule();
+      }else{
+        closeIdActionModal();
+      }
+    }
+
+    function setAsMyId(){ openIdActionModal('pin'); } }
 
     function calcStats(s){
       const r={work:0,off:0,morning:0,afternoon:0,night:0,standby:0,leaves:0};
