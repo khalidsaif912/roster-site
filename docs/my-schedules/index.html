@@ -389,28 +389,30 @@
     body.light .day.empty{background:rgba(240,242,245,.6)}
     .dnum{
       position:absolute;
-      inset:0;
-      display:flex;align-items:center;justify-content:center;
-      font-size:clamp(28px,6vw,52px);
+      top:6px;
+      left:0;right:0;
+      text-align:center;
+      font-size:clamp(20px,4vw,36px);
       font-weight:900;
       color:var(--ink);
-      opacity:.18;
+      opacity:.22;
       font-family:'DM Mono',monospace;
       line-height:1;
       pointer-events:none;
       z-index:1;
     }
-    .day.today .dnum{color:var(--accent);opacity:.25}
-    /* Shift code — big, solid, centered, foreground */
+    .day.today .dnum{color:var(--accent);opacity:.35}
+    /* Shift code — bottom quarter, solid, foreground */
     .day-ghost{ display:none }
     .day-code{
       position:absolute;
-      inset:0;
-      display:flex;align-items:center;justify-content:center;
-      font-size:clamp(16px,3.2vw,30px);
+      bottom:8px;
+      left:0;right:0;
+      text-align:center;
+      font-size:clamp(13px,2.6vw,24px);
       font-weight:900;
       font-family:'DM Mono',monospace;
-      letter-spacing:-.5px;
+      letter-spacing:-.3px;
       white-space:nowrap;
       z-index:2;
       line-height:1;
