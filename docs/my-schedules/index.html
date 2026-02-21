@@ -296,22 +296,39 @@
     }
     .emp-name{font-size:16px;font-weight:700;color:var(--ink);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-    .emp-name-row{display:flex;align-items:baseline;gap:10px;min-width:0}
-    .emp-name-row .emp-name{min-width:0}
+    
+    .emp-name-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .emp-name-row .emp-name{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      letter-spacing:-.2px;
+    }
+    /* ID pill matches previous tag vibe (small mono, subtle) */
     .emp-idpill{
-      display:inline-flex;align-items:center;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      border-radius:6px;
       padding:3px 8px;
-      border-radius:8px;
-      font-size:12px;
-      font-weight:700;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:600;
       font-family:'DM Mono',monospace;
-      color:var(--ink);
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--border2);
       white-space:nowrap;
       flex:0 0 auto;
+      line-height:1.1;
     }
     body.light .emp-idpill{ background:rgba(0,0,0,.04); }
+
     .emp-dept{
       margin-top:6px;
       font-size:12px;
@@ -320,8 +337,9 @@
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      letter-spacing:.1px;
     }
-    .emp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.emp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
     .emp-tag{
       display:inline-flex;align-items:center;gap:4px;
       background:rgba(255,255,255,.05);
@@ -959,6 +977,10 @@
     /* ── Export helpers ── */
     .export-area{display:flex;flex-direction:column;gap:12px}
 
+
+    /* Fine alignment: drop month control slightly */
+    .month-wrap{ margin-top:4px; }
+
 </style>
 </head>
 <body>
@@ -1382,7 +1404,7 @@
           <div class="emp-info" style="min-width:0;flex:1">
             <div class="emp-name-row">
               <div class="emp-name">${esc(data.name)}</div>
-              <span class="emp-idpill">ID9&nbsp;${esc(data.id)}</span>
+              <span class="emp-idpill">ID&nbsp;${esc(data.id)}</span>
             </div>
             <div class="emp-dept">${esc(data.department)}</div>
           </div>
