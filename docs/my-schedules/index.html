@@ -388,36 +388,29 @@
     .day.empty{background:rgba(13,17,23,.5);cursor:default}
     body.light .day.empty{background:rgba(240,242,245,.6)}
     .dnum{
-      font-size:15px;font-weight:800;
-      color:var(--ink);
-      font-family:'DM Mono',monospace;
-      line-height:1;
-      position:relative;z-index:2;
-    }
-    .day.today .dnum{color:var(--accent)}
-    /* Ghost code — huge faint fill */
-    .day-ghost{
       position:absolute;
       inset:0;
       display:flex;align-items:center;justify-content:center;
-      font-size:clamp(22px,5vw,46px);
+      font-size:clamp(28px,6vw,52px);
       font-weight:900;
-      opacity:.17;
-      pointer-events:none;
-      letter-spacing:-2px;
-      line-height:1;
+      color:var(--ink);
+      opacity:.18;
       font-family:'DM Mono',monospace;
+      line-height:1;
+      pointer-events:none;
+      z-index:1;
     }
-    /* Readable code — bottom of cell, no container, bigger */
+    .day.today .dnum{color:var(--accent);opacity:.25}
+    /* Shift code — big, solid, centered, foreground */
+    .day-ghost{ display:none }
     .day-code{
       position:absolute;
-      bottom:8px;
-      left:50%;
-      transform:translateX(-50%);
-      font-size:clamp(10px,1.8vw,15px);
-      font-weight:800;
+      inset:0;
+      display:flex;align-items:center;justify-content:center;
+      font-size:clamp(16px,3.2vw,30px);
+      font-weight:900;
       font-family:'DM Mono',monospace;
-      letter-spacing:.2px;
+      letter-spacing:-.5px;
       white-space:nowrap;
       z-index:2;
       line-height:1;
@@ -450,7 +443,7 @@
     body.light .s-other{background:#f9fafb}
     body.light .day{background:var(--surface)}
     body.light .day.empty{background:rgba(245,247,250,.7)}
-    /* Shift code text colors (no container) */
+    /* Shift code text colors */
     .s-morning .day-code{color:#d29922}
     .s-afternoon .day-code{color:#e8722a}
     .s-night .day-code{color:#bc8cff}
@@ -459,16 +452,16 @@
     .s-training .day-code{color:#58a6ff}
     .s-standby .day-code{color:#ff7b72}
     .s-other .day-code{color:#8b949e}
-    /* Ghost inherits same color */
-    .s-morning .day-ghost{color:#d29922}
-    .s-afternoon .day-ghost{color:#e8722a}
-    .s-night .day-ghost{color:#bc8cff}
-    .s-off .day-ghost{color:#8b949e}
-    .s-leave .day-ghost{color:#3fb950}
-    .s-training .day-ghost{color:#58a6ff}
-    .s-standby .day-ghost{color:#ff7b72}
-    .s-other .day-ghost{color:#8b949e}
-    /* Light mode code colors */
+    /* Day number color matches shift */
+    .s-morning .dnum{color:#d29922}
+    .s-afternoon .dnum{color:#e8722a}
+    .s-night .dnum{color:#bc8cff}
+    .s-off .dnum{color:#8b949e}
+    .s-leave .dnum{color:#3fb950}
+    .s-training .dnum{color:#58a6ff}
+    .s-standby .dnum{color:#ff7b72}
+    .s-other .dnum{color:#8b949e}
+    /* Light mode */
     body.light .s-morning .day-code{color:#b45309}
     body.light .s-afternoon .day-code{color:#c2410c}
     body.light .s-night .day-code{color:#7c3aed}
@@ -476,13 +469,13 @@
     body.light .s-leave .day-code{color:#15803d}
     body.light .s-training .day-code{color:#1d4ed8}
     body.light .s-standby .day-code{color:#be185d}
-    body.light .s-morning .day-ghost{color:#b45309}
-    body.light .s-afternoon .day-ghost{color:#c2410c}
-    body.light .s-night .day-ghost{color:#7c3aed}
-    body.light .s-off .day-ghost{color:#6b7280}
-    body.light .s-leave .day-ghost{color:#15803d}
-    body.light .s-training .day-ghost{color:#1d4ed8}
-    body.light .s-standby .day-ghost{color:#be185d}
+    body.light .s-morning .dnum{color:#b45309}
+    body.light .s-afternoon .dnum{color:#c2410c}
+    body.light .s-night .dnum{color:#7c3aed}
+    body.light .s-off .dnum{color:#6b7280}
+    body.light .s-leave .dnum{color:#15803d}
+    body.light .s-training .dnum{color:#1d4ed8}
+    body.light .s-standby .dnum{color:#be185d}
 
     /* ── LEGEND ── */
     .legend-card{
@@ -1042,11 +1035,9 @@
             const sc=dd?shiftClass(dd.shift_group):'';
             const isToday=(now.getFullYear()===yr&&(now.getMonth()+1)===mo&&now.getDate()===dc);
             const ghostCode = dd ? (dd.shift_code || (dd.shift_group==='Off Day'?'OFF':dd.shift_group==='Annual Leave'?'LV':dd.shift_group==='Sick Leave'?'SL':dd.shift_group==='Training'?'TR':dd.shift_group==='Standby'?'ST':'')) : '';
-            const ghostEl = ghostCode ? `<span class="day-ghost">${esc(ghostCode)}</span>` : '';
             const codeEl = ghostCode ? `<span class="day-code">${esc(ghostCode)}</span>` : '';
             cells+=`<div class="day ${sc} ${isToday?'today':''}">
               <span class="dnum">${dc}</span>
-              ${ghostEl}
               ${codeEl}
             </div>`;
             dc++;
