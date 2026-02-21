@@ -1380,34 +1380,19 @@
 
     /* IMAGE DOWNLOAD — pure Canvas v2 */
     async function dlIMG(){
-      const sched=data.schedules[month]||[];
-      const [yr,mo]=month.split('-').map(Number);
-      const stats=calcStats(sched);
-      const isAr=lang==='ar';
+      const element = document.querySelector('.main');
 
-      // ── Palette (match UI / calendar style) ──
-      const cs=getComputedStyle(document.documentElement);
-      const BG=cs.getPropertyValue('--bg').trim()||'#0d1117';
-      const SURF=cs.getPropertyValue('--surface').trim()||'#161b22';
-      const SURF2=cs.getPropertyValue('--surface2').trim()||'#1c2330';
-      const INK=cs.getPropertyValue('--ink').trim()||'#e6edf3';
-      const MUTED=cs.getPropertyValue('--muted').trim()||'#8b949e';
-      const DIM=cs.getPropertyValue('--dim').trim()||'#3d444d';
-      const BORDER=cs.getPropertyValue('--border').trim()||'rgba(255,255,255,0.09)';
-      const BORDER2=cs.getPropertyValue('--border2').trim()||'rgba(255,255,255,0.15)';
-      const ACCENT=cs.getPropertyValue('--accent').trim()||'#58a6ff';
+      const canvas = await html2canvas(element, {
+        scale: 3,
+        backgroundColor: null,
+        useCORS: true
+      });
 
-      const SHIFT_THEME={
-        Morning:       {bg:'#1f1500',fg:'#e3a217',tagBg:'rgba(227,162,23,.22)',tagBd:'rgba(227,162,23,.5)'},
-        Afternoon:     {bg:'#1f0e00',fg:'#e8722a',tagBg:'rgba(232,114,42,.22)',tagBd:'rgba(232,114,42,.5)'},
-        Night:         {bg:'#100b20',fg:'#c084fc',tagBg:'rgba(192,132,252,.22)',tagBd:'rgba(192,132,252,.5)'},
-        'Off Day':     {bg:'#0e1015',fg:'#94a3b8',tagBg:'rgba(148,163,184,.18)',tagBd:'rgba(148,163,184,.4)'},
-        'Annual Leave':{bg:'#061410',fg:'#4ade80',tagBg:'rgba(74,222,128,.18)',tagBd:'rgba(74,222,128,.45)'},
-        'Sick Leave':  {bg:'#061410',fg:'#4ade80',tagBg:'rgba(74,222,128,.18)',tagBd:'rgba(74,222,128,.45)'},
-        Training:      {bg:'#070e1f',fg:'#60a5fa',tagBg:'rgba(96,165,250,.18)',tagBd:'rgba(96,165,250,.45)'},
-        Standby:       {bg:'#1a0910',fg:'#fb7185',tagBg:'rgba(251,113,133,.18)',tagBd:'rgba(251,113,133,.45)'},
-        Other:         {bg:'#0f1115',fg:'#94a3b8',tagBg:'rgba(148,163,184,.18)',tagBd:'rgba(148,163,184,.4)'},
-      };
+      const link = document.createElement('a');
+      link.download = `schedule-${data.id}-${month}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
 
       const STAT_COLORS={work:ACCENT,off:'#94a3b8',morning:'#e3a217',afternoon:'#e8722a',night:'#c084fc',standby:'#fb7185',leaves:'#4ade80'};
       const FALLBACK={'Off Day':'OFF','Annual Leave':'LV','Sick Leave':'SL',Training:'TR',Standby:'ST',Other:'—'};
@@ -1710,34 +1695,30 @@
     }
 
     /* PDF */
-    function dlPDF(){
-      if(!window.jspdf){alert('PDF library loading, please try again.');return;}
-      const{jsPDF}=window.jspdf;
-      const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      const W=210,H=297,ML=10,MR=10;
-      const sched=data.schedules[month]||[];
-      const[yr,mo]=month.split('-').map(Number);
-      const mName=T.en.months[mo-1];
-      const stats=calcStats(sched);
-      const SC={Morning:{fg:[180,80,0],bg:[255,243,224]},Afternoon:{fg:[160,40,5],bg:[255,235,218]},Night:{fg:[100,40,210],bg:[237,233,254]},'Off Day':{fg:[85,95,115],bg:[238,240,245]},'Annual Leave':{fg:[10,125,60],bg:[218,248,230]},'Sick Leave':{fg:[10,125,60],bg:[218,248,230]},Training:{fg:[10,85,190],bg:[218,238,255]},Standby:{fg:[148,10,110],bg:[250,218,242]},Other:{fg:[90,100,115],bg:[240,241,246]}};
-      const FALLBACK={'Off Day':'OFF','Annual Leave':'LV','Sick Leave':'SL',Training:'TR',Standby:'ST',Other:'—'};
-            const LNAMES={Morning:'Morning',Afternoon:'Afternoon',Night:'Night','Off Day':'Day Off','Annual Leave':'Leave','Sick Leave':'Sick',Training:'Training',Standby:'Standby',Other:'Other'};
-      // Match UI theme (calendar look)
-      const cs=getComputedStyle(document.documentElement);
-      const BG=cs.getPropertyValue('--bg').trim()||'#ffffff';
-      const SURF=cs.getPropertyValue('--surface').trim()||'#ffffff';
-      const SURF2=cs.getPropertyValue('--surface2').trim()||'#f0f2f5';
-      const INK=cs.getPropertyValue('--ink').trim()||'#1a1f2e';
-      const MUTED_TX=cs.getPropertyValue('--muted').trim()||'#6b7280';
-      const DIM_TX=cs.getPropertyValue('--dim').trim()||'#9ca3af';
-      const ACCENT_HEX=cs.getPropertyValue('--accent').trim()||'#1d6fd4';
+    async function dlPDF(){
+      const element = document.querySelector('.main');
 
-      function hexToRgbArr(h){
-        const x=h.replace('#','').trim();
-        if(x.length===3){
-          const r=parseInt(x[0]+x[0],16), g=parseInt(x[1]+x[1],16), b=parseInt(x[2]+x[2],16);
-          return [r,g,b];
-        }
+      const canvas = await html2canvas(element, {
+        scale: 3,
+        backgroundColor: "#ffffff",
+        useCORS: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 190;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      pdf.save(`schedule-${data.id}-${month}.pdf`);
+    }
         if(x.length===6){
           return [parseInt(x.slice(0,2),16),parseInt(x.slice(2,4),16),parseInt(x.slice(4,6),16)];
         }
