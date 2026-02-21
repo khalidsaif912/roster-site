@@ -151,23 +151,23 @@
     }
     .aurora-bar-inner{
       position:absolute;
-      top:0; left:4%; right:4%;
-      height:22px;
-      border-radius:0 0 60% 60%;
+      top:0; left:2%; right:2%;
+      height:32px;
+      border-radius:0 0 50% 50%;
       background:linear-gradient(90deg,
         #1f6feb, #58a6ff, #3fb950, #bc8cff, #ff7b72, #58a6ff, #1f6feb
       );
       background-size:300% 100%;
-      filter:blur(12px);
+      filter:blur(14px);
       opacity:0;
-      transform:scaleX(.7);
-      transition: opacity .4s ease, transform .4s ease;
-      animation: aurora 5s ease infinite;
+      transform:scaleX(.6) scaleY(.5);
+      transition: opacity .5s ease, transform .5s ease;
+      animation: aurora 4s ease infinite;
       will-change: opacity, transform;
     }
     .aurora-bar-inner.visible{
-      opacity:.65;
-      transform:scaleX(1);
+      opacity:.9;
+      transform:scaleX(1) scaleY(1);
     }
     body.light .aurora-bar-inner{ opacity:0 !important; }
     .brand{display:flex;align-items:center;gap:10px;min-width:0}
@@ -286,17 +286,19 @@
     .search-input::placeholder{color:var(--dim);font-size:13px}
     .search-input:focus{border-color:rgba(56,139,253,.6);box-shadow:0 0 0 3px rgba(56,139,253,.15)}
     .search-btn{
-      height:36px;padding:0 16px;
-      background:linear-gradient(135deg,#1f6feb,#388bfd);
-      border:none;color:#fff;
+      height:36px;padding:0 18px;
+      background:linear-gradient(135deg,#1a5fd4,#1f6feb);
+      border:1px solid rgba(56,139,253,.5);
+      color:#fff;
       border-radius:10px;
       font-size:13px;font-weight:700;
       white-space:nowrap;
-      transition:filter .15s,transform .1s;
-      box-shadow:0 4px 14px rgba(31,111,235,.35);
+      transition:filter .15s,transform .1s,box-shadow .15s;
+      box-shadow:0 4px 16px rgba(31,111,235,.5), inset 0 1px 0 rgba(255,255,255,.15);
       flex:0 0 auto;
+      letter-spacing:.2px;
     }
-    .search-btn:hover{filter:brightness(1.1)}
+    .search-btn:hover{filter:brightness(1.15);box-shadow:0 6px 20px rgba(31,111,235,.65)}
     .search-btn:active{transform:scale(.97)}
 
     .mnav-arrow{
@@ -685,20 +687,20 @@
       border:1px solid var(--border);
       border-radius:10px;
       padding:12px 14px;
-      color:var(--muted);
+      color:#c9d1d9;
       font-size:13px;font-weight:600;
       transition:all .15s;
       cursor:pointer;
     }
-    .action-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:var(--ink)}
+    .action-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:#fff}
     .action-btn:active{transform:scale(.98)}
     .action-btn.primary{
-      background:linear-gradient(135deg,rgba(31,111,235,.18),rgba(56,139,253,.08));
-      border-color:rgba(56,139,253,.35);
-      color:var(--accent);
+      background:linear-gradient(135deg,rgba(31,111,235,.2),rgba(56,139,253,.1));
+      border-color:rgba(56,139,253,.4);
+      color:#58a6ff;
       font-weight:700;
     }
-    .action-btn.primary:hover{background:linear-gradient(135deg,rgba(31,111,235,.28),rgba(56,139,253,.18));border-color:rgba(56,139,253,.55)}
+    .action-btn.primary:hover{background:linear-gradient(135deg,rgba(31,111,235,.32),rgba(56,139,253,.22));border-color:rgba(56,139,253,.65);color:#79b8ff}
     .action-ico{font-size:17px;flex:0 0 auto}
 
     /* ── STATS MODAL ── */
@@ -2022,15 +2024,17 @@
       if(!topbar) return;
 
       function setAuroraPos(){
-        if(auroraBar) auroraBar.style.top = topbar.offsetHeight + 'px';
+        const h = topbar.offsetHeight || 62;
+        if(auroraBar) auroraBar.style.top = h + 'px';
       }
 
       function onScroll(){
-        const scrolled = window.scrollY > 10;
+        const scrolled = window.scrollY > 5;
         if(auroraInner) auroraInner.classList.toggle('visible', scrolled);
       }
 
-      setAuroraPos();
+      // init position after fonts/layout settle
+      setTimeout(setAuroraPos, 100);
       window.addEventListener('scroll', onScroll, {passive:true});
       window.addEventListener('resize', setAuroraPos);
     })();
