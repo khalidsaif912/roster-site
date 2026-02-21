@@ -109,13 +109,6 @@
       padding:16px 20px 0;
       max-width:960px;margin:0 auto;
     }
-    .search-hero{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:var(--r-lg);
-      padding:12px;
-      position:relative;
-    }
     .tips-pill{
       width:36px;height:36px;
       border:1px solid var(--border2);
@@ -128,31 +121,24 @@
       transition:all .15s;
     }
     .tips-pill:hover{background:rgba(255,255,255,.1);color:var(--ink)}
-
     .search-form{display:flex;gap:8px;align-items:center}
     .search-input{
-      width:130px;
-      flex:0 0 130px;
+      width:130px;flex:0 0 130px;
       background:var(--surface3);
       border:1px solid var(--border2);
       color:var(--ink);
       border-radius:10px;
       padding:9px 12px;
-      font-size:14px;
-      font-weight:500;
+      font-size:14px;font-weight:500;
       outline:none;
       transition:border-color .15s,box-shadow .15s;
     }
     .search-input::placeholder{color:var(--dim);font-size:13px}
-    .search-input:focus{
-      border-color:rgba(56,139,253,.6);
-      box-shadow:0 0 0 3px rgba(56,139,253,.15);
-    }
+    .search-input:focus{border-color:rgba(56,139,253,.6);box-shadow:0 0 0 3px rgba(56,139,253,.15)}
     .search-btn{
       height:36px;padding:0 16px;
       background:linear-gradient(135deg,#1f6feb,#388bfd);
-      border:none;
-      color:#fff;
+      border:none;color:#fff;
       border-radius:10px;
       font-size:13px;font-weight:700;
       white-space:nowrap;
@@ -163,43 +149,82 @@
     .search-btn:hover{filter:brightness(1.1)}
     .search-btn:active{transform:scale(.97)}
 
-    /* Month Navigator */
-    .month-nav{
-      display:none;
-      align-items:center;
-      gap:8px;
-      margin-top:14px;
-      padding-top:14px;
-      border-top:1px solid var(--border);
-    }
-    .month-nav.visible{display:flex}
-    .mnav-btn{
-      width:36px;height:36px;
-      background:var(--surface3);
+    .mnav-arrow{
+      width:32px;height:32px;
+      background:var(--surface2);
       border:1px solid var(--border2);
       color:var(--muted);
       border-radius:8px;
       display:grid;place-items:center;
-      font-size:16px;
-      flex:0 0 auto;
-      transition:all .15s;
+      font-size:16px;flex:0 0 auto;
+      transition:all .15s;cursor:pointer;
     }
-    .mnav-btn:hover:not(:disabled){background:rgba(255,255,255,.1);color:var(--ink)}
-    .mnav-btn:disabled{opacity:.3;cursor:not-allowed}
-    .mnav-select{
-      flex:1;
-      background:var(--surface3);
+    .mnav-arrow:hover:not(:disabled){background:var(--surface3);color:var(--ink)}
+    .mnav-arrow:disabled{opacity:.3;cursor:not-allowed}
+
+    /* ── MONTH PICKER POPUP ── */
+    .month-picker-btn{
+      display:flex;align-items:center;gap:6px;
+      background:var(--surface2);
       border:1px solid var(--border2);
       color:var(--ink);
+      border-radius:10px;
+      padding:0 12px;
+      height:38px;
+      font-size:13px;font-weight:700;
+      font-family:'DM Mono',monospace;
+      cursor:pointer;
+      transition:all .15s;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .month-picker-btn:hover{background:var(--surface3);border-color:rgba(255,255,255,.2)}
+    .month-picker-btn .mpb-arrow{font-size:10px;opacity:.6}
+    .month-popup{
+      position:absolute;
+      top:calc(100% + 8px);
+      z-index:200;
+      background:var(--surface);
+      border:1px solid var(--border2);
+      border-radius:14px;
+      padding:10px;
+      box-shadow:0 16px 40px rgba(0,0,0,.45);
+      display:none;
+      min-width:200px;
+      animation:popIn .18s cubic-bezier(.22,1,.36,1);
+    }
+    body.light .month-popup{box-shadow:0 8px 28px rgba(0,0,0,.15)}
+    .month-popup.open{display:block}
+    @keyframes popIn{from{opacity:0;transform:scale(.94) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .month-popup-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:5px;
+    }
+    .mp-item{
+      padding:7px 4px;
       border-radius:8px;
-      padding:8px 12px;
-      font-size:13px;font-weight:600;
-      outline:none;
-      appearance:none;
+      font-size:11px;font-weight:600;
       text-align:center;
       cursor:pointer;
+      color:var(--muted);
+      transition:all .12s;
+      border:1px solid transparent;
     }
-    .mnav-label{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;font-family:'DM Mono',monospace}
+    .mp-item:hover{background:var(--surface3);color:var(--ink);border-color:var(--border)}
+    .mp-item.active{
+      background:linear-gradient(135deg,rgba(31,111,235,.2),rgba(56,139,253,.1));
+      border-color:rgba(56,139,253,.4);
+      color:var(--accent);
+      font-weight:700;
+    }
+    .mp-year{
+      font-size:10px;font-weight:700;color:var(--dim);
+      text-align:center;padding:4px 0 8px;
+      letter-spacing:.6px;text-transform:uppercase;
+      border-bottom:1px solid var(--border);
+      margin-bottom:8px;
+    }
 
     /* ── MAIN CONTENT ── */
     .main{
@@ -654,22 +679,14 @@
 
   <!-- SEARCH SECTION -->
   <section class="search-section">
-    <div class="search-hero">
-      <form id="searchForm">
-        <div class="search-form">
-          <input class="search-input" id="empId" inputmode="numeric" autocomplete="off"
-                 placeholder="e.g. 12345" pattern="[0-9]+" required/>
-          <button class="search-btn" type="submit" id="sbtn">📅 View</button>
-          <button class="tips-pill" type="button" onclick="openTips()" id="tipsBtn" aria-label="Tips">❔</button>
-        </div>
-      </form>
-
-      <div class="month-nav" id="monthNav">
-        <button class="mnav-btn" id="mPrev" onclick="chMonth(-1)" aria-label="Prev">‹</button>
-        <select class="mnav-select" id="mSel" onchange="jumpMonth(this.value)"></select>
-        <button class="mnav-btn" id="mNext" onclick="chMonth(1)" aria-label="Next">›</button>
+    <form id="searchForm">
+      <div class="search-form">
+        <input class="search-input" id="empId" inputmode="numeric" autocomplete="off"
+               placeholder="e.g. 12345" pattern="[0-9]+" required/>
+        <button class="search-btn" type="submit" id="sbtn">📅 View</button>
+        <button class="tips-pill" type="button" onclick="openTips()" id="tipsBtn" aria-label="Tips">❔</button>
       </div>
-    </div>
+    </form>
   </section>
 
   <!-- MAIN -->
@@ -911,6 +928,18 @@
 
     function chMonth(dir){ const ci=months.indexOf(month),ni=ci+dir; if(ni>=0&&ni<months.length){month=months[ni];renderSchedule();} }
     function jumpMonth(val){ if(months.includes(val)){month=val;renderSchedule();} }
+    function toggleMonthPicker(){
+      const p=document.getElementById('monthPopup');
+      if(p) p.classList.toggle('open');
+    }
+    function closeMonthPicker(){
+      const p=document.getElementById('monthPopup');
+      if(p) p.classList.remove('open');
+    }
+    // Close popup on outside click
+    document.addEventListener('click',function(e){
+      if(!e.target.closest('#mpBtn')&&!e.target.closest('#monthPopup')) closeMonthPicker();
+    });
 
     function renderSchedule(){
       const sched=data.schedules[month]||[];
@@ -921,16 +950,17 @@
       const dim=new Date(yr,mo,0).getDate();
       const now=new Date();
 
-      // Month nav
-      const nav=document.getElementById('monthNav');
-      nav.classList.add('visible');
-      const sel=document.getElementById('mSel');
-      sel.innerHTML=months.map(m=>{
-        const p=m.split('-').map(Number);
-        return `<option value="${m}" ${m===month?'selected':''}>${T[lang].months[p[1]-1]} ${p[0]}</option>`;
-      }).join('');
-      document.getElementById('mPrev').disabled=!hasPrev;
-      document.getElementById('mNext').disabled=!hasNext;
+      // Month picker popup data
+      const mLabel=`${T[lang].months[mo-1]} ${yr}`;
+      const years=[...new Set(months.map(m=>m.split('-')[0]))];
+      const popupHTML=years.map(y=>`
+        <div class="mp-year">${y}</div>
+        <div class="month-popup-grid">
+          ${months.filter(m=>m.startsWith(y)).map(m=>{
+            const mm=parseInt(m.split('-')[1]);
+            return '<div class="mp-item '+(m===month?'active':'')+'" onclick="jumpMonth(\'' +m+ '\');closeMonthPicker()">'+T[lang].months[mm-1].slice(0,3)+'</div>';
+          }).join('')}
+        </div>`).join('');
 
       const savedId=localStorage.getItem('savedEmpId');
       const isMyId=savedId===data.id;
@@ -993,7 +1023,17 @@
               </div>
             </div>
           </div>
-          ${changeBtn}
+          <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto">
+            <button class="mnav-arrow" onclick="chMonth(-1)" ${!hasPrev?'disabled':''} aria-label="Prev">‹</button>
+            <div style="position:relative">
+              <button class="month-picker-btn" id="mpBtn" onclick="toggleMonthPicker()">
+                ${esc(mLabel)} <span class="mpb-arrow">▼</span>
+              </button>
+              <div class="month-popup" id="monthPopup">${popupHTML}</div>
+            </div>
+            <button class="mnav-arrow" onclick="chMonth(1)" ${!hasNext?'disabled':''} aria-label="Next">›</button>
+            ${changeBtn}
+          </div>
         </div>
 
         <!-- Calendar -->
