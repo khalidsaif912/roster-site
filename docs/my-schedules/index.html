@@ -144,30 +144,30 @@
     .aurora-bar{
       position:fixed;
       z-index:99;
-      height:0;
+      height:22px;
       left:0;right:0;
       overflow:visible;
       pointer-events:none;
     }
     .aurora-bar-inner{
       position:absolute;
-      top:0; left:2%; right:2%;
-      height:32px;
-      border-radius:0 0 50% 50%;
+      bottom:0; left:4%; right:4%;
+      height:22px;
+      border-radius:0 0 60% 60%;
       background:linear-gradient(90deg,
         #1f6feb, #58a6ff, #3fb950, #bc8cff, #ff7b72, #58a6ff, #1f6feb
       );
       background-size:300% 100%;
-      filter:blur(14px);
+      filter:blur(10px);
       opacity:0;
-      transform:scaleX(.6) scaleY(.5);
-      transition: opacity .5s ease, transform .5s ease;
+      transform:translateY(-100%) scaleX(.7);
+      transition: opacity .2s ease, transform .2s cubic-bezier(.22,1,.36,1);
       animation: aurora 4s ease infinite;
       will-change: opacity, transform;
     }
     .aurora-bar-inner.visible{
-      opacity:.9;
-      transform:scaleX(1) scaleY(1);
+      opacity:.35;
+      transform:translateY(0) scaleX(1);
     }
     body.light .aurora-bar-inner{ opacity:0 !important; }
     .brand{display:flex;align-items:center;gap:10px;min-width:0}
@@ -192,7 +192,7 @@
     }
     .brand-info{min-width:0}
     .brand-name{font-size:14px;font-weight:800;color:#58a6ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.2px}
-    .brand-sub{font-size:11px;color:rgba(139,148,158,.9);font-weight:500;white-space:nowrap}
+    .brand-sub{font-size:13px;color:#58a6ff;font-weight:600;white-space:nowrap;opacity:.75;}
     .top-btns{display:flex;gap:6px;flex:0 0 auto}
     .ghost-btn{
       height:38px;padding:0 12px;
@@ -1031,13 +1031,13 @@
       filter: brightness(1.02);
     }
 
-    /* action-btn ألوان واضحة */
+    /* action-btn — كل الأزرار نفس اللون الأزرق */
     .action-btn{
-      color: #8b949e !important;
-      font-weight:600;
+      color: #58a6ff !important;
+      font-weight: 600 !important;
     }
     .action-btn:hover{
-      color: #c9d1d9 !important;
+      color: #79b8ff !important;
     }
     .action-btn.primary{
       background: linear-gradient(135deg,rgba(31,111,235,.22),rgba(56,139,253,.12)) !important;
