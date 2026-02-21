@@ -1378,9 +1378,12 @@
         </div>`;
     }
 
-    /* IMAGE DOWNLOAD — pure Canvas v2 */
+    /* IMAGE DOWNLOAD — snapshot of UI (matches calendar style) */
     async function dlIMG(){
-      const element = document.querySelector('.main');
+      const element = document.querySelector('.main'); // export what user sees
+
+      // Hide UI that you don't want in export (optional hooks)
+      // e.g., document.querySelector('.actions-card')?.classList.add('no-export');
 
       const canvas = await html2canvas(element, {
         scale: 3,
@@ -1392,286 +1395,8 @@
       link.download = `schedule-${data.id}-${month}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-    };
 
-      const STAT_COLORS={work:ACCENT,off:'#94a3b8',morning:'#e3a217',afternoon:'#e8722a',night:'#c084fc',standby:'#fb7185',leaves:'#4ade80'};
-      const FALLBACK={'Off Day':'OFF','Annual Leave':'LV','Sick Leave':'SL',Training:'TR',Standby:'ST',Other:'—'};
-
-      // Short Arabic day names for the calendar header
-      const DAY_SHORT_AR=['أحد','اثن','ثلا','أرب','خمس','جمع','سبت'];
-      const DAY_SHORT_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      const dayShort=isAr?DAY_SHORT_AR:DAY_SHORT_EN;
-
-      // ── Layout ──
-      const SC=3;
-      const W=560;
-      const PAD=16;
-      const INNER=W-PAD*2;
-
-      // Header
-      const HDR_H=82;
-
-      // Calendar
-      const CAL_GAP=12;
-      const DAY_LBL_H=34;
-      const firstDow=new Date(yr,mo-1,1).getDay();
-      const dim=new Date(yr,mo,0).getDate();
-      const nRows=Math.ceil((firstDow+dim)/7);
-      const CELL_W=Math.floor(INNER/7);
-      const CELL_H=74;
-      const CAL_CARD_H=DAY_LBL_H+nRows*CELL_H;
-
-      // Stats
-      const STATS_GAP=12;
-      const STAT_COLS=4;
-      const STAT_GAP=8;
-      const STAT_CARD_W=Math.floor((INNER-(STAT_COLS-1)*STAT_GAP)/STAT_COLS);
-      const STAT_CARD_H=80;
-      const STAT_ROWS=Math.ceil(STAT_META.length/STAT_COLS);
-      const STATS_INNER_H=26+STAT_ROWS*(STAT_CARD_H+STAT_GAP)-STAT_GAP+16;
-      const STATS_CARD_H=STATS_INNER_H;
-
-      const TOTAL_H=HDR_H+CAL_GAP+CAL_CARD_H+STATS_GAP+STATS_CARD_H+PAD;
-
-      const canvas=document.createElement('canvas');
-      canvas.width=W*SC; canvas.height=TOTAL_H*SC;
-      const ctx=canvas.getContext('2d');
-      ctx.scale(SC,SC);
-
-      // ── Helpers ──
-      function rr(x,y,w,h,r){
-        if(r<=0){ctx.rect(x,y,w,h);return;}
-        ctx.beginPath();
-        ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
-        ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-        ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
-        ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
-        ctx.closePath();
-      }
-      function fillRR(x,y,w,h,r,c){ctx.fillStyle=c;rr(x,y,w,h,r);ctx.fill();}
-      function strokeRR(x,y,w,h,r,c,lw){ctx.lineWidth=lw||0.6;ctx.strokeStyle=c;rr(x,y,w,h,r);ctx.stroke();}
-      function clipRR(x,y,w,h,r){ctx.save();rr(x,y,w,h,r);ctx.clip();}
-
-      // ── Background ──
-      ctx.fillStyle=BG;ctx.fillRect(0,0,W,TOTAL_H);
-
-      // ══ HEADER CARD ══
-      fillRR(0,0,W,HDR_H,0,SURF2);
-      // Accent bottom line
-      ctx.fillStyle=ACCENT;ctx.fillRect(0,HDR_H-2,W,2);
-
-      // Avatar
-      const AV=48, AVY=(HDR_H-AV)/2;
-      const AVX=isAr?W-PAD-AV:PAD;
-      const initials=(data.name||'?').split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-      const avGrad=ctx.createLinearGradient(AVX,AVY,AVX+AV,AVY+AV);
-      avGrad.addColorStop(0,'#1f6feb');avGrad.addColorStop(1,'#58a6ff');
-      fillRR(AVX,AVY,AV,AV,12,avGrad);
-      ctx.fillStyle='#fff';ctx.font=`800 16px Arial`;
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(initials,AVX+AV/2,AVY+AV/2+1);
-
-      // Text block (opposite side from avatar)
-      const TX=isAr?W-PAD-AV-12:PAD+AV+12;
-      const tAlign=isAr?'right':'left';
-      ctx.textAlign=tAlign;ctx.textBaseline='alphabetic';
-
-      // Name
-      ctx.fillStyle=INK;ctx.font=`700 20px Arial`;
-      ctx.fillText(String(data.name||''),TX,HDR_H*0.38);
-
-      // Department
-      ctx.fillStyle=MUTED;ctx.font=`400 12px Arial`;
-      ctx.fillText(String(data.department||''),TX,HDR_H*0.38+20);
-
-      // ID badge pill
-      const idTxt=`ID  ${data.id||''}`;
-      ctx.font=`700 11px Arial`;
-      const idW=ctx.measureText(idTxt).width+16;
-      const idX=isAr?W-PAD-AV-12-idW:PAD+AV+12;
-      const idY=HDR_H*0.38+34;
-      fillRR(idX,idY-13,idW,18,5,'rgba(88,166,255,0.15)');
-      strokeRR(idX,idY-13,idW,18,5,'rgba(88,166,255,0.35)',0.5);
-      ctx.fillStyle=ACCENT;ctx.textAlign='left';
-      ctx.fillText(idTxt,idX+8,idY);
-
-      // Month + Year  (right side if LTR, left if RTL — opposite text block)
-      const MX=isAr?PAD:W-PAD;
-      ctx.textAlign=isAr?'left':'right';
-      ctx.fillStyle=INK;ctx.font=`800 22px Arial`;
-      ctx.fillText(T[lang].months[mo-1]||'',MX,32);
-      ctx.fillStyle=MUTED;ctx.font=`400 13px Arial`;
-      ctx.fillText(String(yr),MX,52);
-
-      // ══ CALENDAR CARD ══
-      const calY=HDR_H+CAL_GAP;
-      clipRR(PAD,calY,INNER,CAL_CARD_H,14);
-      fillRR(PAD,calY,INNER,CAL_CARD_H,14,SURF);
-      ctx.restore();
-      strokeRR(PAD,calY,INNER,CAL_CARD_H,14,BORDER2,0.7);
-
-      // Day label row
-      clipRR(PAD,calY,INNER,DAY_LBL_H,14);
-      fillRR(PAD,calY,INNER,DAY_LBL_H,0,SURF2);
-      // cover bottom corners
-      ctx.fillStyle=SURF2;
-      ctx.fillRect(PAD,calY+DAY_LBL_H-14,INNER,14);
-      ctx.restore();
-
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      for(let d=0;d<7;d++){
-        const lx=PAD+d*CELL_W+CELL_W/2;
-        ctx.fillStyle=MUTED;ctx.font=`700 11px Arial`;
-        ctx.fillText(dayShort[d],lx,calY+DAY_LBL_H/2);
-      }
-
-      // Separator line
-      ctx.strokeStyle=BORDER;ctx.lineWidth=0.5;
-      ctx.beginPath();ctx.moveTo(PAD,calY+DAY_LBL_H);ctx.lineTo(PAD+INNER,calY+DAY_LBL_H);ctx.stroke();
-
-      // ── Cells ──
-      const cellsY=calY+DAY_LBL_H;
-      const now=new Date();
-      let dc=1;
-
-      for(let w=0;w<nRows;w++){
-        for(let d=0;d<7;d++){
-          const cx=PAD+d*CELL_W;
-          const cy2=cellsY+w*CELL_H;
-          const isEmpty=(w===0&&d<firstDow)||dc>dim;
-
-          if(isEmpty){
-            ctx.fillStyle='rgba(10,12,16,0.7)';
-            ctx.fillRect(cx,cy2,CELL_W,CELL_H);
-          } else {
-            const dd=sched.find(s=>s.day===dc);
-            const th=dd?(SHIFT_THEME[dd.shift_group]||SHIFT_THEME.Other):null;
-            const isToday=(now.getFullYear()===yr&&(now.getMonth()+1)===mo&&now.getDate()===dc);
-
-            // Cell bg
-            ctx.fillStyle=th?th.bg:SURF;
-            ctx.fillRect(cx,cy2,CELL_W,CELL_H);
-
-            if(isToday){
-              ctx.fillStyle='rgba(31,111,235,0.18)';
-              ctx.fillRect(cx,cy2,CELL_W,CELL_H);
-              ctx.fillStyle=ACCENT;ctx.fillRect(cx,cy2,CELL_W,2.5);
-            }
-
-            // Ghost number (big, faint) — day number
-            const gSize=Math.min(CELL_H*0.55,34);
-            ctx.save();
-            ctx.font=`800 ${gSize}px Arial`;
-            ctx.textAlign='left';ctx.textBaseline='top';
-            ctx.fillStyle=th?th.fg+'22':'rgba(255,255,255,0.06)';
-            ctx.fillText(String(dc),cx+3,cy2+1);
-            ctx.restore();
-
-            // Day number (small, readable, top-left)
-            ctx.font=`700 11px Arial`;
-            ctx.textAlign='left';ctx.textBaseline='top';
-            ctx.fillStyle=isToday?ACCENT:(th?th.fg:MUTED);
-            ctx.fillText(String(dc),cx+5,cy2+5);
-
-            // Shift code — HUGE ghost filling the cell center
-            if(dd){
-              const code=dd.shift_code||(FALLBACK[dd.shift_group]||'');
-              if(code){
-                // Big ghost code — measure to fit
-                ctx.save();
-                ctx.textAlign='center';ctx.textBaseline='middle';
-                let bigFS=Math.min(CELL_H*0.52, CELL_W*0.75);
-                ctx.font=`900 ${bigFS}px Arial`;
-                // Scale down if too wide
-                const tw=ctx.measureText(code).width;
-                if(tw>CELL_W-6){ bigFS=bigFS*(CELL_W-6)/tw; }
-                ctx.font=`900 ${bigFS}px Arial`;
-                ctx.fillStyle=th?th.fg+'2e':'rgba(255,255,255,0.08)';
-                ctx.fillText(code, cx+CELL_W/2, cy2+CELL_H*0.55);
-                ctx.restore();
-
-                // Small readable tag at bottom
-                const tagH=20, tagMargin=6;
-                const tagY=cy2+CELL_H-tagH-tagMargin;
-                ctx.font=`700 10px Arial`;
-                const stw=ctx.measureText(code).width;
-                const tagW=Math.min(stw+14,CELL_W-8);
-                const tagX=cx+(CELL_W-tagW)/2;
-                fillRR(tagX,tagY,tagW,tagH,5,th.tagBg);
-                strokeRR(tagX,tagY,tagW,tagH,5,th.tagBd,0.7);
-                ctx.fillStyle=th.fg;
-                ctx.font=`700 10px Arial`;
-                ctx.textAlign='center';ctx.textBaseline='middle';
-                ctx.fillText(code,tagX+tagW/2,tagY+tagH/2);
-              }
-            }
-            dc++;
-          }
-
-          // Grid lines
-          ctx.strokeStyle=BORDER;ctx.lineWidth=0.5;
-          ctx.strokeRect(cx+0.25,cy2+0.25,CELL_W-0.5,CELL_H-0.5);
-        }
-      }
-
-      // ══ STATS CARD ══
-      const stCardY=calY+CAL_CARD_H+STATS_GAP;
-      fillRR(PAD,stCardY,INNER,STATS_CARD_H,14,SURF);
-      strokeRR(PAD,stCardY,INNER,STATS_CARD_H,14,BORDER2,0.7);
-
-      // Section label
-      ctx.textAlign=isAr?'right':'left';ctx.textBaseline='alphabetic';
-      ctx.fillStyle=DIM;ctx.font=`700 10px Arial`;
-      ctx.fillText((isAr?'الإحصائيات':'STATISTICS'),isAr?PAD+INNER-10:PAD+10,stCardY+20);
-
-      // Stat cards
-      STAT_META.forEach((m,i)=>{
-        const col=i%STAT_COLS;
-        const row=Math.floor(i/STAT_COLS);
-        const sx=PAD+col*(STAT_CARD_W+STAT_GAP);
-        const sy=stCardY+28+row*(STAT_CARD_H+STAT_GAP);
-        const clr=STAT_COLORS[m.k];
-
-        fillRR(sx,sy,STAT_CARD_W,STAT_CARD_H,10,SURF2);
-        strokeRR(sx,sy,STAT_CARD_W,STAT_CARD_H,10,BORDER,0.5);
-
-        // Top color accent bar
-        clipRR(sx,sy,STAT_CARD_W,STAT_CARD_H,10);
-        ctx.fillStyle=clr;ctx.fillRect(sx,sy,STAT_CARD_W,3.5);
-        ctx.restore();
-
-        // Ghost number — huge, faint, filling the card
-        ctx.save();
-        ctx.textAlign='center';ctx.textBaseline='middle';
-        let gfs=Math.min(STAT_CARD_H*0.75, STAT_CARD_W*0.85);
-        ctx.font=`900 ${gfs}px Arial`;
-        const gtw=ctx.measureText(String(stats[m.k])).width;
-        if(gtw>STAT_CARD_W-4){ gfs=gfs*(STAT_CARD_W-4)/gtw; }
-        ctx.font=`900 ${gfs}px Arial`;
-        ctx.fillStyle=clr+'28';
-        ctx.fillText(String(stats[m.k]),sx+STAT_CARD_W/2,sy+STAT_CARD_H*0.54);
-        ctx.restore();
-
-        // Emoji icon
-        ctx.font=`16px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(m.icon,sx+STAT_CARD_W/2,sy+20);
-
-        // Number value (on top of ghost)
-        ctx.fillStyle=clr;ctx.font=`800 24px Arial`;
-        ctx.textAlign='center';ctx.textBaseline='alphabetic';
-        ctx.fillText(String(stats[m.k]),sx+STAT_CARD_W/2,sy+58);
-
-        // Label
-        ctx.fillStyle=MUTED;ctx.font=`500 9px Arial`;
-        const lbl=isAr?m.label_ar:m.label_en;
-        ctx.fillText(lbl,sx+STAT_CARD_W/2,sy+72);
-      });
-
-      // ── Download ──
-      const a=document.createElement('a');
-      a.download=`schedule-${data.id}-${month}-${lang}.png`;
-      a.href=canvas.toDataURL('image/png');
-      a.click();
+      // document.querySelector('.actions-card')?.classList.remove('no-export');
     }
 
     /* ICS */
@@ -1696,171 +1421,42 @@
 
     /* PDF */
     async function dlPDF(){
-      const element = document.querySelector('.main');
+      const element = document.querySelector('.main'); // export what user sees
 
       const canvas = await html2canvas(element, {
         scale: 3,
-        backgroundColor: "#ffffff",
+        backgroundColor: '#ffffff', // keep PDF background white
         useCORS: true
       });
 
       const imgData = canvas.toDataURL('image/png');
 
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-      const imgWidth = 190;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 10;
 
-      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      const imgW = pageW - margin * 2;
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      let heightLeft = imgH;
+      let position = margin;
+
+      // First page
+      pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+      heightLeft -= (pageH - margin * 2);
+
+      // Additional pages (shift image up)
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position = margin - (imgH - heightLeft);
+        pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+        heightLeft -= (pageH - margin * 2);
+      }
+
       pdf.save(`schedule-${data.id}-${month}.pdf`);
-    }
-        if(x.length===6){
-          return [parseInt(x.slice(0,2),16),parseInt(x.slice(2,4),16),parseInt(x.slice(4,6),16)];
-        }
-        return [29,111,212];
-      }
-      const ACCENT=hexToRgbArr(ACCENT_HEX);
-      const NAVY=hexToRgbArr(SURF2);      // reuse naming to keep rest minimal
-      const NAVY2=hexToRgbArr(SURF);      // card bg
-      const WHITE=hexToRgbArr(INK);       // ink
-      const RULE=hexToRgbArr('#cfd6e3');  // soft grid/border
-      const EMPTY=hexToRgbArr('#f6f7fb'); // empty cell
-      const DIM=hexToRgbArr(DIM_TX);
-      const MUTED=hexToRgbArr(MUTED_TX);
-
-      // ── HEADER (calendar style) ──
-      const HDR_H=32;
-      // Background matches UI bg
-      doc.setFillColor(...hexToRgbArr(BG));doc.rect(0,0,W,HDR_H,'F');
-
-      // Header card (like the banner)
-      const cardX=ML, cardY=8, cardW=W-ML-MR, cardH=20;
-      doc.setFillColor(...NAVY2); // SURF
-      doc.setDrawColor(...RULE);
-      doc.roundedRect(cardX, cardY, cardW, cardH, 4, 4, 'FD');
-
-      // Subtle accent line
-      doc.setFillColor(...ACCENT);
-      doc.roundedRect(cardX, cardY, cardW, 1.6, 4, 4, 'F');
-
-      // Name
-      doc.setTextColor(...WHITE);
-      doc.setFontSize(14);doc.setFont(undefined,'bold');
-      doc.text(String(data.name), cardX+6, cardY+9);
-
-      // Dept + ID
-      doc.setFontSize(9);doc.setFont(undefined,'normal');
-      doc.setTextColor(...MUTED);
-      doc.text(String(data.department||''), cardX+6, cardY+15.2);
-      doc.setTextColor(...MUTED);
-      doc.setFontSize(8);
-      doc.text(`ID  ${data.id}`, cardX+6, cardY+19);
-
-      // Month + Year on the right (same row)
-      doc.setTextColor(...WHITE);
-      doc.setFontSize(12);doc.setFont(undefined,'bold');
-      doc.text(String(mName), cardX+cardW-6, cardY+9, {align:'right'});
-      doc.setTextColor(...MUTED);
-      doc.setFontSize(9);doc.setFont(undefined,'normal');
-      doc.text(String(yr), cardX+cardW-6, cardY+15.2, {align:'right'});
-
-      // ── CALENDAR ──
-      const CAL_HDR=9,STATS_H=44,FOOT_H=8,GAP1=4,GAP2=5;
-      const CAL_TOP=HDR_H+GAP1,STATS_TOP=H-FOOT_H-GAP2-STATS_H,CAL_BOT=STATS_TOP-GAP2,CAL_BODY=CAL_BOT-CAL_TOP-CAL_HDR;
-      const firstDow=new Date(yr,mo-1,1).getDay(),dim=new Date(yr,mo,0).getDate();
-      let nRows=0;{let d2=1;for(let w=0;w<6;w++){let any=false;for(let d=0;d<7;d++){if(!((w===0&&d<firstDow)||d2>dim)){any=true;d2++;}}if(any)nRows++;if(d2>dim)break;}}
-      const CH=Math.floor(CAL_BODY/nRows),CW=(W-ML-MR)/7;
-
-      // Day header bar
-      doc.setFillColor(...NAVY);doc.rect(ML,CAL_TOP,W-ML-MR,CAL_HDR,'F');
-      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((d,i)=>{
-        doc.setTextColor(...WHITE);doc.setFontSize(8);doc.setFont(undefined,'bold');
-        doc.text(d,ML+i*CW+CW/2,CAL_TOP+6.2,{align:'center'});
-      });
-
-      // Calendar cells
-      let dc=1,row=0;doc.setLineWidth(0.18);
-      for(let w=0;w<6;w++){
-        for(let d=0;d<7;d++){
-          const cx=ML+d*CW,cy=CAL_TOP+CAL_HDR+row*CH;
-          const isEmpty=(w===0&&d<firstDow)||dc>dim;
-          if(isEmpty){doc.setFillColor(...EMPTY);doc.setDrawColor(...RULE);doc.rect(cx,cy,CW,CH,'FD');continue;}
-          const dd=sched.find(s=>s.day===dc),sh=dd?(SC[dd.shift_group]||SC.Other):null;
-          doc.setFillColor(...(sh?sh.bg:WHITE));doc.setDrawColor(...RULE);doc.rect(cx,cy,CW,CH,'FD');
-
-          // Ghost day number
-          const numStr=String(dc);
-          let ghostR,ghostG,ghostB;
-          if(sh){ghostR=Math.round(sh.bg[0]*.6+sh.fg[0]*.4);ghostG=Math.round(sh.bg[1]*.6+sh.fg[1]*.4);ghostB=Math.round(sh.bg[2]*.6+sh.fg[2]*.4);}
-          else{ghostR=215;ghostG=220;ghostB=228;}
-          const ghostSize=Math.round(CH*.68);
-          doc.setTextColor(ghostR,ghostG,ghostB);
-          doc.setFontSize(ghostSize>36?36:ghostSize<20?20:ghostSize);
-          doc.setFont(undefined,'bold');
-          doc.text(numStr,cx+2,cy+ghostSize*.7,{align:'left'});
-
-          // Shift code centered
-          if(dd){const code=dd.shift_code||(FALLBACK[dd.shift_group]||'');if(code){const fs=CH>=36?19:CH>=28?17:14;doc.setTextColor(...sh.fg);doc.setFontSize(fs);doc.setFont(undefined,'bold');doc.text(code,cx+CW/2,cy+CH*.68,{align:'center'});}}
-          dc++;
-        }
-        if(dc>dim)break;
-        row++;
-      }
-
-      // ── STATS ──
-      doc.setDrawColor(...RULE);doc.setLineWidth(0.25);doc.line(ML,STATS_TOP,W-MR,STATS_TOP);
-      doc.setTextColor(...DIM);doc.setFontSize(7.5);doc.setFont(undefined,'bold');
-      doc.text('MONTHLY STATISTICS', ML, STATS_TOP+5);
-
-      const SL=[
-        {l:'Work Days',v:stats.work,c:ACCENT},
-        {l:'Day Off',v:stats.off,c:[85,95,115]},
-        {l:'Morning',v:stats.morning,c:[180,80,0]},
-        {l:'Afternoon',v:stats.afternoon,c:[160,40,5]},
-        {l:'Night',v:stats.night,c:[100,40,210]},
-        {l:'Standby',v:stats.standby,c:[148,10,110]},
-        {l:'Leaves',v:stats.leaves,c:[10,125,60]}
-      ];
-      const nSt=SL.length,SGAP=2.5,sW=(W-ML-MR-(nSt-1)*SGAP)/nSt,CARD_Y=STATS_TOP+8,CARD_H=24;
-      SL.forEach(({l,v,c},i)=>{
-        const sx=ML+i*(sW+SGAP);
-        // Card bg
-        doc.setFillColor(248,250,254);doc.setDrawColor(...RULE);doc.setLineWidth(0.15);
-        doc.roundedRect(sx,CARD_Y,sW,CARD_H,2,2,'FD');
-        // Color top bar
-        doc.setFillColor(...c);doc.roundedRect(sx,CARD_Y,sW,2.5,1,1,'F');
-        // Value
-        doc.setTextColor(...c);doc.setFontSize(19);doc.setFont(undefined,'bold');
-        doc.text(String(v),sx+sW/2,CARD_Y+16,{align:'center'});
-        // Label
-        doc.setTextColor(...DIM);doc.setFontSize(5.5);doc.setFont(undefined,'bold');
-        doc.text(l,sx+sW/2,CARD_Y+21.5,{align:'center'});
-      });
-
-      // Legend row
-      const LY=CARD_Y+CARD_H+3;
-      const usedG=[...new Set(sched.map(s=>s.shift_group))];
-      const lStep=(W-ML-MR)/Math.max(usedG.length,1);
-      usedG.forEach((g,i)=>{
-        const sh2=SC[g]||SC.Other;const lx=ML+i*lStep;
-        doc.setFillColor(...sh2.bg);doc.setDrawColor(...sh2.fg);doc.setLineWidth(0.4);
-        doc.roundedRect(lx,LY,lStep-2,5.5,1.5,1.5,'FD');
-        doc.setTextColor(...sh2.fg);doc.setFontSize(6);doc.setFont(undefined,'bold');
-        doc.text(LNAMES[g]||g,lx+(lStep-2)/2,LY+3.8,{align:'center'});
-      });
-
-      // ── FOOTER ──
-      doc.setDrawColor(...RULE);doc.setLineWidth(0.2);doc.line(ML,H-5,W-MR,H-5);
-      doc.setTextColor(...DIM);doc.setFontSize(6.5);doc.setFont(undefined,'normal');
-      doc.text('My Schedule', ML, H-2);
-      doc.text(`${mName} ${yr}  ·  ${data.id}`, W-MR, H-2, {align:'right'});
-
-      doc.save(`schedule-${data.id}-${month}.pdf`);
     }
 
     /* SHARE */
