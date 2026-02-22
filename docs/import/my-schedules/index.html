@@ -1,491 +1,419 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Import - My Schedule</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    :root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.12);--ink:#e6edf3;--muted:#8b949e;--dim:#484f58;--accent:#58a6ff;--r:12px;--r-lg:18px;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--glass-bg:rgba(255,255,255,.06);--glass-bg-hover:rgba(255,255,255,.10);--glass-border:rgba(255,255,255,.16);--glass-border-hover:rgba(255,255,255,.24);--glass-shadow:0 10px 28px rgba(0,0,0,.22);}
-    body.light{--bg:#f5f7fa;--surface:#ffffff;--surface2:#f0f2f5;--surface3:#e8ebf0;--border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.13);--ink:#1a1f2e;--muted:#6b7280;--dim:#9ca3af;--accent:#1d6fd4;--glass-bg:rgba(255,255,255,.70);--glass-bg-hover:rgba(255,255,255,.86);--glass-border:rgba(0,0,0,.10);--glass-border-hover:rgba(0,0,0,.16);--glass-shadow:0 10px 24px rgba(0,0,0,.10);}
-    html{background:var(--bg);color:var(--ink);font-size:15px;scroll-behavior:smooth}
-    body{font-family:'Sora',system-ui,-apple-system,sans-serif;background:var(--bg);min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .2s,color .2s;padding-top:64px;}
-    body.ar{direction:rtl}
-    button,input{font-family:inherit;font-size:inherit;cursor:pointer}
-    @keyframes aurora{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    @keyframes popIn{from{opacity:0;transform:scale(.94) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
-    @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-    @keyframes avatarPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    /* ═══════ RESET ═══════ */
+    body {
+      margin:0; padding:0;
+      background:#eef1f7;
+      font-family:'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+    }
+    * { box-sizing:border-box; }
 
-    .topbar{position:fixed;top:0;left:0;right:0;z-index:100;padding-top:var(--safe-top);background:linear-gradient(135deg,rgba(3,5,11,.99) 0%,rgba(6,10,19,.99) 60%,rgba(4,7,15,.99) 100%);backdrop-filter:blur(28px) saturate(220%);-webkit-backdrop-filter:blur(28px) saturate(220%);border-bottom:1px solid rgba(56,139,253,.18);box-shadow:0 8px 32px rgba(0,0,0,.85),0 3px 10px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.04);overflow:visible;}
-    .topbar::before{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(56,139,253,.5) 30%,rgba(63,185,80,.4) 60%,rgba(188,140,255,.4) 80%,transparent 100%);background-size:200% 100%;animation:aurora 4s ease infinite;pointer-events:none;}
-    body.light .topbar{background:rgba(225,232,245,.97);border-bottom-color:rgba(29,111,212,.18);box-shadow:0 6px 24px rgba(0,0,0,.18);}
-    .topbar-inner{display:flex;align-items:center;padding:11px 20px;gap:10px;max-width:1080px;margin:0 auto;}
-    .home-btn{width:38px;height:38px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;display:grid;place-items:center;cursor:pointer;transition:all .18s;flex:0 0 auto;}
-    .home-btn svg{width:19px;height:19px;transition:transform .18s;}
-    .home-btn:hover{background:rgba(56,139,253,.18);border-color:rgba(56,139,253,.4);}
-    .home-btn:hover svg{transform:scale(1.12);}
-    .home-btn:active{transform:scale(.94);}
-    .topbar-center{display:flex;align-items:center;flex:1;min-width:0;}
-    .topbar-right{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex:0 0 auto;}
-    .brand-name{font-size:14px;font-weight:800;color:#58a6ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.2px}
-    .brand-sub{font-size:13px;color:#58a6ff;font-weight:600;white-space:nowrap;opacity:.75;}
-    .ghost-btn{height:38px;padding:0 12px;border:1px solid var(--glass-border);background:var(--glass-bg);color:#c9d1d9;border-radius:10px;font-size:12px;font-weight:600;transition:all .15s;white-space:nowrap;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);box-shadow:var(--glass-shadow);}
-    .ghost-btn:hover{background:var(--glass-bg-hover);border-color:var(--glass-border-hover);transform:translateY(-1px);}
-    .ghost-btn:active{transform:scale(.97)}
-    .theme-btn{width:38px;padding:0;font-size:17px;border-radius:10px;}
-    #langBtn{color:#58a6ff!important;border-color:rgba(56,139,253,.3)!important;font-weight:700;font-size:13px;}
-    #langBtn:hover{background:rgba(56,139,253,.18)!important;border-color:rgba(56,139,253,.5)!important;color:#79b8ff!important;}
-    .brand-mark{display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 auto;}
-    .brand-swap{position:relative;width:38px;height:38px;flex:0 0 auto;}
-    .brand-sq{position:absolute;inset:0;width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#1f6feb,#388bfd);display:grid;place-items:center;font-size:18px;border:none;color:#fff;box-shadow:0 0 0 1px rgba(56,139,253,.28),0 4px 12px rgba(31,111,235,.28);cursor:pointer;opacity:0;transform:scale(.98);transition:opacity .25s ease,transform .25s ease;pointer-events:none;}
-    .brand-sq.show{opacity:1;transform:scale(1);pointer-events:auto;}
+    /* ═══════ WRAP ═══════ */
+    .wrap { max-width:680px; margin:0 auto; padding:16px 14px 28px; }
 
-    .aurora-bar{position:fixed;z-index:99;height:22px;left:0;right:0;overflow:visible;pointer-events:none;}
-    .aurora-bar-inner{position:absolute;bottom:0;left:4%;right:4%;height:22px;border-radius:0 0 60% 60%;background:linear-gradient(90deg,#1f6feb,#58a6ff,#3fb950,#bc8cff,#ff7b72,#58a6ff,#1f6feb);background-size:300% 100%;filter:blur(10px);opacity:0;transform:translateY(-100%) scaleX(.7);transition:opacity .2s ease,transform .2s cubic-bezier(.22,1,.36,1);animation:aurora 4s ease infinite;}
-    .aurora-bar-inner.visible{opacity:.35;transform:translateY(0) scaleX(1);}
-    body.light .aurora-bar-inner{opacity:0!important;}
+    /* ═══════ HEADER ═══════ */
+    .header {
+      background:linear-gradient(135deg, #1e40af 0%, #1976d2 50%, #0ea5e9 100%);
+      color:#fff;
+      padding:26px 18px 24px;
+      border-radius:20px;
+      text-align:center;
+      box-shadow:0 8px 28px rgba(30,64,175,.25);
+      position:relative;
+      overflow:hidden;
+    }
+    .header::before {
+      content:''; position:absolute;
+      top:-30px; right:-40px;
+      width:140px; height:140px;
+      border-radius:50%;
+      background:rgba(255,255,255,.08);
+    }
+    .header::after {
+      content:''; position:absolute;
+      bottom:-50px; left:-30px;
+      width:160px; height:160px;
+      border-radius:50%;
+      background:rgba(255,255,255,.06);
+    }
+    .header h1 { margin:0; font-size:24px; font-weight:800; position:relative; z-index:1; letter-spacing:-.3px; }
 
-    .search-section{padding:16px 20px 0;max-width:960px;margin:0 auto;}
-    .search-form{display:flex;gap:8px;align-items:center}
-    .search-avatar-wrap{display:flex;align-items:center;gap:4px;flex:0 0 auto;}
-    .search-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1f6feb,#58a6ff);display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;flex:0 0 auto;box-shadow:0 3px 10px rgba(31,111,235,.4);letter-spacing:-.5px;animation:avatarPop .2s cubic-bezier(.22,1,.36,1);}
-    .search-change-btn{width:36px;height:36px;background:linear-gradient(135deg,#1f6feb,#58a6ff);border:none;color:#fff;border-radius:10px;font-size:15px;display:grid;place-items:center;flex:0 0 auto;transition:filter .15s,transform .1s;box-shadow:0 3px 10px rgba(31,111,235,.4);}
-    .search-change-btn:hover{filter:brightness(1.15)}
-    .search-change-btn:active{transform:scale(.95)}
-    .id-input{position:relative;display:flex;align-items:center;flex:0 0 auto;}
-    .id-prefix{height:36px;padding:0 10px;display:flex;align-items:center;border-radius:10px 0 0 10px;font-family:'DM Mono',monospace;font-weight:800;font-size:12px;color:var(--muted);background:var(--glass-bg);border:1px solid var(--glass-border);border-right:none;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);box-shadow:var(--glass-shadow);}
-    body.ar .id-prefix{border-radius:0 10px 10px 0;border-right:1px solid var(--glass-border);border-left:none;}
-    .search-input{width:130px;flex:0 0 130px;background:var(--glass-bg)!important;border:1px solid var(--glass-border)!important;color:var(--ink);border-radius:0 10px 10px 0!important;padding:9px 12px;padding-left:12px;height:36px;font-size:14px;font-weight:500;outline:none;transition:border-color .15s,box-shadow .15s;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);box-shadow:var(--glass-shadow);}
-    body.ar .search-input{border-radius:10px 0 0 10px!important;}
-    .search-input::placeholder{color:var(--dim);font-size:13px}
-    .search-input:focus{border-color:var(--glass-border-hover)!important;box-shadow:0 0 0 3px rgba(56,139,253,.15);}
-    .search-btn{height:36px;padding:0 18px;background:linear-gradient(135deg,#1553c7,#1f6feb)!important;border:1px solid rgba(56,139,253,.6)!important;color:#fff!important;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;transition:filter .15s,transform .1s;box-shadow:0 4px 18px rgba(31,111,235,.55),inset 0 1px 0 rgba(255,255,255,.18)!important;flex:0 0 auto;letter-spacing:.2px;}
-    .search-btn:hover{filter:brightness(1.15);box-shadow:0 6px 22px rgba(31,111,235,.7)!important;}
-    .search-btn:active{transform:scale(.97)}
+    /* زر اللغة */
+    .langToggle {
+      position:absolute; top:14px; right:16px; z-index:10;
+      background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.25);
+      border-radius:50%; width:32px; height:32px;
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-size:13px; font-weight:800; cursor:pointer;
+      transition:all .25s; -webkit-tap-highlight-color:transparent; padding:0;
+    }
+    .langToggle:hover { background:rgba(255,255,255,.30); transform:scale(1.08); }
+    body.ar { direction:rtl; font-family:'Segoe UI',Tahoma,Arial,sans-serif; }
+    .empRow, .empName, .empStatus { direction:ltr !important; unicode-bidi:embed; text-align:left !important; }
 
-    .month-picker-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.18)!important;color:var(--ink)!important;border-radius:10px!important;padding:0 10px!important;height:32px!important;font-size:12px!important;font-weight:700;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;white-space:nowrap;flex:0 0 auto;backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);}
-    body.light .month-picker-btn{background:rgba(255,255,255,.75)!important;border:1px solid rgba(0,0,0,.12)!important;}
-    .month-picker-btn:hover{background:rgba(255,255,255,.14)!important;}
-    .month-picker-btn .mpb-arrow{font-size:10px;opacity:.6}
-    .month-popup{position:absolute;top:calc(100% + 8px);z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:10px;box-shadow:0 16px 40px rgba(0,0,0,.45);display:none;min-width:200px;animation:popIn .18s cubic-bezier(.22,1,.36,1);}
-    .month-popup.open{display:block}
-    .month-popup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
-    .mp-item{padding:7px 4px;border-radius:8px;font-size:11px;font-weight:600;text-align:center;cursor:pointer;color:var(--muted);transition:all .12s;border:1px solid transparent;}
-    .mp-item:hover{background:var(--surface3);color:var(--ink);border-color:var(--border)}
-    .mp-item.active{background:linear-gradient(135deg,rgba(31,111,235,.2),rgba(56,139,253,.1));border-color:rgba(56,139,253,.4);color:var(--accent);font-weight:700;}
+    /* رسالة الترحيب */
+    .welcomeMsg {
+      position:absolute; top:14px; left:16px; z-index:10;
+      background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25);
+      border-radius:20px; padding:4px 10px;
+      color:#fff; font-size:11px; font-weight:700;
+      display:none; align-items:center; gap:5px;
+      max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      cursor:pointer; transition:all .25s;
+    }
+    .welcomeMsg:hover { background:rgba(255,255,255,.28); }
+    .welcomeMsg.visible { display:flex; }
 
-    .main{padding:20px 20px calc(40px + var(--safe-bot));max-width:960px;margin:0 auto;}
-    .stack{display:flex;flex-direction:column;gap:16px}
-    .export-area{display:flex;flex-direction:column;gap:12px}
+    /* Date Picker Wrapper */
+    .datePickerWrapper {
+      position:relative;
+      display:inline-block;
+      margin-top:14px;
+      z-index:1;
+    }
+    .header .dateTag {
+      display:inline-block;
+      background:rgba(255,255,255,.18);
+      padding:5px 18px;
+      border-radius:10px;
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:.3px;
+      cursor:pointer;
+      transition:all .3s;
+      border:2px solid rgba(255,255,255,.2);
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+      -webkit-user-select:none;
+      direction:ltr;
+    }
+    .header .dateTag:hover {
+      background:rgba(255,255,255,.25);
+      transform:translateY(-1px);
+    }
+    /* الـ input مخفي تماماً - لا يُرى ولا يُضغط عليه */
+#datePicker {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 16px;   /* مهم جداً لمنع zoom على iOS */
+  border: none;
+  /* ← أضف هذا: */
+  -webkit-appearance: none;
+}
 
-    .emp-banner{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
-    .emp-info{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
-    .emp-name-row{display:flex;align-items:center;gap:10px;min-width:0;}
-    .emp-name{font-size:16px;font-weight:800;letter-spacing:-.3px;color:var(--ink);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .emp-dept{margin-top:6px;font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .emp-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 0 auto;}
-    body.ar .emp-right{align-items:flex-start;}
-    .month-wrap{position:relative;flex:0 0 auto;margin-top:2px;}
-    .change-btn{width:34px;height:34px;background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--muted);border-radius:9px;font-size:16px;display:grid;place-items:center;flex:0 0 auto;transition:all .15s;backdrop-filter:blur(14px) saturate(170%);}
-    .change-btn:hover{background:var(--glass-bg-hover);border-color:var(--glass-border-hover);color:var(--ink);transform:translateY(-1px);}
 
-    .stats-row{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
-    @media(max-width:700px){.stats-row{grid-template-columns:repeat(4,1fr)}}
-    @media(max-width:400px){.stats-row{grid-template-columns:repeat(2,1fr)}}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 8px 14px;text-align:center;position:relative;overflow:hidden;transition:border-color .2s,transform .15s,box-shadow .15s;}
-    .stat-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
-    .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-    .stat-card.c-blue::after{background:linear-gradient(90deg,#1f6feb,#58a6ff)}.stat-card.c-gray::after{background:linear-gradient(90deg,#484f58,#8b949e)}.stat-card.c-amber::after{background:linear-gradient(90deg,#b45309,#d29922)}.stat-card.c-orange::after{background:linear-gradient(90deg,#c2410c,#db6d28)}.stat-card.c-purple::after{background:linear-gradient(90deg,#7c3aed,#bc8cff)}.stat-card.c-pink::after{background:linear-gradient(90deg,#be185d,#ff7b72)}.stat-card.c-green::after{background:linear-gradient(90deg,#15803d,#3fb950)}
-    .stat-ico{font-size:18px;margin-bottom:6px;display:block}.stat-val{font-size:24px;font-weight:800;color:var(--ink);font-family:'DM Mono',monospace;line-height:1}.stat-lbl{font-size:9.5px;color:var(--muted);font-weight:600;margin-top:5px;line-height:1.3}
+    /* ═══════ SUMMARY BAR ═══════ */
+    .summaryBar { 
+      display:flex; 
+      justify-content:center; 
+      align-items:stretch;
+      gap:12px; 
+      margin-top:14px;
+      flex-wrap:wrap;
+    }
+    a.summaryChip:hover {
+      transform:translateY(-3px);
+      box-shadow:0 8px 20px rgba(15,23,42,.12);
+    }
+    a.summaryChip.gamesChip .chipVal { color:#7c3aed; }
+    a.summaryChip.gamesChip:hover { box-shadow:0 8px 20px rgba(124,58,237,.18); }
+    .summaryChip {
+      background:#fff;
+      border:1px solid rgba(15,23,42,.1);
+      border-radius:14px;
+      padding:10px 12px;
+      text-align:center;
+      box-shadow:0 2px 8px rgba(15,23,42,.06);
+      transition:all .25s ease;
+      min-width:72px;
+    }
+    .summaryChip .chipVal { font-size:22px; font-weight:900; color:#1e40af; }
+    .summaryChip .chipLabel { 
+      font-size:9.5px;
+      font-weight:600; 
+      color:#64748b; 
+      text-transform:uppercase; 
+      letter-spacing:.4px; 
+      margin-top:2px;
+      white-space:nowrap;
+    }
 
-    .cal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;}
-    .cal-head{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:1px solid var(--border);}
-    .cal-head div{padding:14px 4px;text-align:center;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;}
-    .cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
-    .day{background:var(--surface);min-height:72px;padding:8px 7px 7px;display:flex;flex-direction:column;position:relative;transition:background .1s;border-right:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;}
-    .day:nth-child(7n){border-right:none}
-    @media(max-width:380px){.day{min-height:60px;padding:4px 3px}}
-    .day.empty{background:rgba(13,17,23,.5);}
-    body.light .day.empty{background:rgba(240,242,245,.6)}
-    .dnum{position:absolute;top:6px;left:0;right:0;text-align:center;font-size:clamp(20px,4vw,36px);font-weight:900;color:var(--ink);opacity:.22;font-family:'DM Mono',monospace;line-height:1;pointer-events:none;z-index:1;}
-    .day.today .dnum{color:var(--accent);opacity:.35}
-    .day-code{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:clamp(13px,2.6vw,24px);font-weight:900;font-family:'DM Mono',monospace;letter-spacing:-.3px;white-space:nowrap;z-index:2;line-height:1;}
-    .day.today{background:rgba(31,111,235,.1)!important}.day.today::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,#1f6feb,#58a6ff);z-index:3;}
-    .s-morning{background:#1a140a}.s-afternoon{background:#1a0f07}.s-night{background:#110d1f}.s-off{background:#0f1117}.s-leave{background:#0a1410}.s-training{background:#0a1020}.s-standby{background:#1a0d14}.s-other{background:#111318}
-    body.light .s-morning{background:#fffbf0}body.light .s-afternoon{background:#fff7f0}body.light .s-night{background:#f5f3ff}body.light .s-off{background:#f8fafc}body.light .s-leave{background:#f0fdf4}body.light .s-training{background:#eff6ff}body.light .s-standby{background:#fdf2f8}body.light .day{background:var(--surface)}body.light .day.empty{background:rgba(245,247,250,.7)}
-    .s-morning .day-code{color:#d29922}.s-afternoon .day-code{color:#e8722a}.s-night .day-code{color:#bc8cff}.s-off .day-code{color:#8b949e}.s-leave .day-code{color:#3fb950}.s-training .day-code{color:#58a6ff}.s-standby .day-code{color:#ff7b72}.s-other .day-code{color:#8b949e}
-    .s-morning .dnum{color:#d29922}.s-afternoon .dnum{color:#e8722a}.s-night .dnum{color:#bc8cff}.s-off .dnum{color:#8b949e}.s-leave .dnum{color:#3fb950}.s-training .dnum{color:#58a6ff}.s-standby .dnum{color:#ff7b72}.s-other .dnum{color:#8b949e}
-    body.light .s-morning .day-code{color:#b45309}body.light .s-afternoon .day-code{color:#c2410c}body.light .s-night .day-code{color:#7c3aed}body.light .s-off .day-code{color:#6b7280}body.light .s-leave .day-code{color:#15803d}body.light .s-training .day-code{color:#1d4ed8}body.light .s-standby .day-code{color:#be185d}
-    body.light .s-morning .dnum{color:#b45309}body.light .s-afternoon .dnum{color:#c2410c}body.light .s-night .dnum{color:#7c3aed}body.light .s-off .dnum{color:#6b7280}body.light .s-leave .dnum{color:#15803d}body.light .s-training .dnum{color:#1d4ed8}body.light .s-standby .dnum{color:#be185d}
+    /* ═══════ SHIFT FILTER BUTTONS AS CHIPS ═══════ */
+    button.summaryChip.shiftFilterBtn {
+      border:2px solid transparent;
+      position:relative;
+      overflow:hidden;
+      padding:10px 14px; /* padding أصغر للأزرار */
+    }
+    button.summaryChip.shiftFilterBtn:hover {
+      transform:translateY(-3px);
+      box-shadow:0 8px 20px rgba(15,23,42,.12);
+    }
+    button.summaryChip.shiftFilterBtn.active {
+      border-color:currentColor;
+      box-shadow:0 6px 16px rgba(15,23,42,.18);
+    }
+    button.summaryChip.shiftFilterBtn.active::before {
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      background:currentColor;
+      opacity:.06;
+    }
+    
+    /* ألوان الورديات */
+    button.shiftFilterBtn.morning {
+      color:#f59e0b;
+    }
+    button.shiftFilterBtn.morning .chipVal { color:#f59e0b; }
+    button.shiftFilterBtn.morning .chipLabel { color:#92400e; }
+    
+    button.shiftFilterBtn.afternoon {
+      color:#f97316;
+    }
+    button.shiftFilterBtn.afternoon .chipVal { color:#f97316; }
+    button.shiftFilterBtn.afternoon .chipLabel { color:#9a3412; }
+    
+    button.shiftFilterBtn.night {
+      color:#8b5cf6;
+    }
+    button.shiftFilterBtn.night .chipVal { color:#8b5cf6; }
+    button.shiftFilterBtn.night .chipLabel { color:#5b21b6; }
+    
+    button.shiftFilterBtn.all {
+      color:#1e40af;
+    }
+    button.shiftFilterBtn.all .chipVal { color:#1e40af; }
+    button.shiftFilterBtn.all .chipLabel { color:#1e40af; }
+    
+    /* للشاشات المتوسطة */
+    @media (max-width:900px){
+      .summaryBar { flex-wrap:wrap; } /* السماح بالانتقال للصف الثاني */
+    }
+    
+    /* للموبايل */
+    @media (max-width:600px){
+      .summaryBar { gap:6px; }
+      .summaryChip { padding:8px 8px; min-width:60px; }
+      .summaryChip .chipVal { font-size:18px; }
+      .summaryChip .chipLabel { font-size:8.5px; letter-spacing:.2px; }
+    }
 
-    .actions-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:8px;}
-    .actions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-    .action-btn{display:flex;align-items:center;justify-content:center;gap:8px;color:#58a6ff!important;font-weight:700!important;background:linear-gradient(135deg,rgba(31,111,235,.18),rgba(56,139,253,.10))!important;border:1px solid rgba(56,139,253,.35)!important;border-radius:10px;padding:12px 10px;font-size:13px;transition:all .15s;min-height:48px;position:relative;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);}
-    .action-btn:hover{color:#79b8ff!important;background:linear-gradient(135deg,rgba(31,111,235,.30),rgba(56,139,253,.20))!important;border-color:rgba(56,139,253,.6)!important;transform:translateY(-1px);}
-    .action-btn:active{transform:scale(.98)}
-    .action-ico{font-size:16px;flex:0 0 auto}
 
-    .stats-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s ease;}
-    .stats-modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);width:100%;max-width:560px;box-shadow:0 24px 64px rgba(0,0,0,.5);animation:popIn .2s cubic-bezier(.22,1,.36,1);overflow:hidden;}
-    .stats-modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--ink);}
-    .stats-modal-close{width:28px;height:28px;background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:7px;color:var(--muted);font-size:12px;display:grid;place-items:center;cursor:pointer;transition:all .15s;}
-    .stats-modal-close:hover{background:rgba(255,255,255,.12);color:var(--ink)}
-    .stats-modal-body{padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-    @media(max-width:400px){.stats-modal-body{grid-template-columns:repeat(2,1fr)}}
+    /* ═══════ DEPARTMENT CARD ═══════ */
+    .deptCard {
+      margin-top:18px;
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(15,23,42,.07);
+      box-shadow:0 4px 18px rgba(15,23,42,.08);
+    }
+    .deptHead {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 16px;
+      background:#fff;
+    }
+    .deptIcon {
+      width:40px; height:40px;
+      border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .deptTitle { font-size:18px; font-weight:800; color:#1e293b; flex:1; letter-spacing:-.2px; }
+    .deptBadge { min-width:48px; padding:6px 10px; border-radius:12px; text-align:center; }
 
-    .state-view{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:48px 24px;text-align:center;}
-    .state-emoji{font-size:42px;display:block;margin-bottom:12px}.state-title{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:6px}.state-desc{font-size:13px;color:var(--muted);line-height:1.65;max-width:38ch;margin:0 auto}
-    .spin{width:36px;height:36px;border:2.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px;}
+    /* ═══════ SHIFT STACK ═══════ */
+    .shiftStack { padding:10px; display:flex; flex-direction:column; gap:8px; }
 
-    .modal{position:fixed;inset:0;z-index:999;display:none;align-items:flex-end;justify-content:center;padding:0;}
-    @media(min-width:600px){.modal{align-items:center;padding:20px}}
-    .modal.open{display:flex}
-    .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
-    .modal-sheet{position:relative;z-index:1;width:100%;max-width:540px;background:var(--surface);border:1px solid var(--border2);border-radius:24px 24px 0 0;overflow:hidden;animation:slideUp .25s cubic-bezier(.22,1,.36,1);max-height:85dvh;display:flex;flex-direction:column;}
-    @media(min-width:600px){.modal-sheet{border-radius:20px;max-width:560px}}
-    .modal-handle{width:40px;height:4px;background:var(--dim);border-radius:2px;margin:14px auto 0;opacity:.5}
-    .modal-head{padding:18px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-    .modal-title{font-size:18px;font-weight:700;color:var(--ink)}.modal-sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5}
-    .modal-close{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);font-size:16px;display:grid;place-items:center;flex:0 0 auto;transition:all .15s;}
-    .modal-close:hover{background:rgba(255,255,255,.12);color:var(--ink)}
-    .modal-body{overflow:auto;-webkit-overflow-scrolling:touch;padding:18px 22px;}
-    .modal-intro{background:rgba(88,166,255,.05);border:1px solid rgba(88,166,255,.15);border-radius:12px;padding:14px 16px;margin-bottom:14px;}
-    .modal-intro-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}.modal-intro-desc{font-size:13px;color:var(--muted);line-height:1.65}
-    .tip{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.02);}.tip+.tip{margin-top:10px}
-    .tip-ico{font-size:20px;flex:0 0 auto;margin-top:1px}.tip-text{font-size:13px;color:var(--muted);line-height:1.65;font-weight:500}
-    .modal-foot{position:sticky;bottom:0;background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,.22));backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:16px 22px calc(16px + var(--safe-bot));display:flex;justify-content:flex-end;}
-    body.light .modal-foot{background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.75));}
-    .ok-btn{height:40px;padding:0 20px;background:linear-gradient(135deg,#1f6feb,#388bfd);border:none;color:#fff;border-radius:10px;font-size:13px;font-weight:700;transition:filter .15s;}
-    .ok-btn:hover{filter:brightness(1.1)}
-    .tbtn{flex:1;height:36px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--border2);background:rgba(255,255,255,.05);color:var(--muted);transition:all .12s;}
-    .tbtn:hover{background:rgba(255,255,255,.1);color:var(--ink)}
-    .tbtn.primary{background:linear-gradient(135deg,#1f6feb,#388bfd);border:none;color:#fff;}
-    .tbtn.primary:hover{filter:brightness(1.1)}
+    /* ═══════ SHIFT CARD — <details> ═══════ */
+    .shiftCard {
+      border-radius:14px;
+      overflow:hidden;
+    }
 
-    .toast-container{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:20px;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);}
-    .toast-card{pointer-events:auto;width:min(400px,100%);background:var(--surface);border:1px solid rgba(56,139,253,.25);border-radius:20px;padding:20px;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:slideUp .22s cubic-bezier(.22,1,.36,1);}
-    .toast-row{display:flex;align-items:flex-start;gap:10px}
-    .toast-ico{width:38px;height:38px;border-radius:10px;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.2);display:grid;place-items:center;font-size:16px;flex:0 0 auto;}
-    .toast-text p{font-size:12.5px;color:var(--muted);line-height:1.55;font-weight:500}.toast-text strong{color:var(--ink)}
-    .toast-btns{display:flex;gap:8px;margin-top:10px}
+    .shiftSummary {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:11px 14px;
+      cursor:pointer;
+      list-style:none;
+      -webkit-appearance:none;
+      appearance:none;
+      user-select:none;
+    }
+    .shiftSummary::-webkit-details-marker { display:none; }
+    .shiftSummary::marker              { display:none; }
 
-    @media print{.topbar,.search-section,.toast-container,.modal,.actions-card{display:none!important}body{background:#fff;color:#000}}
+    .shiftIcon  { font-size:20px; line-height:1; flex-shrink:0; }
+    .shiftLabel { font-size:15px; font-weight:800; flex:1; letter-spacing:-.1px; }
+    .shiftCount {
+      font-size:13px; font-weight:800;
+      padding:3px 10px; border-radius:20px;
+      flex-shrink:0;
+    }
+
+    /* chevron يدور لما يفتح */
+    .shiftSummary::after {
+      content:'▾';
+      font-size:14px;
+      color:#94a3b8;
+      transition:transform .2s;
+      flex-shrink:0;
+    }
+    .shiftCard[open] .shiftSummary::after {
+      transform:rotate(180deg);
+    }
+
+    .shiftBody { background:rgba(255,255,255,.7); }
+
+    /* ── employee row ── */
+    .empRow {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:9px 16px;
+      border-top:1px solid rgba(15,23,42,.06);
+    }
+    .empRowAlt { background:rgba(15,23,42,.02); }
+    .empName  { font-size:15px; font-weight:700; color:#1e293b; }
+    .empStatus { font-size:13px; font-weight:600; }
+
+    /* ═══════ CTA ═══════ */
+    .btnWrap { margin-top:20px; text-align:center; }
+    .btn {
+      display:inline-block;
+      padding:14px 38px;
+      border-radius:16px;
+      background:linear-gradient(135deg, #1e40af, #1976d2);
+      color:#fff !important;
+      text-decoration:none;
+      font-weight:800;
+      font-size:15px;
+      box-shadow:0 6px 20px rgba(30,64,175,.3);
+    }
+
+    /* ═══════ FOOTER ═══════ */
+    .footer { margin-top:18px; text-align:center; font-size:12px; color:#94a3b8; padding:12px 0; line-height:1.9; }
+    .footer strong { color:#64748b; }
+
+    /* ═══════ MOBILE ═══════ */
+    @media (max-width:480px){
+      .wrap            { padding:12px 10px 22px; }
+      .header h1       { font-size:21px; }
+      .deptTitle       { font-size:16px; }
+      .empName         { font-size:14px; }
+      .empStatus       { font-size:12px; }
+      .shiftLabel      { font-size:14px; }
+      .summaryBar      { gap:8px; }
+      .summaryChip     { padding:8px 14px; }
+      .summaryChip .chipVal { font-size:19px; }
+    }
+
+  
+  .card{background:#fff;border-radius:18px;border:1px solid rgba(15,23,42,.07);box-shadow:0 4px 18px rgba(15,23,42,.08);padding:14px;margin-top:16px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input{padding:12px 14px;border-radius:14px;border:1px solid rgba(15,23,42,.15);font-size:16px;background:rgba(255,255,255,.75)}
+  button{padding:12px 16px;border-radius:14px;border:0;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#1e40af,#1976d2);color:#fff}
+  table{width:100%;border-collapse:separate;border-spacing:0 8px}
+  td,th{text-align:center;padding:10px 8px;background:rgba(15,23,42,.03)}
+  th{font-size:12px;color:#64748b}
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:800}
   </style>
 </head>
 <body>
-
-<header class="topbar">
-  <div class="topbar-inner">
-    <button class="home-btn" onclick="goBack()" aria-label="Home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:#8b949e">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
-        <path d="M9 21V12h6v9"/>
-      </svg>
-    </button>
-    <div class="topbar-center">
-      <div>
-        <div class="brand-name" id="ttl">Import - My Schedule</div>
-        <div class="brand-sub" id="sub">Enter your Employee ID</div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <button class="ghost-btn theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-      <button class="ghost-btn" onclick="toggleLang()" id="langBtn">English</button>
-      <div class="brand-mark">
-        <div class="brand-swap">
-          <button class="brand-sq show" id="brandCal" type="button" onclick="openTips()">📅</button>
-          <button class="brand-sq" id="brandQ" type="button" onclick="openTips()">❔</button>
-        </div>
-      </div>
+<div class="wrap">
+  <div class="header">
+    <button class="langToggle" onclick="location.href=_importBase()+'/'">⟵</button>
+    <h1 id="pageTitle">🗓️ Import - My Schedule</h1>
+    <div class="datePickerWrapper">
+      <div class="dateTag" style="cursor:default">Search by ID</div>
     </div>
   </div>
-</header>
 
-<div class="aurora-bar" id="auroraBar"><div class="aurora-bar-inner" id="auroraBarInner"></div></div>
-
-<section class="search-section">
-  <form id="searchForm">
-    <div class="search-form">
-      <div class="search-avatar-wrap" id="searchAvatarWrap" style="display:none">
-        <div class="search-avatar" id="searchAvatar"></div>
-        <button class="search-change-btn" type="button" id="searchChangeBtn" style="display:none"></button>
-      </div>
-      <div class="id-input">
-        <span class="id-prefix">SN</span>
-        <input class="search-input" id="empId" inputmode="numeric" autocomplete="off" placeholder="e.g. 12345" pattern="[0-9]+" required/>
-      </div>
-      <button class="search-btn" type="submit" id="sbtn">📅 View</button>
+  <div class="card">
+    <div class="row">
+      <div style="font-weight:900;">ID</div>
+      <input id="empId" inputmode="numeric" placeholder="e.g. 990896" />
+      <button onclick="loadSchedule()">View</button>
     </div>
-  </form>
-</section>
-
-<main class="main">
-  <div id="area" class="stack">
-    <div class="state-view">
-      <span class="state-emoji">📦</span>
-      <div class="state-title" id="e1">Search your schedule</div>
-      <div class="state-desc" id="e2">Enter your Employee ID above to view your monthly Import roster.</div>
+    <div style="margin-top:10px;color:#64748b;font-size:12px">
+      Tip: Your ID is saved automatically after viewing.
     </div>
   </div>
-</main>
 
-<footer style="text-align:center;padding:18px 16px 28px;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;user-select:none;">
-  <span id="footerSource" style="font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(139,148,158,.55);display:none;"></span>
-  <span style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(139,148,158,.45);">khalidsaif912.github.io/roster-site</span>
-  <span id="footerCredit" style="font-size:10px;font-weight:600;letter-spacing:.6px;color:rgba(139,148,158,.45);">Design: KHALID ALRAQADI</span>
-</footer>
-
-<div class="toast-container" id="toastMount" style="display:none"></div>
-
-<!-- ID ACTION MODAL -->
-<div class="modal" id="idActionModal" role="dialog" aria-modal="true" style="align-items:center;padding:20px">
-  <div class="modal-backdrop" onclick="closeIdActionModal()"></div>
-  <div class="modal-sheet" style="border-radius:20px;max-width:400px;width:100%">
-    <div class="modal-head" style="border-bottom:none;padding-bottom:8px">
-      <div><div class="modal-title" id="idActionTitle">Action</div></div>
-      <button class="modal-close" onclick="closeIdActionModal()">✕</button>
-    </div>
-    <div class="modal-body" style="padding-top:4px">
-      <div class="modal-intro">
-        <div class="modal-intro-title" id="idActionIntroTitle">Confirm</div>
-        <div class="modal-intro-desc" id="idActionIntroDesc">—</div>
-      </div>
-    </div>
-    <div class="modal-foot" style="gap:10px;justify-content:space-between;padding:0 22px 22px">
-      <button class="tbtn" style="flex:1;height:42px" onclick="closeIdActionModal()" id="idActionCancel">Cancel</button>
-      <button class="tbtn primary" style="flex:1;height:42px" onclick="confirmIdAction()" id="idActionOk">OK</button>
-    </div>
-  </div>
+  <div class="card" id="result" style="display:none"></div>
 </div>
 
-<!-- TIPS MODAL -->
-<div class="modal" id="tipsModal" role="dialog" aria-modal="true">
-  <div class="modal-backdrop" onclick="closeTips()"></div>
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-head">
-      <div><div class="modal-title" id="tipsTitleModal">Help & Tips</div><div class="modal-sub" id="tipsSub">Quick help for using the roster.</div></div>
-      <button class="modal-close" onclick="closeTips()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-intro"><div class="modal-intro-title" id="miTitle">Your Import roster in one view</div><div class="modal-intro-desc" id="miDesc">Enter your Employee ID to view the month, export as PDF / Image, or add to your calendar.</div></div>
-      <div class="tip"><div class="tip-ico">💾</div><div class="tip-text" id="tip1">Save your Employee ID once — it will load automatically next time.</div></div>
-      <div class="tip"><div class="tip-ico">🖼️</div><div class="tip-text" id="tip2">Image export produces a clean card with header, calendar, and stats.</div></div>
-      <div class="tip"><div class="tip-ico">📆</div><div class="tip-text" id="tip3">Use ICS export to add shifts to Apple/Google/Outlook calendars.</div></div>
-    </div>
-    <div class="modal-foot"><button class="ok-btn" onclick="closeTips()" id="tipsOk">Got it</button></div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-  // ── مسار الـ JSON (من /import/my-schedules/ → /import/schedules/) ──
-  function schedulesUrl(id){ return '../schedules/' + encodeURIComponent(id) + '.json'; }
+function _importBase() {
+  var origin = location.origin;
+  var root = (location.pathname.includes('/roster-site/') ? origin + '/roster-site' : origin);
+  return root + '/import';
+}
 
-  let data=null, month=null, months=[], lang='ar', theme='dark';
+function badge(code) {
+  var s=(code||"").toUpperCase().trim();
+  if(s==="O"||s==="OFF") return '<span class="pill" style="background:#e0e7ff;color:#3730a3">OFF</span>';
+  if(s.startsWith("MN")||s.startsWith("ME")) return '<span class="pill" style="background:#fef3c7;color:#92400e">'+code+'</span>';
+  if(s.startsWith("AN")||s.startsWith("AE")) return '<span class="pill" style="background:#ffedd5;color:#9a3412">'+code+'</span>';
+  if(s.startsWith("NN")||s.startsWith("NE")) return '<span class="pill" style="background:#ede9fe;color:#5b21b6">'+code+'</span>';
+  return '<span class="pill" style="background:#f1f5f9;color:#334155">'+code+'</span>';
+}
 
-  (function(){
-    const sl=localStorage.getItem('importPrefLang'), st=localStorage.getItem('importPrefTheme');
-    if(sl==='en'||sl==='ar') lang=sl;
-    if(st==='light'||st==='dark') theme=st;
-    if(theme==='light') document.body.classList.add('light');
-    if(lang==='en'){document.documentElement.lang='en';document.documentElement.dir='ltr';}
-  })();
+async function loadSchedule(idParam) {
+  var id = idParam || document.getElementById('empId').value.trim();
+  if(!id) return;
+  localStorage.setItem('savedEmpId', id);
 
-  const STAT_META=[
-    {k:'work',icon:'💼',c:'c-blue',label_en:'Work Days',label_ar:'أيام عمل'},
-    {k:'off',icon:'🛌',c:'c-gray',label_en:'Days Off',label_ar:'أيام راحة'},
-    {k:'morning',icon:'☀️',c:'c-amber',label_en:'Morning',label_ar:'صباحي'},
-    {k:'afternoon',icon:'🌤️',c:'c-orange',label_en:'Afternoon',label_ar:'مسائي'},
-    {k:'night',icon:'🌙',c:'c-purple',label_en:'Night',label_ar:'ليلي'},
-    {k:'standby',icon:'🧍',c:'c-pink',label_en:'Standby',label_ar:'احتياطي'},
-    {k:'leaves',icon:'✈️',c:'c-green',label_en:'Leaves',label_ar:'إجازات'},
-  ];
-
-  const T={
-    en:{title:'Import - My Schedule',sub:'Enter your Employee ID',heroTitle:'Your Import roster in one view',heroDesc:'Enter your Employee ID to view the month, export as PDF, Image, or add to your calendar.',tipsTitle:'Help & Tips',tipsSub:'Quick help for using the roster.',langBtn:'ع',ph:'e.g. 12345',sbtn:'📅 View',loading:'Loading…',notFound:'Employee not found',notFoundSub:'ID not in the system. Please check and try again.',e1:'Search your schedule',e2:'Enter your Employee ID above to view your monthly Import roster.',pdf:'PDF',img:'Image',ics:'ICS',share:'Share',print:'Print',stats:'Stats',changeId:'Change ID',setAsMyId:'Set as My ID',days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],months:['January','February','March','April','May','June','July','August','September','October','November','December'],saveSub:'Open your schedule faster next time.',saveYes:'✅ Save',saveNo:'Not now',idActTitle:'Employee ID',idActChange:'Change saved ID?',idActChangeSub:'This will remove the saved ID from this device.',idActPin:'Set as My ID?',idActPinSub:'Save this ID on this device for faster access.',cancel:'Cancel',ok:'OK'},
-    ar:{title:'الوارد - جدولي',sub:'أدخل رقمك الوظيفي',heroTitle:'جدول الوارد في عرض واحد',heroDesc:'أدخل رقمك الوظيفي لعرض الشهر، ثم حمّل PDF/صورة أو أضفه للتقويم.',tipsTitle:'مساعدة ونصائح',tipsSub:'مساعدة سريعة لاستخدام الجدول.',langBtn:'EN',ph:'مثال: 12345',sbtn:'📅 عرض',loading:'جاري التحميل…',notFound:'لم يُعثر على موظف',notFoundSub:'الرقم غير موجود في النظام. تحقق وأعد المحاولة.',e1:'ابحث عن جدولك',e2:'أدخل رقمك الوظيفي أعلاه لعرض مناوبات الوارد.',pdf:'PDF',img:'صورة',ics:'ICS',share:'مشاركة',print:'طباعة',stats:'إحصائيات',changeId:'تغيير الرقم',setAsMyId:'احفظ كرقمي',days:['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],months:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],saveSub:'لفتح الجدول بسرعة في المرات القادمة.',saveYes:'✅ احفظ',saveNo:'ليس الآن',idActTitle:'الرقم الوظيفي',idActChange:'هل تريد حذف الرقم الوظيفي؟',idActChangeSub:'سيتم حذف الرقم المحفوظ من هذا الجهاز نهائياً.',idActPin:'هل تريد حفظ الرقم الوظيفي؟',idActPinSub:'سيتم حفظ هذا الرقم على هذا الجهاز لفتح الجدول بسرعة.',cancel:'إلغاء',ok:'موافق'}
-  };
-
-  function t(k){return T[lang][k];}
-  function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-  document.getElementById('themeBtn').textContent=(theme==='dark'?'🌙':'☀️');
-
-  function applyLangUI(){
-    document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-    document.body.classList.toggle('ar',lang==='ar');
-    document.getElementById('ttl').textContent=t('title');
-    document.getElementById('sub').textContent=t('sub');
-    document.getElementById('langBtn').textContent=t('langBtn');
-    document.getElementById('empId').placeholder=t('ph');
-    document.getElementById('sbtn').textContent=t('sbtn');
-    const e1=document.getElementById('e1'),e2=document.getElementById('e2');
-    if(e1)e1.textContent=t('e1');if(e2)e2.textContent=t('e2');
-    document.getElementById('tipsTitleModal').textContent=t('tipsTitle');
-    document.getElementById('tipsSub').textContent=t('tipsSub');
-    document.getElementById('miTitle').textContent=t('heroTitle');
-    document.getElementById('miDesc').textContent=t('heroDesc');
-    document.getElementById('tip1').textContent=lang==='ar'?'احفظ رقمك مرة واحدة — وسيظهر تلقائياً في المرة القادمة.':'Save your Employee ID once — it will load automatically next time.';
-    document.getElementById('tip2').textContent=lang==='ar'?'حفظ الصورة ينتج بطاقة مرتبة بالتقويم والإحصائيات.':'Image export produces a clean card with calendar and stats.';
-    document.getElementById('tip3').textContent=lang==='ar'?'استخدم تصدير ICS لإضافة المناوبات إلى تقويم Apple/Google/Outlook.':'Use ICS export to add shifts to Apple/Google/Outlook calendars.';
-    document.getElementById('tipsOk').textContent='OK';
-    const fc=document.getElementById('footerCredit');
-    if(fc)fc.textContent=lang==='ar'?'تصميم: خالد الرقادي':'Design: KHALID ALRAQADI';
-    if(data)renderSchedule();
+  var url = _importBase() + '/schedules/' + encodeURIComponent(id) + '.json';
+  var res = await fetch(url);
+  if(!res.ok) {
+    document.getElementById('result').style.display='block';
+    document.getElementById('result').innerHTML = '<div style="font-weight:900">Not found</div><div style="color:#64748b;margin-top:6px">No schedule JSON for ID '+id+'</div>';
+    return;
   }
+  var data = await res.json();
 
-  function toggleTheme(){theme=theme==='dark'?'light':'dark';document.body.classList.toggle('light',theme==='light');document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';localStorage.setItem('importPrefTheme',theme);}
-  function toggleLang(){lang=lang==='en'?'ar':'en';localStorage.setItem('importPrefLang',lang);applyLangUI();}
+  var days = data.days || [];
+  var rows = days.map(d => '<tr><td>'+d.day+'</td><td>'+d.weekday+'</td><td>'+badge(d.code)+'</td></tr>').join('');
+  var html = `
+    <div style="font-weight:900;font-size:18px">${data.name}</div>
+    <div style="color:#64748b;font-weight:700;margin-top:2px">${data.department} · ${data.monthLabel}</div>
+    <table style="margin-top:12px">
+      <thead><tr><th>Day</th><th>Weekday</th><th>Shift</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
 
-  function goBack(){
-    const base=location.pathname.includes('/roster-site/')?'/roster-site':'';
-    if(document.referrer&&document.referrer.includes(location.host))history.back();
-    else location.href=base+'/import/';
-  }
-  function openTips(){document.getElementById('tipsModal').classList.add('open');}
-  function closeTips(){document.getElementById('tipsModal').classList.remove('open');}
+  var box = document.getElementById('result');
+  box.style.display='block';
+  box.innerHTML=html;
+}
 
-  document.getElementById('searchForm').addEventListener('submit',async(e)=>{e.preventDefault();const id=document.getElementById('empId').value.trim();if(id)await loadSchedule(id);});
-
-  async function loadSchedule(id){
-    document.getElementById('area').innerHTML=`<div class="state-view"><div class="spin"></div><div class="state-title">${t('loading')}</div><div class="state-desc">${lang==='ar'?'انتظر لحظات…':'Please wait a moment…'}</div></div>`;
-    try{
-      const res=await fetch(schedulesUrl(id));
-      if(!res.ok)throw new Error('not found');
-      data=await res.json();
-      // دعم كلا الصيغتين: schedules{} (الجديدة) أو days[] (القديمة)
-      if(!data.schedules&&data.days){
-        const mk=data.month||(new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0'));
-        data={id:data.id,name:data.name,department:data.department,schedules:{[mk]:data.days.map(d=>({day:d.day,shift_code:d.code,shift_group:codeToGroup(d.code)}))}};
-      }
-      months=Object.keys(data.schedules||{}).sort();
-      if(!months.length)throw new Error('empty');
-      if(!localStorage.getItem('importSavedEmpId'))showSaveToast(id);
-      const now=new Date(),cur=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-      month=months.includes(cur)?cur:months[months.length-1];
-      renderSchedule();
-    }catch(e){
-      document.getElementById('searchAvatarWrap').style.display='none';
-      document.getElementById('area').innerHTML=`<div class="state-view"><span class="state-emoji">❌</span><div class="state-title">${t('notFound')}</div><div class="state-desc">${t('notFoundSub')}</div></div>`;
-    }
-  }
-
-  function codeToGroup(c){c=(c||'').toUpperCase().trim();if(!c||c==='O'||c==='OFF')return 'Off Day';if(c==='AL'||c.includes('ANNUAL'))return 'Annual Leave';if(c==='SL'||c.includes('SICK'))return 'Sick Leave';if(c==='TR'||c.includes('TRAIN'))return 'Training';if(c.startsWith('ST')||c.includes('STANDBY'))return 'Standby';if(c.startsWith('MN')||c.startsWith('ME'))return 'Morning';if(c.startsWith('AN')||c.startsWith('AE'))return 'Afternoon';if(c.startsWith('NN')||c.startsWith('NE'))return 'Night';return 'Other';}
-
-  function showSaveToast(id){const m=document.getElementById('toastMount');m.style.display='flex';m.innerHTML=`<div class="toast-card"><div class="toast-row"><div class="toast-ico">💾</div><div class="toast-text"><p><strong>${lang==='ar'?'هل تريد حفظ الرقم الوظيفي؟':'Save Employee ID?'}</strong><br>${t('saveSub')}</p></div></div><div class="toast-btns"><button class="tbtn primary" onclick="confirmSave('${id}')">${t('saveYes')}</button><button class="tbtn" onclick="dismissToast()">${t('saveNo')}</button></div></div>`;setTimeout(()=>dismissToast(),10000);}
-  function confirmSave(id){localStorage.setItem('importSavedEmpId',id);dismissToast();if(data)renderSchedule();}
-  function dismissToast(){const m=document.getElementById('toastMount');m.innerHTML='';m.style.display='none';}
-  function changeMyId(){openIdActionModal('change');}
-  function setAsMyId(){openIdActionModal('pin');}
-
-  let _pendingIdAction=null;
-  function openIdActionModal(kind){
-    _pendingIdAction=kind;const m=document.getElementById('idActionModal');if(!m)return;
-    document.getElementById('idActionTitle').textContent=t('idActTitle');
-    document.getElementById('idActionIntroTitle').textContent=kind==='change'?t('idActChange'):t('idActPin');
-    document.getElementById('idActionIntroDesc').textContent=kind==='change'?t('idActChangeSub'):t('idActPinSub');
-    document.getElementById('idActionCancel').textContent=t('cancel');
-    document.getElementById('idActionOk').textContent=t('ok');
-    m.classList.add('open');
-  }
-  function closeIdActionModal(){const m=document.getElementById('idActionModal');if(m)m.classList.remove('open');_pendingIdAction=null;}
-  function confirmIdAction(){
-    if(_pendingIdAction==='change'){localStorage.removeItem('importSavedEmpId');closeIdActionModal();if(data)renderSchedule();}
-    else if(_pendingIdAction==='pin'){if(data&&data.id)localStorage.setItem('importSavedEmpId',String(data.id));closeIdActionModal();if(data)renderSchedule();}
-    else closeIdActionModal();
-  }
-
-  function calcStats(s){const r={work:0,off:0,morning:0,afternoon:0,night:0,standby:0,leaves:0};s.forEach(d=>{const g=d.shift_group||codeToGroup(d.shift_code||'');if(g==='Morning')r.morning++;else if(g==='Afternoon')r.afternoon++;else if(g==='Night')r.night++;else if(g==='Off Day')r.off++;else if(g==='Standby')r.standby++;else if(g==='Annual Leave'||g==='Sick Leave')r.leaves++;});r.work=r.morning+r.afternoon+r.night;return r;}
-  function shiftClass(g){return{Morning:'s-morning',Afternoon:'s-afternoon',Night:'s-night','Off Day':'s-off','Annual Leave':'s-leave','Sick Leave':'s-leave',Training:'s-training',Standby:'s-standby',Other:'s-other'}[g]||'s-other';}
-  function openStatsModal(){const el=document.getElementById('statsModalOverlay');if(el)el.style.display='flex';}
-  function closeStatsModal(){const el=document.getElementById('statsModalOverlay');if(el)el.style.display='none';}
-  document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){closeTips();closeStatsModal();closeMonthPicker();}});
-  function jumpMonth(val){if(months.includes(val)){month=val;renderSchedule();}}
-  function toggleMonthPicker(){
-    const p=document.getElementById('monthPopup');if(!p)return;
-    p.style.cssText='';p.classList.toggle('open');
-    if(p.classList.contains('open')){requestAnimationFrame(()=>{const rect=p.getBoundingClientRect(),vw=window.innerWidth,margin=10;if(rect.right>vw-margin)p.style.transform=`translateX(-${rect.right-(vw-margin)}px)`;else if(rect.left<margin)p.style.transform=`translateX(${margin-rect.left}px)`;if(rect.bottom>window.innerHeight-margin){p.style.top='auto';p.style.bottom='calc(100% + 8px)';}});}
-  }
-  function closeMonthPicker(){const p=document.getElementById('monthPopup');if(p)p.classList.remove('open');}
-  document.addEventListener('click',function(e){if(!e.target.closest('#mpBtn')&&!e.target.closest('#monthPopup'))closeMonthPicker();});
-
-  function renderSchedule(){
-    const sched=data.schedules[month]||[];
-    const [yr,mo]=month.split('-').map(Number);
-    const firstDow=new Date(yr,mo-1,1).getDay(),dim=new Date(yr,mo,0).getDate(),now=new Date();
-    const mLabel=T[lang].months[mo-1];
-    const popupHTML='<div class="month-popup-grid">'+months.map(m=>{const mm=parseInt(m.split('-')[1]);return '<div class="mp-item '+(m===month?'active':'')+'" onclick="jumpMonth(&quot;'+m+'&quot;);closeMonthPicker()">'+T[lang].months[mm-1]+'</div>';}).join('')+'</div>';
-    const savedId=localStorage.getItem('importSavedEmpId');
-    const isMyId=savedId===String(data.id);
-    const initials=(data.name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-    const dayHdr=T[lang].days.map(d=>`<div>${d}</div>`).join('');
-    let cells='',dc=1;
-    for(let w=0;w<6;w++){
-      let rowHasDays=false;
-      for(let d=0;d<7;d++){
-        if(w===0&&d<firstDow){cells+=`<div class="day empty"></div>`;}
-        else if(dc>dim){cells+=`<div class="day empty"></div>`;}
-        else{rowHasDays=true;const dd=sched.find(s=>s.day===dc);const grp=dd?(dd.shift_group||codeToGroup(dd.shift_code||'')):'';const sc=grp?shiftClass(grp):'';const isToday=(now.getFullYear()===yr&&(now.getMonth()+1)===mo&&now.getDate()===dc);const code=dd?(dd.shift_code||(grp==='Off Day'?'OFF':grp==='Annual Leave'?'LV':grp==='Sick Leave'?'SL':grp==='Training'?'TR':grp==='Standby'?'ST':'')):'';const codeEl=code?`<span class="day-code">${esc(code)}</span>`:'';cells+=`<div class="day ${sc} ${isToday?'today':''}"><span class="dnum">${dc}</span>${codeEl}</div>`;dc++;}
-      }
-      if(dc>dim&&!rowHasDays)break;if(dc>dim)break;
-    }
-    const stats=calcStats(sched);
-    const statsHTML=STAT_META.map(m=>`<div class="stat-card ${m.c}"><span class="stat-ico">${m.icon}</span><div class="stat-val">${stats[m.k]}</div><div class="stat-lbl">${lang==='ar'?m.label_ar:m.label_en}</div></div>`).join('');
-    const avatarEl=document.getElementById('searchAvatar'),avatarWrap=document.getElementById('searchAvatarWrap'),changeSearchBtn=document.getElementById('searchChangeBtn');
-    if(avatarEl)avatarEl.textContent=initials;if(avatarWrap)avatarWrap.style.display='flex';
-    if(changeSearchBtn){if(isMyId){changeSearchBtn.textContent='✏️';changeSearchBtn.title=t('changeId');changeSearchBtn.style.display='grid';changeSearchBtn.onclick=()=>changeMyId();}else if(!savedId)changeSearchBtn.style.display='none';else{changeSearchBtn.textContent='📌';changeSearchBtn.title=t('setAsMyId');changeSearchBtn.style.display='grid';changeSearchBtn.onclick=()=>setAsMyId();}}
-    document.getElementById('area').innerHTML=`
-      <div id="exportArea" class="export-area">
-        <div class="emp-banner">
-          <div class="emp-info"><div class="emp-name-row"><div class="emp-name">${esc(data.name)}</div></div><div class="emp-dept">${esc(data.department)}</div></div>
-          <div class="emp-right"><div class="month-wrap"><button class="month-picker-btn" id="mpBtn" onclick="toggleMonthPicker()">${esc(mLabel)} <span class="mpb-arrow">▼</span></button><div class="month-popup" id="monthPopup">${popupHTML}</div></div></div>
-        </div>
-        <div class="cal-card"><div class="cal-head">${dayHdr}</div><div class="cal-body">${cells}</div></div>
-      </div>
-      <div class="actions-card">
-        <div class="actions-grid">
-          <button class="action-btn" onclick="dlPDF()"><span class="action-ico">📄</span>PDF</button>
-          <button class="action-btn" onclick="dlIMG()"><span class="action-ico">🖼️</span>${lang==='ar'?'صورة':'Image'}</button>
-          <button class="action-btn" onclick="openStatsModal()"><span class="action-ico">📊</span>${lang==='ar'?'إحصائيات':'Stats'}</button>
-        </div>
-        <div class="actions-grid" style="margin-top:8px">
-          <button class="action-btn" onclick="dlICS()"><span class="action-ico">📆</span>ICS</button>
-          <button class="action-btn" onclick="shareS()"><span class="action-ico">🔗</span>${lang==='ar'?'مشاركة':'Share'}</button>
-          <button class="action-btn" onclick="window.print()"><span class="action-ico">🖨️</span>${lang==='ar'?'طباعة':'Print'}</button>
-        </div>
-      </div>
-      <div class="stats-modal-overlay" id="statsModalOverlay" onclick="closeStatsModal()" style="display:none">
-        <div class="stats-modal" onclick="event.stopPropagation()">
-          <div class="stats-modal-head"><span>${lang==='ar'?'الإحصائيات':'Statistics'}</span><button onclick="closeStatsModal()" class="stats-modal-close">✕</button></div>
-          <div class="stats-modal-body">${statsHTML}</div>
-        </div>
-      </div>`;
-  }
-
-  async function captureExportCanvas(){const source=document.getElementById('exportArea')||document.querySelector('.main');if(!source)throw new Error('no export area');const clone=source.cloneNode(true);const wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-9999px;top:0;width:420px;padding:16px;box-sizing:border-box;';wrap.style.background=getComputedStyle(document.body).backgroundColor||'#0d1117';wrap.appendChild(clone);document.body.appendChild(wrap);await new Promise(requestAnimationFrame);const canvas=await html2canvas(wrap,{scale:3,backgroundColor:null,useCORS:true});document.body.removeChild(wrap);return canvas;}
-  async function dlIMG(){try{const canvas=await captureExportCanvas();const a=document.createElement('a');a.download=`import-${data.id}-${month}.png`;a.href=canvas.toDataURL('image/png');a.click();}catch(e){alert(lang==='ar'?'تعذر حفظ الصورة.':'Image export failed.');}}
-  async function dlPDF(){try{const canvas=await captureExportCanvas();const imgData=canvas.toDataURL('image/png');const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});const pageW=210,pageH=297,margin=10,imgW=pageW-margin*2,imgH=(canvas.height*imgW)/canvas.width;pdf.addImage(imgData,'PNG',margin,margin,imgW,imgH);let rem=imgH-(pageH-margin*2);while(rem>0){pdf.addPage();pdf.addImage(imgData,'PNG',margin,margin-(imgH-rem),imgW,imgH);rem-=(pageH-margin*2);}pdf.save(`import-${data.id}-${month}.pdf`);}catch(e){alert(lang==='ar'?'تعذر حفظ PDF.':'PDF export failed.');}}
-  function dlICS(){const sched=data.schedules[month]||[];const[yr,mo]=month.split('-').map(Number);const pad=n=>String(n).padStart(2,'0');const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ImportMySchedule//EN','CALSCALE:GREGORIAN'];sched.forEach(d=>{const dt=`${yr}${pad(mo)}${pad(d.day)}`;const dn=new Date(yr,mo-1,d.day+1);const dtE=`${dn.getFullYear()}${pad(dn.getMonth()+1)}${pad(dn.getDate())}`;lines.push('BEGIN:VEVENT',`DTSTART;VALUE=DATE:${dt}`,`DTEND;VALUE=DATE:${dtE}`,`SUMMARY:${d.shift_code||d.shift_group}`,`UID:${dt}-${data.id}@import`,'END:VEVENT');});lines.push('END:VCALENDAR');const blob=new Blob([lines.join('\r\n')],{type:'text/calendar'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`import-${data.id}-${month}.ics`;a.click();URL.revokeObjectURL(a.href);}
-  function shareS(){const base=location.pathname.includes('/roster-site/')?'/roster-site':'';const url=`${location.origin}${base}/import/my-schedules/?emp=${encodeURIComponent(data.id)}`;if(navigator.share)navigator.share({title:'Import - My Schedule',text:`Schedule: ${data.name}`,url});else{navigator.clipboard.writeText(url);alert(lang==='ar'?'تم نسخ الرابط ✅':'Link copied ✅');}}
-
-  /* Icon swap */
-  (function(){const cal=document.getElementById('brandCal'),q=document.getElementById('brandQ');if(!cal||!q)return;let sc=true;setInterval(()=>{sc=!sc;cal.classList.toggle('show',sc);q.classList.toggle('show',!sc);},2600);})();
-
-  /* Aurora scroll */
-  (function(){const topbar=document.querySelector('.topbar'),aI=document.getElementById('auroraBarInner'),aB=document.getElementById('auroraBar');if(!topbar)return;function sp(){const h=topbar.offsetHeight||62;if(aB)aB.style.top=h+'px';}window.addEventListener('scroll',()=>{if(aI)aI.classList.toggle('visible',window.scrollY>5);},{passive:true});setTimeout(sp,100);window.addEventListener('resize',sp);})();
-
-  /* Init */
-  applyLangUI();
-  const p=new URLSearchParams(location.search).get('emp');
-  if(p){document.getElementById('empId').value=p;loadSchedule(p);}
-  else{const saved=localStorage.getItem('importSavedEmpId');if(saved){document.getElementById('empId').value=saved;loadSchedule(saved);}}
+(function() {
+  var params = new URLSearchParams(location.search);
+  var emp = params.get('emp');
+  var saved = localStorage.getItem('savedEmpId');
+  if(emp) { document.getElementById('empId').value = emp; loadSchedule(emp); }
+  else if(saved) { document.getElementById('empId').value = saved; }
+})();
 </script>
 </body>
 </html>
