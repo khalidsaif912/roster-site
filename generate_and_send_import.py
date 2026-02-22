@@ -125,14 +125,22 @@ def parse_month_sheet(xlsx_path: str, sheet_name: str) -> Dict[str, Any]:
     if day_row is None:
         raise ValueError("Could not find day header row (SUN/MON/..).")
 
-    # In this file, the 'JD | Employee Name | SN | 1..31' row is right after day row
+    # Find JD header row and column dynamically (JD col may not be col 0)
     header_row = day_row + 1
-    if str(df.iloc[header_row, 0]).strip().upper() != "JD":
-        # Try to locate JD row near
-        for j in range(day_row, min(day_row + 6, len(df))):
-            if str(df.iloc[j, 0]).strip().upper() == "JD":
+    jd_col = None
+    for j in range(day_row, min(day_row + 6, len(df))):
+        for c in range(df.shape[1]):
+            if str(df.iloc[j, c]).strip().upper() == "JD":
                 header_row = j
+                jd_col = c
                 break
+        if jd_col is not None:
+            break
+    if jd_col is None:
+        jd_col = 0  # fallback
+
+    name_col = jd_col + 1
+    sn_col = jd_col + 2
 
     # Detect date columns (ints 1..31)
     date_cols: Dict[int, int] = {}
@@ -148,9 +156,9 @@ def parse_month_sheet(xlsx_path: str, sheet_name: str) -> Dict[str, Any]:
     # Employees start after header_row
     employees: List[Dict[str, Any]] = []
     for r in range(header_row + 1, len(df)):
-        dept = df.iloc[r, 0]
-        name = df.iloc[r, 1] if df.shape[1] > 1 else None
-        sn = df.iloc[r, 2] if df.shape[1] > 2 else None
+        dept = df.iloc[r, jd_col]
+        name = df.iloc[r, name_col] if df.shape[1] > name_col else None
+        sn = df.iloc[r, sn_col] if df.shape[1] > sn_col else None
 
         # skip empty
         if pd.isna(dept) and pd.isna(name) and pd.isna(sn):
@@ -476,11 +484,11 @@ async function loadSchedule(idParam) {{
   var days = data.days || [];
   var rows = days.map(d => '<tr><td>'+d.day+'</td><td>'+d.weekday+'</td><td>'+badge(d.code)+'</td></tr>').join('');
   var html = `
-    <div style="font-weight:900;font-size:18px">${{data.name}}</div>
-    <div style="color:#64748b;font-weight:700;margin-top:2px">${{data.department}} · ${{data.monthLabel}}</div>
+    <div style="font-weight:900;font-size:18px">${data.name}</div>
+    <div style="color:#64748b;font-weight:700;margin-top:2px">${data.department} · ${data.monthLabel}</div>
     <table style="margin-top:12px">
       <thead><tr><th>Day</th><th>Weekday</th><th>Shift</th></tr></thead>
-      <tbody>${{rows}}</tbody>
+      <tbody>${rows}</tbody>
     </table>
   `;
 
