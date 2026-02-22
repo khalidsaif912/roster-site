@@ -914,13 +914,16 @@
     .month-wrap{position:relative}
     .month-popup{
       inset-inline-end:0;
-      max-width:min(260px, calc(100vw - 40px));
-      max-height:240px;
+      max-width:min(260px, calc(100vw - 24px));
+      max-height:260px;
       overflow:auto;
+      /* prevent overflow out of screen */
+      left:auto !important;
+      right:auto !important;
     }
     body.ar .month-popup{
-      inset-inline-start:0;
-      inset-inline-end:auto;
+      inset-inline-start:auto;
+      inset-inline-end:0;
     }
 
 
@@ -1761,7 +1764,26 @@
     function jumpMonth(val){ if(months.includes(val)){month=val;renderSchedule();} }
     function toggleMonthPicker(){
       const p=document.getElementById('monthPopup');
-      if(p) p.classList.toggle('open');
+      if(!p) return;
+      p.classList.toggle('open');
+      if(p.classList.contains('open')){
+        // Reset position first
+        p.style.left=''; p.style.right=''; p.style.transform='';
+        requestAnimationFrame(()=>{
+          const rect=p.getBoundingClientRect();
+          const vw=window.innerWidth;
+          const margin=12;
+          if(rect.right > vw - margin){
+            p.style.right='0'; p.style.left='auto';
+          } else if(rect.left < margin){
+            p.style.left='0'; p.style.right='auto';
+          }
+          // ensure it doesn't go off bottom
+          if(rect.bottom > window.innerHeight - margin){
+            p.style.top='auto'; p.style.bottom='calc(100% + 8px)';
+          }
+        });
+      }
     }
     function closeMonthPicker(){
       const p=document.getElementById('monthPopup');
