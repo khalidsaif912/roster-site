@@ -33,7 +33,7 @@ jobs:
       - name: Check if Excel file changed
         id: check_changes
         env:
-          SOURCE_NAME_URL: ${{ secrets.SOURCE_NAME_URL }}
+          SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
         run: |
           python << 'EOF'
           import os
@@ -175,7 +175,7 @@ jobs:
       - name: Generate employee schedules
         if: steps.check_changes.outputs.should_process == 'true'
         env:
-          EXCEL_URL: ${{ secrets.EXCEL_URL }}
+          EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
           ROSTER_FILENAME: ${{ steps.check_changes.outputs.filename }}
         run: |
           if [ -f "generate_employee_schedules.py" ]; then
