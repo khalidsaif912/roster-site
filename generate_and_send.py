@@ -51,14 +51,14 @@ DEPARTMENTS = [
 DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
 SHIFT_MAP = {
-    "MN06": ("🌅 Morning (MN06)", "Morning"),
-    "ME06": ("🌅 Morning (ME06)", "Morning"),
-    "ME07": ("🌅 Morning (ME07)", "Morning"),
-    "MN12": ("🌆 Afternoon (MN12)", "Afternoon"),
-    "AN13": ("🌆 Afternoon (AN13)", "Afternoon"),
-    "AE14": ("🌆 Afternoon (AE14)", "Afternoon"),
-    "NN21": ("🌙 Night (NN21)", "Night"),
-    "NE22": ("🌙 Night (NE22)", "Night"),
+    "MN06": ("MN06", "Morning"),
+    "ME06": ("ME06", "Morning"),
+    "ME07": ("ME07", "Morning"),
+    "MN12": ("MN12", "Afternoon"),
+    "AN13": ("AN13", "Afternoon"),
+    "AE14": ("AE14", "Afternoon"),
+    "NN21": ("NN21", "Night"),
+    "NE22": ("NE22", "Night"),
 }
 
 # تم تحويل كل الأسماء للإنجليزية
@@ -134,29 +134,29 @@ def map_shift(code: str):
 
     # ✅ Leave types (separated)
     if c == "AL" or c == "LV" or "ANNUAL LEAVE" in c:
-        return ("🏖️ Annual Leave", "Annual Leave")
+        return ("AL", "Annual Leave")
 
     if c == "SL" or "SICK LEAVE" in c:
-        return ("🤒 Sick Leave", "Sick Leave")
+        return ("SL", "Sick Leave")
 
     # Training
     if c in ["TR"] or "TRAINING" in c:
-        return ("📚 Training", "Training")
+        return ("TR", "Training")
 
     # 🔹 Standby - إظهار الكود الأصلي
     if c in ["ST", "STM", "STN", "STNE22", "STME06", "STMN06", "STAE14"] or "STANDBY" in c:
-        return (f"🧍 {c0}", "Standby")
+        return (c0, "Standby")
 
     if c == "OT" or c.startswith("OT"):
-        return (f"⏱️ {c0}", "Standby")
+        return (c0, "Standby")
 
     if c in ["OFF", "O"] or re.search(r"(REST|OFF\s*DAY|REST\/OFF)", c):
-        return ("🛌 Off Day", "Off Day")
+        return ("OFF", "Off Day")
 
     if c in SHIFT_MAP:
         return SHIFT_MAP[c]
 
-    return (f"❓ {c0}", "Other")
+    return (c0, "Other")
 
 def current_shift_key(now: datetime) -> str:
     # 21:00–04:59 Night, 13:00–20:59 Afternoon, else Morning
@@ -651,7 +651,7 @@ def dept_card_html(dept_name: str, dept_color: dict, buckets: dict, open_group: 
      </div>"""
 
         shifts_html += f"""
-    <details class="shiftCard" style="border:1px solid {colors['border']}; background:{colors['bg']}"{open_attr}>
+    <details class="shiftCard" data-shift="{group_key}" style="border:1px solid {colors['border']}; background:{colors['bg']}"{open_attr}>
       <summary class="shiftSummary" style="background:{colors['summary_bg']}; border-bottom:1px solid {colors['summary_border']};">
         <span class="shiftIcon">{colors['icon']}</span>
         <span class="shiftLabel" style="color:{colors['label_color']};">{display_name}</span>
@@ -1247,13 +1247,8 @@ window.openDatePicker = function() {{
   // Group shift cards by shift type
   var shiftGroups = {{}};
   allShiftCards.forEach(function(card){{
-    var summary = card.querySelector('.shiftSummary');
-    if(!summary) return;
-    
-    var label = summary.querySelector('.shiftLabel');
-    if(!label) return;
-    
-    var shiftType = label.textContent.trim();
+    var shiftType = card.dataset.shift;
+    if(!shiftType) return;
     if(!shiftGroups[shiftType]) shiftGroups[shiftType] = [];
     shiftGroups[shiftType].push(card);
   }});
