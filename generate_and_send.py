@@ -2420,6 +2420,13 @@ def main():
     with open("docs/now/index.html", "w", encoding="utf-8") as f:
         f.write(html_now)
 
+    # Write source name for my-schedules page to display
+    _src = cached_source_name(curr_key) or source_name
+    if _src:
+        os.makedirs("docs/my-schedules", exist_ok=True)
+        with open("docs/my-schedules/source.txt", "w", encoding="utf-8") as f:
+            f.write(_src)
+
     # Email: send ONLY active shift + matching Standby
     subject = f"Duty Roster — {now.strftime('%d %B %Y')} — {active_group} Active"
     email_html = build_pretty_email_html(active_group, now, all_shifts_by_dept, pages_base)
