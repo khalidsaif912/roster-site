@@ -1416,6 +1416,39 @@
     </div>
   </main>
 
+  <!-- FOOTER -->
+  <footer style="
+    text-align:center;
+    padding:18px 16px 28px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    pointer-events:none;
+    user-select:none;
+  ">
+    <span id="footerSource" style="
+      font-size:10px;
+      font-weight:600;
+      letter-spacing:.6px;
+      color:rgba(139,148,158,.22);
+      display:none;
+    "></span>
+    <span style="
+      font-size:10px;
+      font-weight:600;
+      letter-spacing:1.2px;
+      text-transform:uppercase;
+      color:rgba(139,148,158,.28);
+    ">khalidsaif912.github.io/roster-site</span>
+    <span id="footerCredit" style="
+      font-size:9.5px;
+      font-weight:500;
+      letter-spacing:.8px;
+      color:rgba(139,148,158,.2);
+    ">Design: KHALID ALRAQADI</span>
+  </footer>
+
   <!-- TOAST -->
   <div class="toast-container" id="toastMount" style="display:none"></div>
 
@@ -1598,6 +1631,8 @@
       document.getElementById('tip2').textContent=(lang==='ar'?'حفظ الصورة ينتج بطاقة مرتبة (رأس + تقويم + دليل + إحصائيات).':'Image export produces a clean card with header, calendar, legend, and stats.');
       document.getElementById('tip3').textContent=(lang==='ar'?'استخدم تصدير ICS لإضافة المناوبات إلى تقويم Apple/Google/Outlook.':'Use ICS export to add shifts to Apple/Google/Outlook calendars.');
       document.getElementById('tipsOk').textContent='OK';
+      const fc=document.getElementById('footerCredit');
+      if(fc) fc.textContent=lang==='ar'?'تصميم: خالد الرقادي':'Design: KHALID ALRAQADI';
       if(data) renderSchedule();
     }
 
@@ -2093,6 +2128,18 @@
     const p=new URLSearchParams(location.search).get('emp');
     if(p){document.getElementById('empId').value=p;loadSchedule(p);}
     else{const saved=localStorage.getItem('savedEmpId');if(saved){document.getElementById('empId').value=saved;loadSchedule(saved);}}
+
+    // Load source name for footer
+    (function(){
+      const base=location.pathname.includes('/roster-site/')?'/roster-site/':'/';
+      fetch(base+'my-schedules/source.txt')
+        .then(r=>r.ok?r.text():null)
+        .then(txt=>{
+          if(!txt) return;
+          const el=document.getElementById('footerSource');
+          if(el){el.textContent='Source: '+txt.trim();el.style.display='';}
+        }).catch(()=>{});
+    })();
   </script>
 </body>
 </html>
