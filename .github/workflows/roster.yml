@@ -152,8 +152,8 @@ jobs:
       - name: Generate page + send email
         if: steps.check_changes.outputs.should_process == 'true'
         env:
-          EXCEL_URL: ${{ secrets.EXCEL_URL }}
-          SOURCE_NAME_URL: ${{ secrets.SOURCE_NAME_URL }}
+          EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
+          SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
           PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
