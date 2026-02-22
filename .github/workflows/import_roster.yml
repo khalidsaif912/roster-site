@@ -2,7 +2,6 @@ name: Import Roster Site (WO/Export)
 on:
   workflow_dispatch: {}
   schedule:
-    # Runs frequently to approximate "instant" updates from Power Automate email flow.
     - cron: "*/5 * * * *"
 permissions:
   contents: write
@@ -49,17 +48,16 @@ jobs:
               h = hashlib.sha256(data).hexdigest()
               cache_file = Path("import_last_hash.txt")
               old = cache_file.read_text(encoding="utf-8").strip() if cache_file.exists() else ""
-              changed = (h != old)
               cache_file.write_text(h, encoding="utf-8")
               out = os.environ["GITHUB_OUTPUT"]
               with open(out, "a", encoding="utf-8") as f:
-                  f.write(f"changed={str(changed).lower()}\n")
+                  f.write(f"changed={str(h != old).lower()}\n")
                   f.write(f"hash={h}\n")
                   f.write(f"old_hash={old}\n")
               print("========================================")
               print("Import Excel hash:", h)
               print("Previous hash   :", old or "(none)")
-              print("Changed         :", changed)
+              print("Changed         :", h != old)
               print("========================================")
           if __name__ == "__main__":
               main()
@@ -83,6 +81,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update IMPORT roster"
+            git pull --rebase
             git push
             echo "Pushed!"
           fi
