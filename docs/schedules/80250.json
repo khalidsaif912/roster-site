@@ -171,8 +171,8 @@
         "day": 19,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
+        "shift_code": "NN21",
+        "shift_label": "🌙 Night (NN21)",
         "shift_group": "Night"
       },
       {
@@ -207,8 +207,8 @@
         "day": 23,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
         "shift_group": "Morning"
       },
       {
@@ -216,8 +216,8 @@
         "day": 24,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "AE14",
-        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
         "shift_group": "Afternoon"
       },
       {
@@ -225,8 +225,8 @@
         "day": 25,
         "day_name_ar": "الأربعاء",
         "day_name_en": "Wednesday",
-        "shift_code": "AE14",
-        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
         "shift_group": "Afternoon"
       },
       {
@@ -234,8 +234,8 @@
         "day": 26,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
+        "shift_code": "NN21",
+        "shift_label": "🌙 Night (NN21)",
         "shift_group": "Night"
       },
       {
@@ -243,8 +243,8 @@
         "day": 27,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
+        "shift_code": "NN21",
+        "shift_label": "🌙 Night (NN21)",
         "shift_group": "Night"
       },
       {

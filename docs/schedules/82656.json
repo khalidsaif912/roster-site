@@ -207,9 +207,9 @@
         "day": 23,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "AE14",
-        "shift_label": "🌆 Afternoon (AE14)",
-        "shift_group": "Afternoon"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-02-24",
