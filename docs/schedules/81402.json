@@ -553,9 +553,9 @@
         "day": 2,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "AE14",
+        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-03-03",
