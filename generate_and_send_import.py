@@ -904,7 +904,7 @@ def main() -> None:
         print(f"WARNING: Could not download Excel: {e}")
         print("Will attempt to use cached rosters...")
 
-    # ── 2. قراءة اسم الملف من source_name.txt ───────────────────
+    # ── 2. قراءة اسم الملف من source_name.txt (اختياري) ─────────
     source_name = ""
     if source_name_url:
         try:
@@ -913,8 +913,24 @@ def main() -> None:
             print(f"WARNING: Could not read source_name.txt: {e}")
     print(f"📄 Source file: {source_name or '(unknown)'}")
 
-    # ── 3. استخراج الشهر من اسم الملف ───────────────────────────
+    # ── 3. استخراج الشهر — من اسم الملف أو من داخل الـ Excel ────
     incoming_key = month_key_from_filename(source_name) if source_name else None
+
+    if not incoming_key and data:
+        # نقرأ الشهر مباشرة من اسم الـ sheet داخل الـ Excel
+        try:
+            import io
+            xls_tmp = pd.ExcelFile(io.BytesIO(data))
+            for sname in xls_tmp.sheet_names:
+                k = month_key_from_filename(sname)
+                if k:
+                    incoming_key = k
+                    source_name = source_name or sname
+                    print(f"📅 Detected month from sheet name: '{sname}' → {k}")
+                    break
+        except Exception as e:
+            print(f"WARNING: Could not read sheet names from Excel: {e}")
+
     print(f"📅 Detected month: {incoming_key or 'unknown'}")
 
     # ── 4. حفظ في الكاش إذا نجح التحميل ────────────────────────
