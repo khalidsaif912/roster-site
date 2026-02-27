@@ -33,11 +33,12 @@ jobs:
       - name: Check if Import Excel file changed
         id: check_import_changes
         env:
-          IMPORT_SOURCE_NAME_URL: ${{ secrets.IMPORT_SOURCE_NAME_URL }}
+          IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
         run: |
           python << 'EOF'
           import os
           import base64
+          import hashlib
           import requests
           from pathlib import Path
           import sys
@@ -45,108 +46,90 @@ jobs:
           from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
           def candidate_urls(url):
-              """نفس استراتيجيات التحميل الموجودة في generate_and_send_import.py"""
               candidates = []
               u = urlparse(url)
               host = (u.netloc or "").lower()
-              is_sp = "sharepoint.com" in host
-              is_od = "onedrive.live.com" in host or "1drv.ms" in host
-              if not (is_sp or is_od):
+              if not ("sharepoint.com" in host or "onedrive.live.com" in host or "1drv.ms" in host):
                   return [url]
-              # Strategy 1: OneDrive Sharing API
               encoded = base64.b64encode(url.encode("utf-8")).decode("utf-8")
               encoded = encoded.rstrip("=").replace("/", "_").replace("+", "-")
               candidates.append(f"https://api.onedrive.com/v1.0/shares/u!{encoded}/root/content")
-              # Strategy 2: ?download=1
               qs = dict(parse_qsl(u.query, keep_blank_values=True))
               qs["download"] = "1"
-              u2 = u._replace(query=urlencode(qs, doseq=True))
-              candidates.append(urlunparse(u2))
-              # Strategy 3: /p/ → /s/
-              new_path = u.path.replace("/:x:/p/", "/:x:/s/").replace("/:t:/p/", "/:t:/s/")
-              if new_path != u.path:
-                  u3 = u._replace(path=new_path, query=urlencode(qs, doseq=True))
-                  candidates.append(urlunparse(u3))
-              # Strategy 4: original
+              candidates.append(urlunparse(u._replace(query=urlencode(qs, doseq=True))))
               candidates.append(url)
               return candidates
 
-          def fetch_source_name(url):
-              """تحميل source_name.txt مع التحقق أن المحتوى نص وليس HTML"""
-              headers = {"User-Agent": "Mozilla/5.0 (GitHub Actions) roster-site"}
+          def download_excel(url):
+              headers = {
+                  "User-Agent": "Mozilla/5.0 (GitHub Actions) roster-site",
+                  "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*",
+              }
               for i, dl_url in enumerate(candidate_urls(url), 1):
                   try:
                       print(f"  [Strategy {i}] {dl_url[:80]}...")
-                      r = requests.get(dl_url, headers=headers, timeout=15, allow_redirects=True)
+                      r = requests.get(dl_url, headers=headers, timeout=60, allow_redirects=True)
                       r.raise_for_status()
-                      text = r.text.strip()
-                      # تحقق أن المحتوى ليس HTML
-                      if text and not text.startswith("<!") and "<html" not in text.lower()[:100]:
-                          print(f"  ✅ Strategy {i} succeeded: {text}")
-                          return text
-                      print(f"  ⚠️  Strategy {i} got HTML — trying next...")
+                      data = r.content or b""
+                      if data.startswith(b"PK"):
+                          print(f"  ✅ Strategy {i} succeeded!")
+                          return data
+                      print(f"  ⚠️  Strategy {i}: not xlsx, trying next...")
                   except Exception as e:
                       print(f"  ⚠️  Strategy {i} failed: {e}")
               return None
 
           def main():
               try:
-                  source_url = os.getenv('IMPORT_SOURCE_NAME_URL')
-                  if not source_url:
-                      print("IMPORT_SOURCE_NAME_URL not found")
+                  excel_url = os.getenv('IMPORT_EXCEL_URL')
+                  if not excel_url:
+                      print("IMPORT_EXCEL_URL not found")
                       sys.exit(1)
 
-                  print(f"Checking: {source_url[:60]}...")
-                  current_filename = fetch_source_name(source_url)
+                  print(f"Checking: {excel_url[:60]}...")
+                  data = download_excel(excel_url)
 
-                  if not current_filename:
-                      print("❌ Could not fetch source_name.txt from any strategy")
+                  if not data:
+                      print("❌ Could not download Excel file")
                       sys.exit(1)
 
-                  print(f"Current file: {current_filename}")
+                  # نحسب hash للملف للكشف عن التغيير
+                  current_hash = hashlib.md5(data).hexdigest()
+                  print(f"Excel MD5: {current_hash}")
 
                   cache_file = "import_last_filename.txt"
                   changed = True
-                  old_filename = "none"
+                  old_hash = "none"
 
                   if Path(cache_file).exists():
-                      with open(cache_file, 'r', encoding='utf-8') as f:
-                          old_filename = f.read().strip()
-                      if old_filename:
-                          print(f"Previous file: {old_filename}")
-                          if old_filename == current_filename:
-                              print("No changes detected")
-                              changed = False
-                          else:
-                              print(f"Change detected: {old_filename} -> {current_filename}")
+                      old_hash = Path(cache_file).read_text(encoding='utf-8').strip()
+                      if old_hash == current_hash:
+                          print("No changes detected")
+                          changed = False
+                      else:
+                          print(f"Change detected! (hash changed)")
                   else:
                       print("First run")
 
-                  with open(cache_file, 'w', encoding='utf-8') as f:
-                      f.write(current_filename)
+                  Path(cache_file).write_text(current_hash, encoding='utf-8')
 
-                  # Muscat time (UTC+4)
                   muscat_tz = timezone(timedelta(hours=4))
                   now = datetime.now(muscat_tz)
                   print(f"Muscat time: {now.strftime('%H:%M')}")
 
                   mandatory_update_hours = [0, 5, 6, 13, 14, 20, 21]
-                  is_mandatory_update = (now.hour in mandatory_update_hours)
+                  is_mandatory_update = now.hour in mandatory_update_hours
                   should_process = changed or is_mandatory_update
 
                   print(f"File changed: {changed}")
                   print(f"Mandatory update hour: {is_mandatory_update}")
                   print(f"Should process: {should_process}")
 
-                  # تنظيف اسم الملف من أي أحرف تسبب مشكلة في GITHUB_OUTPUT
-                  safe_filename = current_filename.replace('\n', ' ').replace('\r', '').strip()
-                  safe_old = old_filename.replace('\n', ' ').replace('\r', '').strip()
-
                   with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                       f.write(f"changed={str(changed).lower()}\n")
                       f.write(f"should_process={str(should_process).lower()}\n")
-                      f.write(f"filename={safe_filename}\n")
-                      f.write(f"old_filename={safe_old}\n")
+                      f.write(f"filename={current_hash}\n")
+                      f.write(f"old_filename={old_hash}\n")
 
                   print("=" * 60)
                   print(f"  File changed:     {changed}")
@@ -154,12 +137,6 @@ jobs:
                   print(f"  Should process:   {should_process}")
                   print("=" * 60)
 
-              except requests.exceptions.Timeout:
-                  print("Connection timeout")
-                  sys.exit(1)
-              except requests.exceptions.RequestException as e:
-                  print(f"Request error: {e}")
-                  sys.exit(1)
               except Exception as e:
                   print(f"Unexpected error: {e}")
                   import traceback
@@ -185,7 +162,6 @@ jobs:
         if: steps.check_import_changes.outputs.should_process == 'true'
         env:
           IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
-          IMPORT_SOURCE_NAME_URL: ${{ secrets.IMPORT_SOURCE_NAME_URL }}
           PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
         run: |
           echo "Generating /docs/import ..."
