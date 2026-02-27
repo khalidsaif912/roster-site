@@ -25,6 +25,7 @@ import re
 import json
 import hashlib
 import datetime as dt
+import calendar
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
@@ -60,6 +61,22 @@ def muscat_today() -> dt.date:
     muscat = now_utc.astimezone(dt.timezone(dt.timedelta(hours=MUSCAT_UTC_OFFSET_HOURS)))
     return muscat.date()
 
+
+
+
+def month_start(d: dt.date) -> dt.date:
+    return dt.date(d.year, d.month, 1)
+
+def add_months(d: dt.date, delta: int) -> dt.date:
+    y = d.year + (d.month - 1 + delta) // 12
+    m = (d.month - 1 + delta) % 12 + 1
+    day = min(d.day, calendar.monthrange(y, m)[1])
+    return dt.date(y, m, day)
+
+def iter_month_days(year: int, month: int):
+    dim = calendar.monthrange(year, month)[1]
+    for day in range(1, dim + 1):
+        yield dt.date(year, month, day)
 
 def download_excel(url: str) -> bytes:
     # Allow SharePoint links, the existing Export script already supports share links,
@@ -732,28 +749,27 @@ def build_my_schedule_html(style: str, repo_base_path: str) -> str:
 </html>"""
 
 
-def build_employee_json(parsed: Dict[str, Any], emp: Dict[str, Any]) -> Dict[str, Any]:
+
+def build_employee_month_entries(parsed: Dict[str, Any], emp: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Return a list of day entries for a single month."""
     year = parsed["year"]
     month = parsed["month"]
-    month_label = f"{parsed['month_name']} {year}"
-    # weekday labels based on actual calendar
-    days = []
+    out: List[Dict[str, Any]] = []
     for d in sorted(parsed["date_cols"].keys()):
         try:
-            wd = dt.date(year, month, d).strftime("%a")
+            dt.date(year, month, d)  # validate
         except ValueError:
             continue
         code = emp["shifts"].get(d, "")
-        if code:
-            days.append({"day": d, "weekday": wd, "code": code})
-    return {
-        "id": emp["id"],
-        "name": emp["name"],
-        "department": emp["dept_name"],
-        "month": f"{year}-{month:02d}",
-        "monthLabel": month_label,
-        "days": days,
-    }
+        if not code:
+            continue
+        bucket, *_ = shift_bucket(code)
+        out.append({
+            "day": int(d),
+            "shift_code": str(code),
+            "shift_group": bucket,
+        })
+    return out
 
 
 def get_source_filename() -> str:
@@ -789,42 +805,99 @@ def main() -> None:
     data = download_excel(url)
     xlsx_path.write_bytes(data)
 
-    today = muscat_today()
-    sheet = find_sheet_for_date(str(xlsx_path), today)
+
+today = muscat_today()
+
+# Generate previous / current / next months (Muscat time)
+month_starts = [
+    month_start(add_months(today, -1)),
+    month_start(today),
+    month_start(add_months(today, +1)),
+]
+
+style, export_script = load_export_ui_template(repo_root)
+
+# Collect per-employee schedules across the 3 months
+schedules_by_emp: Dict[str, Dict[str, Any]] = {}
+
+parsed_for_today: Dict[str, Any] | None = None
+
+for m0 in month_starts:
+    sheet = find_sheet_for_date(str(xlsx_path), m0)
     parsed = parse_month_sheet(str(xlsx_path), sheet)
     parsed["source_filename"] = source_filename
 
-    style, export_script = load_export_ui_template(repo_root)
+    month_key = f"{parsed['year']}-{parsed['month']:02d}"
 
-    # Generate duty roster page (today)
-    duty_html = build_duty_html(style, export_script, parsed, today, repo_base_path="/import")
-    (out_root / "index.html").write_text(duty_html, encoding="utf-8")
+    # Build daily duty roster pages for this month:
+    # docs/import/YYYY-MM-DD/index.html
+    for d in iter_month_days(parsed["year"], parsed["month"]):
+        day_dir = out_root / d.strftime("%Y-%m-%d")
+        day_dir.mkdir(parents=True, exist_ok=True)
+        html = build_duty_html(style, export_script, parsed, d, repo_base_path="/import")
+        (day_dir / "index.html").write_text(html, encoding="utf-8")
 
-    # Generate /now/ alias (same content)
-    now_dir = out_root / "now"
-    now_dir.mkdir(parents=True, exist_ok=True)
-    (now_dir / "index.html").write_text(duty_html, encoding="utf-8")
-
-    # Generate schedules JSON
-    sched_dir = out_root / "schedules"
-    sched_dir.mkdir(parents=True, exist_ok=True)
+    # Merge employee schedules for this month
     for emp in parsed["employees"]:
-        payload = build_employee_json(parsed, emp)
-        (sched_dir / f"{emp['id']}.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        emp_id = str(emp["id"]).strip()
+        if not emp_id:
+            continue
 
-    # Generate My Schedule page
-    my_dir = out_root / "my-schedules"
-    my_dir.mkdir(parents=True, exist_ok=True)
-    (my_dir / "index.html").write_text(build_my_schedule_html(style, repo_base_path="/import"), encoding="utf-8")
+        rec = schedules_by_emp.get(emp_id)
+        if rec is None:
+            rec = {
+                "id": emp_id,
+                "name": emp["name"],
+                "department": emp["dept_name"],
+                "schedules": {},
+            }
+            schedules_by_emp[emp_id] = rec
 
-    # Save a small meta file for debugging
-    meta = {
-        "sheet": parsed["sheet"],
-        "generated_for": str(today),
-        "employees_total": len(parsed["employees"]),
-        "excel_sha256": hashlib.sha256(data).hexdigest(),
-    }
-    (out_root / "import_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+        rec["schedules"][month_key] = build_employee_month_entries(parsed, emp)
+
+    if parsed["year"] == today.year and parsed["month"] == today.month:
+        parsed_for_today = parsed
+
+if parsed_for_today is None:
+    # Fallback: use current month sheet
+    sheet = find_sheet_for_date(str(xlsx_path), today)
+    parsed_for_today = parse_month_sheet(str(xlsx_path), sheet)
+    parsed_for_today["source_filename"] = source_filename
+
+# Landing page = today's date page
+today_dir = out_root / today.strftime("%Y-%m-%d")
+duty_today = (today_dir / "index.html").read_text(encoding="utf-8")
+(out_root / "index.html").write_text(duty_today, encoding="utf-8")
+
+# Generate /now/ alias (same content)
+now_dir = out_root / "now"
+now_dir.mkdir(parents=True, exist_ok=True)
+(now_dir / "index.html").write_text(duty_today, encoding="utf-8")
+
+# Generate schedules JSON (merged across prev/current/next months)
+sched_dir = out_root / "schedules"
+sched_dir.mkdir(parents=True, exist_ok=True)
+for emp_id, payload in schedules_by_emp.items():
+    payload["months"] = sorted(payload.get("schedules", {}).keys())
+    (sched_dir / f"{emp_id}.json").write_text(
+        json.dumps(payload, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+# Generate My Schedule page
+my_dir = out_root / "my-schedules"
+my_dir.mkdir(parents=True, exist_ok=True)
+(my_dir / "index.html").write_text(build_my_schedule_html(style, repo_base_path="/import"), encoding="utf-8")
+
+
+# Save a small meta file for debugging
+meta = {
+    "generated_for": str(today),
+    "months_generated": [m.strftime("%Y-%m") for m in month_starts],
+    "employees_total_unique": len(schedules_by_emp),
+    "excel_sha256": hashlib.sha256(data).hexdigest(),
+}
+(out_root / "import_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     print("OK: Generated Import pages in docs/import/")
 
