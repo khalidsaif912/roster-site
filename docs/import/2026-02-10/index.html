@@ -1081,7 +1081,7 @@
 
   
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">27FEB2026 / 10:03</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">27FEB2026 / 10:07</strong>
     <br>Total: <strong>78 employees</strong>
      &nbsp;·&nbsp; Source: <strong>IMP_FEB_2026.xlsx</strong>
   </div>
@@ -1447,6 +1447,19 @@ function _importBase() {
   var root = (location.pathname.includes('/roster-site/') ? origin + '/roster-site' : origin);
   return root + '/import';
 }
+
+// Override openDatePicker so date navigation goes to /import/YYYY-MM-DD/
+// instead of Export's /date/YYYY-MM-DD/
+window.openDatePicker = function() {
+  var picker = document.getElementById('datePicker');
+  if (!picker) return;
+  picker.showPicker ? picker.showPicker() : picker.click();
+  picker.onchange = function() {
+    if (!picker.value) return;
+    var base = _importBase();
+    window.location.href = base + '/' + picker.value + '/';
+  };
+};
 
 function goToMySchedule(event) {
   if(event) event.preventDefault();
