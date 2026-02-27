@@ -1,10 +1,7 @@
 {
   "generated_for": "2026-02-27",
-  "months_generated": [
-    "2026-01",
-    "2026-02",
-    "2026-03"
-  ],
-  "employees_total_unique": 78,
-  "excel_sha256": "3964563277ff93338fba9d232e4623fa66d48c3c29622b9fd2edda7594784b3d"
+  "months_generated": [],
+  "employees_total_unique": 0,
+  "source_file": "",
+  "incoming_month": null
 }
