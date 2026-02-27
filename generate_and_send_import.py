@@ -890,14 +890,17 @@ my_dir.mkdir(parents=True, exist_ok=True)
 (my_dir / "index.html").write_text(build_my_schedule_html(style, repo_base_path="/import"), encoding="utf-8")
 
 
-# Save a small meta file for debugging
-meta = {
-    "generated_for": str(today),
-    "months_generated": [m.strftime("%Y-%m") for m in month_starts],
-    "employees_total_unique": len(schedules_by_emp),
-    "excel_sha256": hashlib.sha256(data).hexdigest(),
-}
-(out_root / "import_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    # Save a small meta file for debugging
+    meta = {
+        "generated_for": str(today),
+        "months_generated": [m.strftime("%Y-%m") for m in month_starts],
+        "employees_total_unique": len(schedules_by_emp),
+        "excel_sha256": hashlib.sha256(data).hexdigest(),
+    }
+    (out_root / "import_meta.json").write_text(
+        json.dumps(meta, indent=2),
+        encoding="utf-8"
+    )
 
     print("OK: Generated Import pages in docs/import/")
 
