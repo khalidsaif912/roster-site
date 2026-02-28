@@ -334,11 +334,12 @@
 
   <div class="header">
     <button class="langToggle" id="langToggle" onclick="toggleLang()">ع</button>
+      <button class="helpBtn" type="button" onclick="toggleHelp()" aria-label="مساعدة">؟</button>
     <div class="welcomeMsg" id="welcomeMsg" onclick="goToMySchedule()" title="انقر للذهاب لجدولك"></div>
     <h1 id="pageTitle">📥 Import Duty Roster</h1>
     <div class="datePickerWrapper">
       <button class="dateTag" id="dateTag" onclick="openDatePicker()" type="button">📅 19 January 2026</button>
-      <input id="datePicker" type="date" value="2026-01-19" min="2025-12-01" max="2026-02-28" tabindex="-1" aria-hidden="true" />
+      <input id="datePicker" type="date" value="2026-01-19" min="2026-01-01" max="2026-01-31" tabindex="-1" aria-hidden="true" />
     </div>
   </div>
 
@@ -1070,7 +1071,7 @@
 
   
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">27FEB2026 / 17:48</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">28FEB2026 / 01:02</strong>
     <br>Total: <strong>78 employees</strong>
      &nbsp;·&nbsp; Source: <strong>JANUARY 2026</strong>
   </div>
