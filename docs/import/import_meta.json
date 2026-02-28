@@ -1,9 +1,7 @@
 {
   "generated_for": "2026-02-28",
-  "months_generated": [
-    "2026-01"
-  ],
-  "employees_total_unique": 78,
+  "months_generated": [],
+  "employees_total_unique": 0,
   "source_file": "IMP_FEB_2026v.xlsx",
-  "incoming_month": "2026-01"
+  "incoming_month": null
 }
