@@ -1240,8 +1240,25 @@ def main() -> None:
                     print(f"  ⚠️  Sheet '{sn}' و '{cached_keys_this_run[sn_key]}' كلاهما {sn_key} — سيُستخدم الأخير")
 
                 cached_keys_this_run[sn_key] = sn
+
+                # ── حماية الكاش ──────────────────────────────────────────
+                # لا نكتب فوق كاش موجود إلا إذا كان الشهر مُثبَّتاً بشكل واضح:
+                # - اسم الشيت يحتوي اسم الشهر صراحةً، أو
+                # - محتوى الشيت يُثبت الشهر (detect_sheet_month)
+                # أما التخمين بـ "الشهر التالي" أو اسم الملف → لا يُكتب فوق كاش موجود
                 xlsx_cache = cache_dir / f"{sn_key}.xlsx"
                 meta_cache = cache_dir / f"{sn_key}.meta.json"
+
+                confirmed_by_content = (
+                    month_key_from_filename(sn) is not None or           # اسم الشيت واضح
+                    detect_sheet_month(tf_path, sn) == sn_key            # محتوى الشيت يُثبته
+                )
+
+                if xlsx_cache.exists() and not confirmed_by_content:
+                    print(f"  🔒 Skipping overwrite of {sn_key}.xlsx — not confirmed by sheet name/content (تخمين فقط)")
+                    cached_keys_from_sheets.append(sn_key)  # نعدّه موجوداً من الكاش القديم
+                    continue
+
                 xlsx_cache.write_bytes(data)
                 meta_cache.write_text(json.dumps({
                     "month_key": sn_key,
@@ -1250,7 +1267,10 @@ def main() -> None:
                     "downloaded_at": now_str,
                 }, ensure_ascii=False, indent=2), encoding="utf-8")
                 cached_keys_from_sheets.append(sn_key)
-                print(f"  ✅ Cached sheet '{sn}' → {sn_key}.xlsx")
+                if confirmed_by_content:
+                    print(f"  ✅ Cached sheet '{sn}' → {sn_key}.xlsx")
+                else:
+                    print(f"  ✅ Cached sheet '{sn}' → {sn_key}.xlsx (كاش جديد بالتخمين)")
 
             Path(tf_path).unlink(missing_ok=True)
 
