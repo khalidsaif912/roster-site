@@ -776,7 +776,7 @@ body.ar{direction:rtl}
 
   
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">28FEB2026 / 14:42</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">28FEB2026 / 15:27</strong>
     <br>Total: <strong>78 employees</strong>
      &nbsp;·&nbsp; Source: <strong>IMP_FEB_2026v.xlsx</strong>
   </div>
@@ -806,8 +806,7 @@ function openDatePicker() {
     if (!picker.value) return;
     var chosenMonth = picker.value.substring(0, 7);
     if (_availableMonths.length > 0 && _availableMonths.indexOf(chosenMonth) === -1) {
-      alert('⚠️ هذا الشهر غير متوفر حالياً.
-الأشهر المتوفرة: ' + _availableMonths.join(', '));
+      alert('⚠️ هذا الشهر غير متوفر حالياً. الأشهر المتوفرة: ' + _availableMonths.join(', '));
       return;
     }
     window.location.href = _importBase() + '/' + picker.value + '/';
