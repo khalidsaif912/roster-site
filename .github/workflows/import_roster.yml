@@ -1,0 +1,205 @@
+name: Import Roster Site (WO/Export)
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build_import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check if Import Excel file changed
+        id: check_import_changes
+        env:
+          IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python << 'EOF'
+          import os
+          import base64
+          import hashlib
+          import requests
+          from pathlib import Path
+          import sys
+          from datetime import datetime, timezone, timedelta
+          from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
+
+          def candidate_urls(url):
+              candidates = []
+              u = urlparse(url)
+              host = (u.netloc or "").lower()
+              if not ("sharepoint.com" in host or "onedrive.live.com" in host or "1drv.ms" in host):
+                  return [url]
+              encoded = base64.b64encode(url.encode("utf-8")).decode("utf-8")
+              encoded = encoded.rstrip("=").replace("/", "_").replace("+", "-")
+              candidates.append(f"https://api.onedrive.com/v1.0/shares/u!{encoded}/root/content")
+              qs = dict(parse_qsl(u.query, keep_blank_values=True))
+              qs["download"] = "1"
+              candidates.append(urlunparse(u._replace(query=urlencode(qs, doseq=True))))
+              candidates.append(url)
+              return candidates
+
+          def download_excel(url):
+              headers = {
+                  "User-Agent": "Mozilla/5.0 (GitHub Actions) roster-site",
+                  "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*",
+              }
+              for i, dl_url in enumerate(candidate_urls(url), 1):
+                  try:
+                      print(f"  [Strategy {i}] {dl_url[:80]}...")
+                      r = requests.get(dl_url, headers=headers, timeout=60, allow_redirects=True)
+                      r.raise_for_status()
+                      data = r.content or b""
+                      if data.startswith(b"PK"):
+                          print(f"  ✅ Strategy {i} succeeded!")
+                          return data
+                      print(f"  ⚠️  Strategy {i}: not xlsx, trying next...")
+                  except Exception as e:
+                      print(f"  ⚠️  Strategy {i} failed: {e}")
+              return None
+
+          def main():
+              try:
+                  # إذا كان التشغيل يدوياً، نشتغل دائماً بغض النظر عن التغيير
+                  is_manual = os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch'
+
+                  excel_url = os.getenv('IMPORT_EXCEL_URL')
+                  if not excel_url:
+                      print("IMPORT_EXCEL_URL not found")
+                      sys.exit(1)
+
+                  print(f"Checking: {excel_url[:60]}...")
+                  data = download_excel(excel_url)
+
+                  if not data:
+                      print("❌ Could not download Excel file")
+                      sys.exit(1)
+
+                  current_hash = hashlib.md5(data).hexdigest()
+                  print(f"Excel MD5: {current_hash}")
+
+                  cache_file = "import_last_filename.txt"
+                  changed = True
+                  old_hash = "none"
+
+                  if Path(cache_file).exists():
+                      old_hash = Path(cache_file).read_text(encoding='utf-8').strip()
+                      if old_hash == current_hash:
+                          print("No changes detected")
+                          changed = False
+                      else:
+                          print(f"Change detected! (hash changed)")
+                  else:
+                      print("First run")
+
+                  Path(cache_file).write_text(current_hash, encoding='utf-8')
+
+                  muscat_tz = timezone(timedelta(hours=4))
+                  now = datetime.now(muscat_tz)
+                  print(f"Muscat time: {now.strftime('%H:%M')}")
+
+                  mandatory_update_hours = [0, 5, 6, 13, 14, 20, 21]
+                  is_mandatory_update = now.hour in mandatory_update_hours
+
+                  # يشتغل إذا: تغير الملف OR ساعة إلزامية OR تشغيل يدوي
+                  should_process = changed or is_mandatory_update or is_manual
+
+                  print(f"File changed:     {changed}")
+                  print(f"Mandatory hour:   {is_mandatory_update}")
+                  print(f"Manual trigger:   {is_manual}")
+                  print(f"Should process:   {should_process}")
+
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write(f"changed={str(changed).lower()}\n")
+                      f.write(f"should_process={str(should_process).lower()}\n")
+                      f.write(f"filename={current_hash}\n")
+                      f.write(f"old_filename={old_hash}\n")
+
+                  print("=" * 60)
+                  print(f"  File changed:     {changed}")
+                  print(f"  Mandatory update: {is_mandatory_update}")
+                  print(f"  Manual trigger:   {is_manual}")
+                  print(f"  Should process:   {should_process}")
+                  print("=" * 60)
+
+              except Exception as e:
+                  print(f"Unexpected error: {e}")
+                  import traceback
+                  traceback.print_exc()
+                  sys.exit(1)
+
+          if __name__ == "__main__":
+              main()
+          EOF
+
+      - name: Display change info
+        run: |
+          echo "========================================"
+          echo "Import Check Report:"
+          echo "========================================"
+          echo "File changed:   ${{ steps.check_import_changes.outputs.changed }}"
+          echo "Should process: ${{ steps.check_import_changes.outputs.should_process }}"
+          echo "Current file:   ${{ steps.check_import_changes.outputs.filename }}"
+          echo "Previous file:  ${{ steps.check_import_changes.outputs.old_filename }}"
+          echo "========================================"
+
+      - name: Generate Import pages
+        if: steps.check_import_changes.outputs.should_process == 'true'
+        env:
+          IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
+          IMPORT_SOURCE_NAME_URL: ${{ secrets.IMPORT_SOURCE_NAME_URL }}
+          PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
+        run: |
+          pip install pandas openpyxl requests --quiet
+          echo "Generating /docs/import ..."
+          python generate_and_send_import.py
+          echo "Done!"
+
+      - name: Commit updated Import docs
+        if: steps.check_import_changes.outputs.should_process == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/import import_last_filename.txt
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            if [ "${{ steps.check_import_changes.outputs.changed }}" == "true" ]; then
+              git commit -m "Update IMPORT roster: ${{ steps.check_import_changes.outputs.filename }}"
+            else
+              git commit -m "Scheduled IMPORT update"
+            fi
+            git pull --rebase
+            git push
+            echo "Pushed!"
+          fi
+
+      - name: Skip - No action needed
+        if: steps.check_import_changes.outputs.should_process == 'false'
+        run: |
+          echo "========================================"
+          echo "No action needed"
+          echo "Current file: ${{ steps.check_import_changes.outputs.filename }}"
+          echo "========================================"
