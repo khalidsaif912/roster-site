@@ -1071,7 +1071,7 @@
 
   
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">28FEB2026 / 10:43</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">28FEB2026 / 10:56</strong>
     <br>Total: <strong>78 employees</strong>
      &nbsp;·&nbsp; Source: <strong>IMP-FEB_2026.xlsx</strong>
   </div>
@@ -1432,20 +1432,89 @@ function goToMySchedule() {
 
 /* ===== Import path overrides ===== */
 function _importBase() {
-  // Works for local file and GitHub Pages
   var origin = location.origin;
   var root = (location.pathname.includes('/roster-site/') ? origin + '/roster-site' : origin);
   return root + '/import';
 }
 
+// الأشهر المتوفرة فعلاً (مولَّدة من Python)
+var _availableMonths = ["2026-02"];
+
+// ── 1. إعادة التوجيه لتاريخ اليوم عند تحميل الصفحة ──────────────
+(function() {
+  var pageDateStr = '2026-02-02'; // تاريخ الصفحة الحالية
+  var now = new Date();
+  var y = now.getFullYear();
+  var m = String(now.getMonth() + 1).padStart(2, '0');
+  var d = String(now.getDate()).padStart(2, '0');
+  var todayStr = y + '-' + m + '-' + d;
+
+  // إذا الصفحة ليست لتاريخ اليوم → redirect لتاريخ اليوم
+  if (pageDateStr !== todayStr) {
+    var todayMonth = todayStr.substring(0, 7);
+    if (_availableMonths.length === 0 || _availableMonths.indexOf(todayMonth) !== -1) {
+      // شهر اليوم متوفر → اذهب لتاريخ اليوم
+      var base = _importBase();
+      var todayPath = base + '/' + todayStr + '/';
+      fetch(todayPath + 'index.html', {method: 'HEAD'})
+        .then(function(r) {
+          if (r.ok) window.location.replace(todayPath);
+        })
+        .catch(function() {});
+    }
+  }
+})();
+
+// ── 2. فتح مناوبة الوقت الحالي تلقائياً ─────────────────────────
+(function() {
+  var pageDateStr = '2026-02-02';
+  var now = new Date();
+  var y = now.getFullYear();
+  var mo = String(now.getMonth() + 1).padStart(2, '0');
+  var d = String(now.getDate()).padStart(2, '0');
+  var todayStr = y + '-' + mo + '-' + d;
+
+  // فقط إذا كانت الصفحة لتاريخ اليوم
+  if (pageDateStr !== todayStr) return;
+
+  var hour = now.getHours();
+  // الصباح: 06:00 - 13:59 | الظهر: 14:00 - 21:59 | الليل: 22:00 - 05:59
+  var currentShift;
+  if (hour >= 6 && hour < 14) {
+    currentShift = 'Morning';
+  } else if (hour >= 14 && hour < 22) {
+    currentShift = 'Afternoon';
+  } else {
+    currentShift = 'Night';
+  }
+
+  // أغلق كل المناوبات أولاً ثم افتح المناوبة الحالية فقط
+  setTimeout(function() {
+    var allDetails = document.querySelectorAll('details.shiftCard');
+    allDetails.forEach(function(el) {
+      el.removeAttribute('open');
+    });
+    var targetDetails = document.querySelectorAll('details.shiftCard[data-shift="' + currentShift + '"]');
+    targetDetails.forEach(function(el) {
+      el.setAttribute('open', '');
+    });
+    console.log('⏰ Auto-opened shift: ' + currentShift + ' (hour=' + hour + ')');
+  }, 100);
+})();
+
 // Override openDatePicker so date navigation goes to /import/YYYY-MM-DD/
-// instead of Export's /date/YYYY-MM-DD/
 window.openDatePicker = function() {
   var picker = document.getElementById('datePicker');
   if (!picker) return;
   picker.showPicker ? picker.showPicker() : picker.click();
   picker.onchange = function() {
     if (!picker.value) return;
+    var chosenMonth = picker.value.substring(0, 7);
+    if (_availableMonths.length > 0 && _availableMonths.indexOf(chosenMonth) === -1) {
+      alert('⚠️ هذا الشهر غير متوفر حالياً.
+الأشهر المتوفرة: ' + _availableMonths.join(', '));
+      return;
+    }
     var base = _importBase();
     window.location.href = base + '/' + picker.value + '/';
   };
