@@ -55,7 +55,7 @@ body.ar{direction:rtl}
     <h1 id="pageTitle">📥 Import Duty Roster</h1>
     <div class="datePickerWrapper">
       <button class="dateTag" id="dateTag" onclick="openDatePicker()" type="button">📅 20 February 2026</button>
-      <input id="datePicker" type="date" value="2026-02-20" min="2026-02-01" max="2026-02-28" tabindex="-1" aria-hidden="true" />
+      <input id="datePicker" type="date" value="2026-02-20" min="2026-01-01" max="2026-02-28" tabindex="-1" aria-hidden="true" />
     </div>
   </div>
 
@@ -787,7 +787,7 @@ body.ar{direction:rtl}
 
   
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">28FEB2026 / 16:58</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">28FEB2026 / 17:08</strong>
     <br>Total: <strong>78 employees</strong>
      &nbsp;·&nbsp; Source: <strong>IMP_FEB_2026v.xlsx</strong>
   </div>
@@ -806,7 +806,10 @@ function _importBase() {
 }
 
 // ── Available months (from Python) ───────────────────────────────
-var _availableMonths = ["2026-02"];
+var _availableMonths = ["2026-01", "2026-02"];
+
+// ── Flag: user manually chose a date — don't auto-redirect ───────
+var _userChoseDate = false;
 
 // ── Date picker ──────────────────────────────────────────────────
 function openDatePicker() {
@@ -815,11 +818,7 @@ function openDatePicker() {
   try { picker.showPicker(); } catch(e) { picker.click(); }
   picker.onchange = function() {
     if (!picker.value) return;
-    var chosenMonth = picker.value.substring(0, 7);
-    if (_availableMonths.length > 0 && _availableMonths.indexOf(chosenMonth) === -1) {
-      alert('⚠️ هذا الشهر غير متوفر حالياً. الأشهر المتوفرة: ' + _availableMonths.join(', '));
-      return;
-    }
+    sessionStorage.setItem('manualNav', '1');
     window.location.href = _importBase() + '/' + picker.value + '/';
   };
 }
@@ -869,6 +868,12 @@ function toggleHelp() {
   if (welcome && empId) welcome.textContent = empId;
 
   // ── Auto-redirect to today ────────────────────────────────────
+  // لا نعيد التوجيه إذا اختار المستخدم التاريخ يدوياً
+  if (sessionStorage.getItem('manualNav') === '1') {
+    sessionStorage.removeItem('manualNav');
+    return;
+  }
+
   var pageDateStr = '2026-02-20';
   var now = new Date();
   var todayStr = now.getFullYear() + '-' +
