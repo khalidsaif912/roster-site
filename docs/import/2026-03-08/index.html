@@ -167,15 +167,14 @@ body.light .cta-btn:hover{
   display:block;
 }
 /* Lang + Theme buttons inside summary bar */
-.bar-btns{display:flex;gap:6px;flex:0 0 auto}
+.bar-btns{display:flex;gap:6px;flex:0 0 auto;align-self:stretch}
 .bar-btn{
-  height:52px;width:40px;
+  height:100%;min-height:52px;width:42px;
   background:rgba(255,255,255,.055);border:1px solid var(--border2);
-  border-radius:12px;cursor:pointer;font-size:15px;font-weight:800;
+  border-radius:12px;cursor:pointer;font-size:16px;font-weight:800;
   color:var(--ink);display:grid;place-items:center;
   box-shadow:0 3px 12px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.07);
   transition:all .18s;backdrop-filter:blur(12px);font-family:inherit;
-  white-space:nowrap;
 }
 .bar-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.11);box-shadow:0 6px 20px rgba(0,0,0,.35)}
 .bar-btn:active{transform:scale(.95)}
@@ -290,10 +289,6 @@ body.ar .wrap>*:not(.header){direction:rtl}
   </div>
   
   <div class="summary-bar">
-    <div class="s-chip welcome-chip" onclick="goToMySchedule()" id="welcomeChip" style="display:none">
-      <div class="s-val"><span class="wave-hand" id="waveHand">👋</span></div>
-      <span class="welcome-name-chip" id="welcomeName"></span>
-    </div>
     <div class="s-chip">
       <div class="s-val">78</div>
       <div class="s-label" data-i18n="emp">Emp</div>
@@ -303,8 +298,7 @@ body.ar .wrap>*:not(.header){direction:rtl}
       <div class="s-label" data-i18n="dept">Dept</div>
     </div>
     <a href="{BASE}/my-schedules/index.html" class="s-chip" onclick="goToMySchedule(event)" style="text-decoration:none;color:inherit;">
-      <div class="s-val">🗓️</div>
-      <div class="s-label" data-i18n="my">جدولي</div>
+      <div class="s-val">📅</div>
     </a>
     <div class="bar-btns">
       <button class="bar-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
@@ -705,7 +699,7 @@ body.ar .wrap>*:not(.header){direction:rtl}
   </div>
   
   <div class="page-footer">
-    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 15:12</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 15:21</strong>
     &nbsp;&middot;&nbsp; 78 employees &nbsp;&middot;&nbsp; MARCH ROSTER MID.xlsx
   </div>
 
@@ -726,16 +720,12 @@ function _wave(){var h=document.getElementById('waveHand');if(!h)return;h.classL
   if(isLight){document.body.classList.add('light');var tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}
   document.querySelectorAll('a[href^="{BASE}"]').forEach(function(a){a.href=a.getAttribute('href').replace('{BASE}',_importBase());});
   var empId=localStorage.getItem('savedEmpId')||localStorage.getItem('importSavedEmpId');
-  var nameEl=document.getElementById('welcomeName'),chipEl=document.getElementById('welcomeChip'),handEl=document.getElementById('waveHand'),hdrW=document.getElementById('hdrWelcome');
-  if(empId&&nameEl){
-    chipEl&&(chipEl.style.display='');
+  var hdrW=document.getElementById('hdrWelcome');
+  if(empId){
     fetch(_importBase()+'/schedules/'+encodeURIComponent(empId)+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
       var first=d&&d.name?d.name.split(' ')[0]:empId;
-      nameEl.textContent=first;
       if(hdrW)hdrW.textContent='👋 مرحباً، '+first;
-      setTimeout(_wave,500+Math.random()*400);
-      if(Math.random()>.4)setTimeout(_wave,5e3+Math.random()*7e3);
-    }).catch(function(){nameEl.textContent=empId;if(hdrW)hdrW.textContent='👋 مرحباً';setTimeout(_wave,500);});
+    }).catch(function(){if(hdrW)hdrW.textContent='👋 مرحباً';});
   }
   if(sessionStorage.getItem('manualNav')==='1'){sessionStorage.removeItem('manualNav');return;}
   var pageDate='2026-03-08',now=new Date();
