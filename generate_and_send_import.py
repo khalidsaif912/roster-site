@@ -601,7 +601,7 @@ body.ar .wrap>*:not(.header){{direction:rtl}}
     </div>
   </div>
   {summary}
-  {{''.join(cards)}}
+  {''.join(cards)}
   <div class="cta-wrap">
     <a class="cta-btn" id="ctaBtn" href="{{BASE}}/now/">\U0001F4CB View Full Duty Roster</a>
   </div>
