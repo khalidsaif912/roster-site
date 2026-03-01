@@ -69,36 +69,41 @@ body{
 
 /* ─── LIGHT THEME ─── */
 body.light{
-  --bg:#f0f4fc;--surface:rgba(255,255,255,.85);--surface2:rgba(255,255,255,.95);
-  --border:rgba(29,78,216,.1);--border2:rgba(29,78,216,.18);
-  --ink:#0f172a;--muted:#4b5a7a;--dim:#94a3b8;
-  --accent:#1d4ed8;--accent2:#7c3aed;--green:#059669;
+  --bg:#c8d4ee;--surface:rgba(255,255,255,.85);--surface2:rgba(255,255,255,.95);
+  --border:rgba(29,78,216,.18);--border2:rgba(29,78,216,.28);
+  --ink:#0a0f1e;--muted:#2e3d6b;--dim:#5a6a96;
+  --accent:#1a42c4;--accent2:#6020c0;--green:#047857;
   background-image:
-    radial-gradient(ellipse 80% 50% at 20% -10%,rgba(59,130,246,.12) 0%,transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(124,58,237,.08) 0%,transparent 55%),
-    radial-gradient(ellipse 40% 30% at 60% 40%,rgba(5,150,105,.05) 0%,transparent 50%);
-  background-color:#f0f4fc;
+    radial-gradient(ellipse 80% 50% at 20% -10%,rgba(29,78,216,.28) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(109,40,217,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 30% at 60% 40%,rgba(4,120,87,.12) 0%,transparent 50%);
+  background-color:#c8d4ee;
 }
 body.light .dept-card{
-  background:rgba(255,255,255,.82);border-color:rgba(29,78,216,.1);
-  box-shadow:0 4px 24px rgba(29,78,216,.08),inset 0 1px 0 rgba(255,255,255,.9);
+  background:rgba(210,220,245,.75);border-color:rgba(29,78,216,.22);
+  box-shadow:0 4px 24px rgba(29,78,216,.16),inset 0 1px 0 rgba(255,255,255,.6);
 }
-body.light .dept-card:hover{box-shadow:0 8px 36px rgba(29,78,216,.14)}
-body.light .dept-head{border-bottom-color:rgba(29,78,216,.08)}
-body.light .dept-icon{box-shadow:0 4px 12px rgba(29,78,216,.15)!important}
-body.light .shift-body{background:rgba(0,0,0,.025)}
-body.light .emp-row:hover{background:rgba(29,78,216,.05)}
-body.light .emp-row:nth-child(even){background:rgba(29,78,216,.03)}
-body.light .emp-row:nth-child(even):hover{background:rgba(29,78,216,.07)}
-body.light .emp-name{color:#0f172a}
+body.light .dept-card:hover{box-shadow:0 8px 36px rgba(29,78,216,.26)}
+body.light .dept-head{border-bottom-color:rgba(29,78,216,.15)}
+body.light .dept-icon{box-shadow:0 4px 12px rgba(29,78,216,.2)!important}
+body.light .shift-body{background:rgba(0,0,30,.06)}
+body.light .emp-row:hover{background:rgba(29,78,216,.1)}
+body.light .emp-row:nth-child(even){background:rgba(29,78,216,.06)}
+body.light .emp-row:nth-child(even):hover{background:rgba(29,78,216,.12)}
+body.light .emp-name{color:#0a0f1e}
 body.light .s-chip{
-  background:rgba(255,255,255,.88);border-color:rgba(29,78,216,.15);
-  box-shadow:0 4px 20px rgba(29,78,216,.1),inset 0 1px 0 rgba(255,255,255,1);
+  background:rgba(200,215,245,.7);border-color:rgba(29,78,216,.28);
+  box-shadow:0 4px 20px rgba(29,78,216,.18),inset 0 1px 0 rgba(255,255,255,.5);
 }
-body.light .s-chip:hover{background:#fff;box-shadow:0 8px 32px rgba(29,78,216,.16)}
-body.light .page-footer{border-top-color:rgba(29,78,216,.1)}
-body.light .cta-btn{box-shadow:0 4px 20px rgba(29,78,216,.3),0 0 0 1px rgba(29,78,216,.15)}
-body.light .cta-btn:hover{box-shadow:0 10px 36px rgba(29,78,216,.4)}
+body.light .s-chip:hover{background:rgba(190,208,242,.85);box-shadow:0 8px 32px rgba(29,78,216,.28)}
+body.light .s-val{color:#1a42c4}
+body.light .s-val.green{color:#047857}
+body.light .s-label{color:#2e3d6b}
+body.light .welcome-name-chip{color:#2e3d6b}
+body.light .dept-title{color:#0a0f1e}
+body.light .page-footer{border-top-color:rgba(29,78,216,.18);color:#3d4f7a}
+body.light .cta-btn{box-shadow:0 4px 20px rgba(29,78,216,.4),0 0 0 1px rgba(29,78,216,.25)}
+body.light .cta-btn:hover{box-shadow:0 10px 36px rgba(29,78,216,.5)}
 
 /* ─── THEME TOGGLE ─── */
 .theme-btn{
@@ -108,8 +113,11 @@ body.light .cta-btn:hover{box-shadow:0 10px 36px rgba(29,78,216,.4)}
   display:grid;place-items:center;transition:all .2s;flex:0 0 auto;
 }
 .theme-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.08)}
-body.light .theme-btn{background:rgba(29,78,216,.08);border-color:rgba(29,78,216,.18);color:#1d4ed8}
-body.light .theme-btn:hover{background:rgba(29,78,216,.15)}
+body.light .theme-btn{background:rgba(29,78,216,.12);border-color:rgba(29,78,216,.28);color:#1a42c4}
+body.light .theme-btn:hover{background:rgba(29,78,216,.22)}
+body.light .shift-card{border-color:rgba(0,0,0,.12)!important}
+body.light .shift-summary{filter:brightness(.88)!important}
+body.light .shift-card:not([open]) .shift-summary:hover{filter:brightness(.82)!important}
 
 /* ─── SUMMARY BAR ─── */
 .summary-bar{display:flex;gap:10px;margin-bottom:16px;justify-content:center;flex-wrap:wrap}
@@ -646,7 +654,7 @@ body.ar .wrap>*:not(.header){direction:rtl}
   </div>
   
   <div class="page-footer">
-    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 13:29</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 13:34</strong>
     &nbsp;&middot;&nbsp; 78 employees &nbsp;&middot;&nbsp; MARCH ROSTER MID.xlsx
   </div>
 
