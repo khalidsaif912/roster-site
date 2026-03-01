@@ -798,7 +798,7 @@ body.ar{direction:rtl}
 
   
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">01MAR2026 / 01:23</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">01MAR2026 / 08:52</strong>
     <br>Total: <strong>78 employees</strong>
      &nbsp;·&nbsp; Source: <strong>MARCH ROSTER MID.xlsx</strong>
   </div>
@@ -876,7 +876,19 @@ function toggleHelp() {
   // Welcome message
   var empId = localStorage.getItem('savedEmpId') || localStorage.getItem('importSavedEmpId');
   var welcome = document.getElementById('welcomeMsg');
-  if (welcome && empId) welcome.textContent = empId;
+  if (welcome && empId) {
+    var isAr = document.body.classList.contains('ar');
+    welcome.textContent = (isAr ? 'مرحباً • ' : 'Welcome • ') + empId;
+    fetch(_importBase() + '/schedules/' + encodeURIComponent(empId) + '.json')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) {
+        if (d && d.name) {
+          var firstName = d.name.split(' ')[0];
+          welcome.textContent = (isAr ? 'مرحباً، ' : 'Welcome, ') + firstName + ' 👋';
+        }
+      })
+      .catch(function() {});
+  }
 
   // ── Auto-redirect to today ────────────────────────────────────
   // لا نعيد التوجيه إذا اختار المستخدم التاريخ يدوياً
