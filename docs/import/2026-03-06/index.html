@@ -167,14 +167,15 @@ body.light .cta-btn:hover{
   display:block;
 }
 /* Lang + Theme buttons inside summary bar */
-.bar-btns{display:flex;gap:6px;flex:0 0 auto;align-self:stretch}
+.bar-btns{display:flex;gap:6px;flex:0 0 auto}
 .bar-btn{
-  height:100%;min-height:52px;width:42px;
+  height:52px;width:40px;
   background:rgba(255,255,255,.055);border:1px solid var(--border2);
-  border-radius:12px;cursor:pointer;font-size:16px;font-weight:800;
+  border-radius:12px;cursor:pointer;font-size:15px;font-weight:800;
   color:var(--ink);display:grid;place-items:center;
   box-shadow:0 3px 12px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.07);
   transition:all .18s;backdrop-filter:blur(12px);font-family:inherit;
+  white-space:nowrap;
 }
 .bar-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.11);box-shadow:0 6px 20px rgba(0,0,0,.35)}
 .bar-btn:active{transform:scale(.95)}
@@ -240,7 +241,7 @@ body:not(.light) .emp-code{filter:brightness(1.4)}
 .emp-row:hover{background:rgba(255,255,255,.06)}
 .emp-row:nth-child(even){background:rgba(255,255,255,.03)}
 .emp-row:nth-child(even):hover{background:rgba(255,255,255,.07)}
-.emp-name{font-weight:700;flex:1;color:#dde6f0}.emp-code{font-weight:800;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px;color:#94b8ff}
+.emp-name{font-weight:600;flex:1;color:var(--ink)}.emp-code{font-weight:800;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px}
 
 /* ─── CTA ─── */
 .cta-wrap{text-align:center;margin:16px 0}
@@ -276,8 +277,7 @@ body.ar .wrap>*:not(.header){direction:rtl}
     <div class="header-shimmer"></div>
     <div class="hdr-row" style="justify-content:center">
       <div class="hdr-center" style="flex:1;text-align:center">
-        <div id="hdrWelcome" style="font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:4px;min-height:18px;letter-spacing:.2px"></div>
-        <div class="hdr-title" id="pageTitle">Import Duty Roster</div>
+        <div class="hdr-title" id="pageTitle">📋 Import Duty Roster</div>
         <div style="position:relative;display:inline-block">
           <button class="date-btn" onclick="openDatePicker()" type="button">
             <span>📅</span><span>06 March 2026</span>
@@ -289,16 +289,21 @@ body.ar .wrap>*:not(.header){direction:rtl}
   </div>
   
   <div class="summary-bar">
+    <div class="s-chip welcome-chip" onclick="goToMySchedule()" id="welcomeChip" style="display:none">
+      <div class="s-val"><span class="wave-hand" id="waveHand">👋</span></div>
+      <span class="welcome-name-chip" id="welcomeName"></span>
+    </div>
     <div class="s-chip">
       <div class="s-val">78</div>
-      <div class="s-label" data-i18n="emp">Emp</div>
+      <div class="s-label" data-i18n="emp">Employees</div>
     </div>
     <div class="s-chip">
       <div class="s-val green">7</div>
-      <div class="s-label" data-i18n="dept">Dept</div>
+      <div class="s-label" data-i18n="dept">Departments</div>
     </div>
     <a href="{BASE}/my-schedules/index.html" class="s-chip" onclick="goToMySchedule(event)" style="text-decoration:none;color:inherit;">
-      <div class="s-val">📅</div>
+      <div class="s-val">🗓️</div>
+      <div class="s-label" data-i18n="my">My Schedule</div>
     </a>
     <div class="bar-btns">
       <button class="bar-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
@@ -686,11 +691,11 @@ body.ar .wrap>*:not(.header){direction:rtl}
     </div>
 
   <div class="cta-wrap">
-    <a class="cta-btn" id="ctaBtn" href="{BASE}/now/">View Full Roster</a>
+    <a class="cta-btn" id="ctaBtn" href="{BASE}/now/">📋 View Full Duty Roster</a>
   </div>
   
   <div class="page-footer">
-    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 16:23</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 16:41</strong>
     &nbsp;&middot;&nbsp; 78 employees &nbsp;&middot;&nbsp; MARCH ROSTER MID.xlsx
   </div>
 
@@ -701,7 +706,7 @@ var _avail=["2026-03"];
 function openDatePicker(){var p=document.getElementById('datePicker');if(!p)return;try{p.showPicker()}catch(e){p.click()}p.onchange=function(){if(!p.value)return;sessionStorage.setItem('manualNav','1');location.href=_importBase()+'/'+p.value+'/';}; }
 function goToMySchedule(e){if(e)e.preventDefault();var id=localStorage.getItem('savedEmpId')||localStorage.getItem('importSavedEmpId');location.href=_importBase()+'/my-schedules/index.html'+(id?'?emp='+encodeURIComponent(id):'');}
 function toggleTheme(){var isLight=document.body.classList.toggle('light');localStorage.setItem('importTheme',isLight?'light':'dark');var btn=document.getElementById('themeBtn');if(btn)btn.textContent=isLight?'☀️':'🌙';}
-var _T={ar:{title:'Import Duty Roster',emp:'موظف',dept:'قسم',my:'جدولي',cta:'عرض جدول المناوبات',Morning:'صباح',Afternoon:'ظهر',Night:'ليل','Off Day':'إجازة','Annual Leave':'سنوية','Sick Leave':'مرضية',Training:'تدريب',Standby:'استعداد',Other:'أخرى'},en:{title:'Import Duty Roster',emp:'Emp',dept:'Dept',my:'جدولي',cta:'View Full Roster',Morning:'Morning',Afternoon:'Afternoon',Night:'Night','Off Day':'Off Day','Annual Leave':'Annual Leave','Sick Leave':'Sick Leave',Training:'Training',Standby:'Standby',Other:'Other'}};
+var _T={ar:{title:'📋 جدول المناوبات',emp:'موظف',dept:'أقسام',my:'جدولي',cta:'📋 عرض جدول المناوبات',Morning:'صباح',Afternoon:'ظهر',Night:'ليل','Off Day':'إجازة','Annual Leave':'إجازة سنوية','Sick Leave':'إجازة مرضية',Training:'تدريب',Standby:'استعداد',Other:'أخرى'},en:{title:'📋 Import Duty Roster',emp:'Employees',dept:'Departments',my:'My Schedule',cta:'📋 View Full Duty Roster',Morning:'Morning',Afternoon:'Afternoon',Night:'Night','Off Day':'Off Day','Annual Leave':'Annual Leave','Sick Leave':'Sick Leave',Training:'Training',Standby:'Standby',Other:'Other'}};
 function _applyLang(isAr){var L=_T[isAr?'ar':'en'];var b=document.getElementById('langToggle');if(b)b.textContent=isAr?'EN':'ع';var pt=document.getElementById('pageTitle');if(pt)pt.textContent=L.title;var cta=document.getElementById('ctaBtn');if(cta)cta.textContent=L.cta;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=L[el.getAttribute('data-i18n')]||el.textContent;});document.querySelectorAll('.shift-label[data-shift]').forEach(function(el){el.textContent=L[el.getAttribute('data-shift')]||el.getAttribute('data-shift');});document.body.classList.toggle('ar',isAr);}
 function toggleLang(){var isAr=!document.body.classList.contains('ar');localStorage.setItem('importLang',isAr?'ar':'en');_applyLang(isAr);}
 function _wave(){var h=document.getElementById('waveHand');if(!h)return;h.classList.remove('waving');void h.offsetWidth;h.classList.add('waving');}
@@ -711,12 +716,14 @@ function _wave(){var h=document.getElementById('waveHand');if(!h)return;h.classL
   if(isLight){document.body.classList.add('light');var tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}
   document.querySelectorAll('a[href^="{BASE}"]').forEach(function(a){a.href=a.getAttribute('href').replace('{BASE}',_importBase());});
   var empId=localStorage.getItem('savedEmpId')||localStorage.getItem('importSavedEmpId');
-  var hdrW=document.getElementById('hdrWelcome');
-  if(empId){
+  var nameEl=document.getElementById('welcomeName'),chipEl=document.getElementById('welcomeChip'),handEl=document.getElementById('waveHand');
+  if(empId&&nameEl){
+    chipEl&&(chipEl.style.display='');
     fetch(_importBase()+'/schedules/'+encodeURIComponent(empId)+'.json').then(function(r){return r.ok?r.json():null;}).then(function(d){
-      var first=d&&d.name?d.name.split(' ')[0]:empId;
-      if(hdrW)hdrW.textContent='👋 مرحباً، '+first;
-    }).catch(function(){if(hdrW)hdrW.textContent='👋 مرحباً';});
+      nameEl.textContent=d&&d.name?d.name.split(' ')[0]:empId;
+      setTimeout(_wave,500+Math.random()*400);
+      if(Math.random()>.4)setTimeout(_wave,5e3+Math.random()*7e3);
+    }).catch(function(){nameEl.textContent=empId;setTimeout(_wave,500);});
   }
   if(sessionStorage.getItem('manualNav')==='1'){sessionStorage.removeItem('manualNav');return;}
   var pageDate='2026-03-06',now=new Date();
