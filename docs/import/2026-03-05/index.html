@@ -8,19 +8,62 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
 .wrap{max-width:900px;margin:0 auto;padding:16px}
-.header{background:linear-gradient(135deg,#1a56db,#1e40af);color:#fff;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;position:relative}
-.langToggle{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;font-weight:700}
-.helpBtn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;font-weight:700}
-.welcomeMsg{font-size:13px;color:rgba(255,255,255,.8);margin-bottom:4px;cursor:pointer;min-height:18px}
-h1{font-size:22px;font-weight:800;margin-bottom:12px}
+
+/* ── Header: flex row, لا يتأثر باتجاه اللغة ── */
+.header{
+  background:linear-gradient(135deg,#1a56db,#1e40af);
+  color:#fff;border-radius:16px;padding:14px 16px;
+  margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+  direction:ltr; /* ثابت دائماً LTR لترتيب العناصر */
+}
+.hdr-left{flex:0 0 auto;display:flex;align-items:center}
+.hdr-center{flex:1;text-align:center}
+.hdr-right{flex:0 0 auto;display:flex;align-items:center}
+
+/* يد الترحيب + اسم */
+.welcomeWrap{display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .2s}
+.welcomeWrap:hover{background:rgba(255,255,255,.15)}
+.waveHand{font-size:22px;display:inline-block;line-height:1;transform-origin:70% 80%}
+.waveHand.waving{animation:waveAnim 1.2s ease-in-out}
+@keyframes waveAnim{
+  0%,100%{transform:rotate(0deg)}
+  15%{transform:rotate(20deg)}
+  35%{transform:rotate(-12deg)}
+  55%{transform:rotate(18deg)}
+  75%{transform:rotate(-8deg)}
+  90%{transform:rotate(10deg)}
+}
+.welcomeName{font-size:13px;font-weight:700;color:rgba(255,255,255,.95);white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis}
+
+/* عنوان وتاريخ */
+h1{font-size:19px;font-weight:800;margin-bottom:8px;color:#fff;line-height:1.2}
 .datePickerWrapper{position:relative;display:inline-block}
-.dateTag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:10px;padding:8px 16px;cursor:pointer;font-size:15px;font-weight:700}
-.dateTag:hover{background:rgba(255,255,255,.25)}
+.dateTag{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);
+  color:#fff;border-radius:10px;padding:7px 14px;cursor:pointer;
+  font-size:14px;font-weight:700;white-space:nowrap;
+  direction:ltr; /* التاريخ ثابت اتجاهه */
+}
+.dateTag:hover{background:rgba(255,255,255,.28)}
 #datePicker{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+
+/* زر اللغة */
+.langToggle{
+  background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);
+  color:#fff;border-radius:9px;padding:6px 12px;
+  cursor:pointer;font-size:14px;font-weight:800;
+  white-space:nowrap;min-width:40px;text-align:center;
+}
+.langToggle:hover{background:rgba(255,255,255,.32)}
+
+/* Summary */
 .summaryBar{display:flex;gap:10px;margin-bottom:16px;justify-content:center;flex-wrap:wrap}
 .summaryChip{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 20px;text-align:center;min-width:80px;text-decoration:none;color:inherit;cursor:pointer}
 .chipVal{font-size:24px;font-weight:800;color:#1a56db}
 .chipLabel{font-size:11px;color:#64748b;font-weight:600;margin-top:2px;text-transform:uppercase}
+
+/* Dept cards */
 .deptCard{background:#fff;border-radius:14px;overflow:hidden;margin-bottom:12px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .deptHead{display:flex;align-items:center;gap:12px;padding:14px 16px}
 .deptIcon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto}
@@ -28,34 +71,54 @@ h1{font-size:22px;font-weight:800;margin-bottom:12px}
 .deptBadge{border-radius:10px;padding:6px 12px;text-align:center;flex:0 0 auto}
 .shiftStack{padding:0 12px 12px}
 .shiftCard{border-radius:10px;overflow:hidden;margin-top:8px}
-.shiftSummary{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;list-style:none;border-radius:10px}
+
+/* رأس المناوبة أدكن من خلفية الأسماء */
+.shiftSummary{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  cursor:pointer;list-style:none;border-radius:10px 10px 0 0;
+  filter:brightness(0.82);
+}
 .shiftSummary::-webkit-details-marker{display:none}
+.shiftBody{padding:8px 14px 12px;filter:brightness(1.0)}
+
 .shiftIcon{font-size:16px}
 .shiftLabel{font-weight:700;font-size:14px;flex:1}
 .shiftCount{border-radius:20px;padding:2px 8px;font-size:12px;font-weight:700}
-.shiftBody{padding:8px 14px 12px}
 .empRow,.empRowAlt{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px}
-.empRowAlt{background:rgba(0,0,0,.03)}
+.empRowAlt{background:rgba(0,0,0,.04)}
 .empName{font-weight:600;flex:1}
 .empStatus{font-weight:800;font-family:monospace;font-size:13px}
 .btnWrap{text-align:center;margin:16px 0}
 .btn{display:inline-block;background:linear-gradient(135deg,#1a56db,#1e40af);color:#fff;border-radius:12px;padding:12px 28px;font-size:15px;font-weight:700;text-decoration:none}
 .footer{text-align:center;font-size:12px;color:#64748b;padding:16px;margin-top:8px}
-body.ar{direction:rtl}
-@media(max-width:500px){.summaryBar{gap:6px}.chipVal{font-size:18px}h1{font-size:18px}}
+body.ar .wrap{direction:rtl}
+@media(max-width:500px){.summaryBar{gap:6px}.chipVal{font-size:18px}h1{font-size:17px}.welcomeName{max-width:70px}}
   </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="header">
-    <button class="langToggle" id="langToggle" onclick="toggleLang()">ع</button>
+    <!-- يسار: يد الترحيب + اسم (ثابت على اليسار دائماً) -->
+    <div class="hdr-left">
+      <div class="welcomeWrap" onclick="goToMySchedule()" title="جدولي">
+        <span class="waveHand" id="waveHand">👋</span>
+        <span class="welcomeName" id="welcomeName"></span>
+      </div>
+    </div>
 
-    <div class="welcomeMsg" id="welcomeMsg" onclick="goToMySchedule()" title="انقر للذهاب لجدولك"></div>
-    <h1 id="pageTitle">Import Duty Roster</h1>
-    <div class="datePickerWrapper">
-      <button class="dateTag" id="dateTag" onclick="openDatePicker()" type="button">📅 05 March 2026</button>
-      <input id="datePicker" type="date" value="2026-03-05" min="2026-03-01" max="2026-03-31" tabindex="-1" aria-hidden="true" />
+    <!-- وسط: عنوان + تاريخ -->
+    <div class="hdr-center">
+      <h1 id="pageTitle">Import Duty Roster</h1>
+      <div class="datePickerWrapper">
+        <button class="dateTag" onclick="openDatePicker()" type="button">📅 05 March 2026</button>
+        <input id="datePicker" type="date" value="2026-03-05" min="2026-03-01" max="2026-03-31" tabindex="-1" aria-hidden="true" />
+      </div>
+    </div>
+
+    <!-- يمين: زر اللغة (ثابت على اليمين دائماً) -->
+    <div class="hdr-right">
+      <button class="langToggle" id="langToggle" onclick="toggleLang()">&#1593;</button>
     </div>
   </div>
 
@@ -63,15 +126,15 @@ body.ar{direction:rtl}
   <div class="summaryBar">
     <div class="summaryChip">
       <div class="chipVal">78</div>
-      <div class="chipLabel" data-key="employees">Employees</div>
+      <div class="chipLabel" data-i18n="employees">Employees</div>
     </div>
     <div class="summaryChip">
       <div class="chipVal" style="color:#059669;">7</div>
-      <div class="chipLabel" data-key="departments">Departments</div>
+      <div class="chipLabel" data-i18n="departments">Departments</div>
     </div>
     <a href="{BASE}/my-schedules/index.html" id="myScheduleBtn" class="summaryChip" style="cursor:pointer;text-decoration:none;" onclick="goToMySchedule(event)">
       <div class="chipVal">🗓️</div>
-      <div class="chipLabel" data-key="mySchedule">My Schedule</div>
+      <div class="chipLabel" data-i18n="mySchedule">My Schedule</div>
     </a>
   </div>
 
@@ -100,7 +163,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" >
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
-        <span class="shiftLabel" style="color:#92400e;">Morning</span>
+        <span class="shiftLabel" data-shift="Morning" style="color:#92400e;">Morning</span>
         <span class="shiftCount" style="background:#f59e0b22; color:#92400e;">2</span>
       </summary>
       <div class="shiftBody">
@@ -117,7 +180,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Afternoon" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
-        <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
+        <span class="shiftLabel" data-shift="Afternoon" style="color:#9a3412;">Afternoon</span>
         <span class="shiftCount" style="background:#f9731622; color:#9a3412;">3</span>
       </summary>
       <div class="shiftBody">
@@ -137,7 +200,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" >
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
-        <span class="shiftLabel" style="color:#5b21b6;">Night</span>
+        <span class="shiftLabel" data-shift="Night" style="color:#5b21b6;">Night</span>
         <span class="shiftCount" style="background:#8b5cf622; color:#5b21b6;">2</span>
       </summary>
       <div class="shiftBody">
@@ -154,7 +217,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Off Day" style="border:1px solid #6366f144; background:#e0e7ff" >
       <summary class="shiftSummary" style="background:#e0e7ff; border-bottom:1px solid #6366f133;">
         <span class="shiftIcon">🛋️</span>
-        <span class="shiftLabel" style="color:#3730a3;">Off Day</span>
+        <span class="shiftLabel" data-shift="Off Day" style="color:#3730a3;">Off Day</span>
         <span class="shiftCount" style="background:#6366f122; color:#3730a3;">4</span>
       </summary>
       <div class="shiftBody">
@@ -177,7 +240,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Other" style="border:1px solid #64748b44; background:#f1f5f9" >
       <summary class="shiftSummary" style="background:#f1f5f9; border-bottom:1px solid #64748b33;">
         <span class="shiftIcon">•</span>
-        <span class="shiftLabel" style="color:#334155;">Other</span>
+        <span class="shiftLabel" data-shift="Other" style="color:#334155;">Other</span>
         <span class="shiftCount" style="background:#64748b22; color:#334155;">2</span>
       </summary>
       <div class="shiftBody">
@@ -217,7 +280,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" >
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
-        <span class="shiftLabel" style="color:#92400e;">Morning</span>
+        <span class="shiftLabel" data-shift="Morning" style="color:#92400e;">Morning</span>
         <span class="shiftCount" style="background:#f59e0b22; color:#92400e;">2</span>
       </summary>
       <div class="shiftBody">
@@ -234,7 +297,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Afternoon" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
-        <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
+        <span class="shiftLabel" data-shift="Afternoon" style="color:#9a3412;">Afternoon</span>
         <span class="shiftCount" style="background:#f9731622; color:#9a3412;">2</span>
       </summary>
       <div class="shiftBody">
@@ -251,7 +314,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" >
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
-        <span class="shiftLabel" style="color:#5b21b6;">Night</span>
+        <span class="shiftLabel" data-shift="Night" style="color:#5b21b6;">Night</span>
         <span class="shiftCount" style="background:#8b5cf622; color:#5b21b6;">1</span>
       </summary>
       <div class="shiftBody">
@@ -265,7 +328,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Off Day" style="border:1px solid #6366f144; background:#e0e7ff" >
       <summary class="shiftSummary" style="background:#e0e7ff; border-bottom:1px solid #6366f133;">
         <span class="shiftIcon">🛋️</span>
-        <span class="shiftLabel" style="color:#3730a3;">Off Day</span>
+        <span class="shiftLabel" data-shift="Off Day" style="color:#3730a3;">Off Day</span>
         <span class="shiftCount" style="background:#6366f122; color:#3730a3;">4</span>
       </summary>
       <div class="shiftBody">
@@ -311,7 +374,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" >
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
-        <span class="shiftLabel" style="color:#92400e;">Morning</span>
+        <span class="shiftLabel" data-shift="Morning" style="color:#92400e;">Morning</span>
         <span class="shiftCount" style="background:#f59e0b22; color:#92400e;">2</span>
       </summary>
       <div class="shiftBody">
@@ -328,7 +391,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Afternoon" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
-        <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
+        <span class="shiftLabel" data-shift="Afternoon" style="color:#9a3412;">Afternoon</span>
         <span class="shiftCount" style="background:#f9731622; color:#9a3412;">1</span>
       </summary>
       <div class="shiftBody">
@@ -342,7 +405,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" >
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
-        <span class="shiftLabel" style="color:#5b21b6;">Night</span>
+        <span class="shiftLabel" data-shift="Night" style="color:#5b21b6;">Night</span>
         <span class="shiftCount" style="background:#8b5cf622; color:#5b21b6;">2</span>
       </summary>
       <div class="shiftBody">
@@ -359,7 +422,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Off Day" style="border:1px solid #6366f144; background:#e0e7ff" >
       <summary class="shiftSummary" style="background:#e0e7ff; border-bottom:1px solid #6366f133;">
         <span class="shiftIcon">🛋️</span>
-        <span class="shiftLabel" style="color:#3730a3;">Off Day</span>
+        <span class="shiftLabel" data-shift="Off Day" style="color:#3730a3;">Off Day</span>
         <span class="shiftCount" style="background:#6366f122; color:#3730a3;">4</span>
       </summary>
       <div class="shiftBody">
@@ -405,7 +468,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" >
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
-        <span class="shiftLabel" style="color:#92400e;">Morning</span>
+        <span class="shiftLabel" data-shift="Morning" style="color:#92400e;">Morning</span>
         <span class="shiftCount" style="background:#f59e0b22; color:#92400e;">5</span>
       </summary>
       <div class="shiftBody">
@@ -431,7 +494,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Afternoon" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
-        <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
+        <span class="shiftLabel" data-shift="Afternoon" style="color:#9a3412;">Afternoon</span>
         <span class="shiftCount" style="background:#f9731622; color:#9a3412;">4</span>
       </summary>
       <div class="shiftBody">
@@ -454,7 +517,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" >
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
-        <span class="shiftLabel" style="color:#5b21b6;">Night</span>
+        <span class="shiftLabel" data-shift="Night" style="color:#5b21b6;">Night</span>
         <span class="shiftCount" style="background:#8b5cf622; color:#5b21b6;">5</span>
       </summary>
       <div class="shiftBody">
@@ -480,7 +543,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Off Day" style="border:1px solid #6366f144; background:#e0e7ff" >
       <summary class="shiftSummary" style="background:#e0e7ff; border-bottom:1px solid #6366f133;">
         <span class="shiftIcon">🛋️</span>
-        <span class="shiftLabel" style="color:#3730a3;">Off Day</span>
+        <span class="shiftLabel" data-shift="Off Day" style="color:#3730a3;">Off Day</span>
         <span class="shiftCount" style="background:#6366f122; color:#3730a3;">8</span>
       </summary>
       <div class="shiftBody">
@@ -538,7 +601,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" >
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
-        <span class="shiftLabel" style="color:#92400e;">Morning</span>
+        <span class="shiftLabel" data-shift="Morning" style="color:#92400e;">Morning</span>
         <span class="shiftCount" style="background:#f59e0b22; color:#92400e;">2</span>
       </summary>
       <div class="shiftBody">
@@ -555,7 +618,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Afternoon" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
-        <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
+        <span class="shiftLabel" data-shift="Afternoon" style="color:#9a3412;">Afternoon</span>
         <span class="shiftCount" style="background:#f9731622; color:#9a3412;">3</span>
       </summary>
       <div class="shiftBody">
@@ -575,7 +638,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" >
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
-        <span class="shiftLabel" style="color:#5b21b6;">Night</span>
+        <span class="shiftLabel" data-shift="Night" style="color:#5b21b6;">Night</span>
         <span class="shiftCount" style="background:#8b5cf622; color:#5b21b6;">2</span>
       </summary>
       <div class="shiftBody">
@@ -592,7 +655,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Off Day" style="border:1px solid #6366f144; background:#e0e7ff" >
       <summary class="shiftSummary" style="background:#e0e7ff; border-bottom:1px solid #6366f133;">
         <span class="shiftIcon">🛋️</span>
-        <span class="shiftLabel" style="color:#3730a3;">Off Day</span>
+        <span class="shiftLabel" data-shift="Off Day" style="color:#3730a3;">Off Day</span>
         <span class="shiftCount" style="background:#6366f122; color:#3730a3;">7</span>
       </summary>
       <div class="shiftBody">
@@ -647,7 +710,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" >
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
-        <span class="shiftLabel" style="color:#92400e;">Morning</span>
+        <span class="shiftLabel" data-shift="Morning" style="color:#92400e;">Morning</span>
         <span class="shiftCount" style="background:#f59e0b22; color:#92400e;">2</span>
       </summary>
       <div class="shiftBody">
@@ -664,7 +727,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Afternoon" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
-        <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
+        <span class="shiftLabel" data-shift="Afternoon" style="color:#9a3412;">Afternoon</span>
         <span class="shiftCount" style="background:#f9731622; color:#9a3412;">1</span>
       </summary>
       <div class="shiftBody">
@@ -678,7 +741,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" >
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
-        <span class="shiftLabel" style="color:#5b21b6;">Night</span>
+        <span class="shiftLabel" data-shift="Night" style="color:#5b21b6;">Night</span>
         <span class="shiftCount" style="background:#8b5cf622; color:#5b21b6;">1</span>
       </summary>
       <div class="shiftBody">
@@ -692,7 +755,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Off Day" style="border:1px solid #6366f144; background:#e0e7ff" >
       <summary class="shiftSummary" style="background:#e0e7ff; border-bottom:1px solid #6366f133;">
         <span class="shiftIcon">🛋️</span>
-        <span class="shiftLabel" style="color:#3730a3;">Off Day</span>
+        <span class="shiftLabel" data-shift="Off Day" style="color:#3730a3;">Off Day</span>
         <span class="shiftCount" style="background:#6366f122; color:#3730a3;">2</span>
       </summary>
       <div class="shiftBody">
@@ -732,7 +795,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" >
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
-        <span class="shiftLabel" style="color:#92400e;">Morning</span>
+        <span class="shiftLabel" data-shift="Morning" style="color:#92400e;">Morning</span>
         <span class="shiftCount" style="background:#f59e0b22; color:#92400e;">1</span>
       </summary>
       <div class="shiftBody">
@@ -746,7 +809,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Afternoon" style="border:1px solid #f9731644; background:#ffedd5" open>
       <summary class="shiftSummary" style="background:#ffedd5; border-bottom:1px solid #f9731633;">
         <span class="shiftIcon">🌤️</span>
-        <span class="shiftLabel" style="color:#9a3412;">Afternoon</span>
+        <span class="shiftLabel" data-shift="Afternoon" style="color:#9a3412;">Afternoon</span>
         <span class="shiftCount" style="background:#f9731622; color:#9a3412;">1</span>
       </summary>
       <div class="shiftBody">
@@ -760,7 +823,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" >
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
-        <span class="shiftLabel" style="color:#5b21b6;">Night</span>
+        <span class="shiftLabel" data-shift="Night" style="color:#5b21b6;">Night</span>
         <span class="shiftCount" style="background:#8b5cf622; color:#5b21b6;">1</span>
       </summary>
       <div class="shiftBody">
@@ -774,7 +837,7 @@ body.ar{direction:rtl}
     <details class="shiftCard" data-shift="Off Day" style="border:1px solid #6366f144; background:#e0e7ff" >
       <summary class="shiftSummary" style="background:#e0e7ff; border-bottom:1px solid #6366f133;">
         <span class="shiftIcon">🛋️</span>
-        <span class="shiftLabel" style="color:#3730a3;">Off Day</span>
+        <span class="shiftLabel" data-shift="Off Day" style="color:#3730a3;">Off Day</span>
         <span class="shiftCount" style="background:#6366f122; color:#3730a3;">2</span>
       </summary>
       <div class="shiftBody">
@@ -798,7 +861,7 @@ body.ar{direction:rtl}
 
   
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">01MAR2026 / 09:57</strong>
+    <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">01MAR2026 / 10:10</strong>
     <br>Total: <strong>78 employees</strong>
      &nbsp;·&nbsp; Source: <strong>MARCH ROSTER MID.xlsx</strong>
   </div>
@@ -842,59 +905,104 @@ function goToMySchedule(event) {
   location.href = id ? base + '?emp=' + encodeURIComponent(id) : base;
 }
 
-// ── Language toggle ──────────────────────────────────────────────
-function toggleLang() {
-  var body = document.body;
-  var isAr = body.classList.toggle('ar');
-  localStorage.setItem('importLang', isAr ? 'ar' : 'en');
+// ── Language toggle + full translation ───────────────────────────
+var _AR = {
+  title: 'جدول المناوبات',
+  employees: 'موظف',
+  departments: 'أقسام',
+  mySchedule: 'جدولي',
+  viewRoster: '📋 عرض جدول المناوبات',
+  Morning: 'صباح',
+  Afternoon: 'ظهر',
+  Night: 'ليل',
+  'Off Day': 'إجازة',
+  'Annual Leave': 'إجازة سنوية',
+  'Sick Leave': 'إجازة مرضية',
+  Training: 'تدريب',
+  Standby: 'استعداد',
+  Other: 'أخرى'
+};
+var _EN = {
+  title: 'Import Duty Roster',
+  employees: 'Employees', departments: 'Departments', mySchedule: 'My Schedule',
+  viewRoster: '📋 View Full Duty Roster',
+  Morning:'Morning',Afternoon:'Afternoon',Night:'Night','Off Day':'Off Day',
+  'Annual Leave':'Annual Leave','Sick Leave':'Sick Leave',
+  Training:'Training',Standby:'Standby',Other:'Other'
+};
+
+function _applyLang(isAr) {
+  var L = isAr ? _AR : _EN;
+  // زر اللغة
   var btn = document.getElementById('langToggle');
   if (btn) btn.textContent = isAr ? 'EN' : 'ع';
+  // العنوان
+  var t = document.getElementById('pageTitle');
+  if (t) t.textContent = L.title;
+  // الـ chips
+  var chips = document.querySelectorAll('[data-i18n]');
+  chips.forEach(function(el) { el.textContent = L[el.getAttribute('data-i18n')] || el.textContent; });
+  // زر CTA
+  var cta = document.getElementById('ctaBtn');
+  if (cta) cta.textContent = L.viewRoster;
+  // أسماء المناوبات
+  document.querySelectorAll('.shiftLabel[data-shift]').forEach(function(el) {
+    var k = el.getAttribute('data-shift');
+    el.textContent = L[k] || k;
+  });
+  // اتجاه المحتوى (الـ header يبقى LTR دائماً)
+  document.body.classList.toggle('ar', isAr);
 }
 
-// ── Help toggle ──────────────────────────────────────────────────
-function toggleHelp() {
-  var el = document.getElementById('helpModal');
-  if (el) el.classList.toggle('open');
+function toggleLang() {
+  var isAr = !document.body.classList.contains('ar');
+  localStorage.setItem('importLang', isAr ? 'ar' : 'en');
+  _applyLang(isAr);
+}
+
+// ── Waving hand ──────────────────────────────────────────────────
+function _wave() {
+  var h = document.getElementById('waveHand');
+  if (!h) return;
+  h.classList.remove('waving');
+  void h.offsetWidth;
+  h.classList.add('waving');
 }
 
 // ── Init on load ─────────────────────────────────────────────────
 (function() {
-  // Restore language
-  var lang = localStorage.getItem('importLang');
-  if (lang === 'ar') {
-    document.body.classList.add('ar');
-    var btn = document.getElementById('langToggle');
-    if (btn) btn.textContent = 'EN';
-  }
+  // اللغة
+  var isAr = localStorage.getItem('importLang') === 'ar';
+  _applyLang(isAr);
 
-  // Fix BASE links
+  // BASE links
   var base = _importBase();
   document.querySelectorAll('a[href^="{BASE}"]').forEach(function(a) {
     a.href = a.getAttribute('href').replace('{BASE}', base);
   });
 
-  // Welcome message
+  // الترحيب + اليد
   var empId = localStorage.getItem('savedEmpId') || localStorage.getItem('importSavedEmpId');
-  var welcome = document.getElementById('welcomeMsg');
-  if (welcome && empId) {
-    var isAr = document.body.classList.contains('ar');
+  var nameEl = document.getElementById('welcomeName');
+  var handEl = document.getElementById('waveHand');
+  if (empId && nameEl) {
     fetch(_importBase() + '/schedules/' + encodeURIComponent(empId) + '.json')
       .then(function(r) { return r.ok ? r.json() : null; })
       .then(function(d) {
-        if (d && d.name) {
-          var firstName = d.name.split(' ')[0];
-          welcome.textContent = (isAr ? 'مرحباً، ' : 'Welcome, ') + firstName + ' 👋';
-        } else {
-          welcome.textContent = (isAr ? 'مرحباً • ' : 'Welcome • ') + empId;
-        }
+        nameEl.textContent = d && d.name ? d.name.split(' ')[0] : empId;
+        setTimeout(_wave, 500 + Math.random()*500);
+        if (Math.random() > 0.45) setTimeout(_wave, 5000 + Math.random()*7000);
       })
       .catch(function() {
-        welcome.textContent = (isAr ? 'مرحباً • ' : 'Welcome • ') + empId;
+        nameEl.textContent = empId;
+        setTimeout(_wave, 500);
       });
+  } else {
+    if (handEl) handEl.style.display = 'none';
+    if (nameEl) nameEl.style.display = 'none';
   }
 
   // ── Auto-redirect to today ────────────────────────────────────
-  // لا نعيد التوجيه إذا اختار المستخدم التاريخ يدوياً
   if (sessionStorage.getItem('manualNav') === '1') {
     sessionStorage.removeItem('manualNav');
     return;
@@ -914,22 +1022,16 @@ function toggleHelp() {
         .then(function(r) { if (r.ok) window.location.replace(todayPath); })
         .catch(function() {});
     }
-    return; // لا تفتح مناوبة إذا لم تكن صفحة اليوم
+    return;
   }
 
   // ── Auto-open current shift ───────────────────────────────────
   var hour = now.getHours();
   var currentShift = (hour >= 6 && hour < 14) ? 'Morning'
-                   : (hour >= 14 && hour < 22) ? 'Afternoon'
-                   : 'Night';
-
+                   : (hour >= 14 && hour < 22) ? 'Afternoon' : 'Night';
   setTimeout(function() {
-    document.querySelectorAll('details.shiftCard').forEach(function(el) {
-      el.removeAttribute('open');
-    });
-    document.querySelectorAll('details.shiftCard[data-shift="' + currentShift + '"]').forEach(function(el) {
-      el.setAttribute('open', '');
-    });
+    document.querySelectorAll('details.shiftCard').forEach(function(el) { el.removeAttribute('open'); });
+    document.querySelectorAll('details.shiftCard[data-shift="' + currentShift + '"]').forEach(function(el) { el.setAttribute('open',''); });
   }, 150);
 
 })();
