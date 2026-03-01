@@ -186,25 +186,25 @@ def shift_bucket(code: str) -> Tuple[str, str, str, str, str]:
     """Return (bucket, icon, accent, bg, text_color)"""
     s = (code or "").strip().upper()
     if not s:
-        return ("Other", "•", "#64748b", "#f1f5f9", "#334155")
+        return ("Other", "•", "#64748b", "rgba(100,116,139,.15)", "#94a3b8")
 
     if s in {"O", "OFF", "OFFDAY", "OFF DAY"}:
-        return ("Off Day", "🛋️", "#6366f1", "#e0e7ff", "#3730a3")
+        return ("Off Day", "🛋️", "#818cf8", "rgba(129,140,248,.12)", "#a5b4fc")
     if s.startswith(("MN", "ME")):
-        return ("Morning", "☀️", "#f59e0b", "#fef3c7", "#92400e")
+        return ("Morning", "☀️", "#fbbf24", "rgba(251,191,36,.12)", "#fcd34d")
     if s.startswith(("AN", "AE")):
-        return ("Afternoon", "🌤️", "#f97316", "#ffedd5", "#9a3412")
+        return ("Afternoon", "🌤️", "#fb923c", "rgba(251,146,60,.12)", "#fdba74")
     if s.startswith(("NN", "NE")):
-        return ("Night", "🌙", "#8b5cf6", "#ede9fe", "#5b21b6")
+        return ("Night", "🌙", "#a78bfa", "rgba(167,139,250,.12)", "#c4b5fd")
     if s.startswith(("ST", "SB")):
-        return ("Standby", "🧍", "#9e9e9e", "#f0f0f0", "#555555")
+        return ("Standby", "🧍", "#94a3b8", "rgba(148,163,184,.10)", "#cbd5e1")
     if "SICK" in s or s.startswith(("SL",)):
-        return ("Sick Leave", "🤒", "#ef4444", "#fee2e2", "#991b1b")
+        return ("Sick Leave", "🤒", "#f87171", "rgba(248,113,113,.12)", "#fca5a5")
     if "ANNUAL" in s or s.startswith(("AL",)):
-        return ("Annual Leave", "✈️", "#10b981", "#d1fae5", "#065f46")
+        return ("Annual Leave", "✈️", "#34d399", "rgba(52,211,153,.12)", "#6ee7b7")
     if "TR" in s or "TRAIN" in s:
-        return ("Training", "🎓", "#0ea5e9", "#e0f2fe", "#075985")
-    return ("Other", "•", "#64748b", "#f1f5f9", "#334155")
+        return ("Training", "🎓", "#38bdf8", "rgba(56,189,248,.12)", "#7dd3fc")
+    return ("Other", "•", "#64748b", "rgba(100,116,139,.15)", "#94a3b8")
 
 
 def parse_month_sheet(xlsx_path: str, sheet_name: str, override_month_key: str | None = None) -> Dict[str, Any]:
@@ -479,27 +479,27 @@ def build_duty_html(style: str, script: str, parsed: Dict[str, Any], date_obj: d
                 safe_code = str(code).replace("\n","").replace("\r","").replace("<","&lt;").strip()
                 emp_rows.append(f'<div class="emp-row"><span class="emp-name">{safe_name} &middot; {safe_id}</span><span class="emp-code" style="color:{info["text"]};">{safe_code}</span></div>')
             shift_blocks.append(f"""
-    <details class="shift-card" data-shift="{key}" style="border:1px solid {info['accent']}55;background:{info['bg']}" {'open' if key=='Afternoon' else ''}>
+    <details class="shift-card" data-shift="{key}" style="border-color:{info['accent']}35;background:{info['bg']}" {'open' if key=='Afternoon' else ''}>
       <summary class="shift-summary" style="background:{info['bg']};">
         <span class="shift-icon">{info['icon']}</span>
         <span class="shift-label" data-shift="{key}" style="color:{info['text']};">{key}</span>
-        <span class="shift-count" style="background:{info['accent']}28;color:{info['text']};">{len(rows)}</span>
+        <span class="shift-count" style="background:{info['accent']}25;color:{info['text']};">{len(rows)}</span>
       </summary>
       <div class="shift-body">{''.join(emp_rows)}</div>
     </details>
 """)
         cards.append(f"""
-    <div class="dept-card">
-      <div style="height:4px;background:linear-gradient(to right,{color},{color}99)"></div>
+    <div class="dept-card" style="animation-delay:{i*0.06:.2f}s">
+      <div style="height:3px;background:linear-gradient(to right,{color},{color}66)"></div>
       <div class="dept-head">
-        <div class="dept-icon" style="background:{color}18;color:{color};">
+        <div class="dept-icon" style="background:{color}22;color:{color};box-shadow:0 4px 12px {color}30;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 21h18M3 10h18M5 21V10l7-6 7 6v11"/>
             <rect x="9" y="14" width="2" height="3"/><rect x="13" y="14" width="2" height="3"/>
           </svg>
         </div>
         <div class="dept-title">{dept}</div>
-        <div class="dept-badge" style="background:{color}18;color:{color};border:1px solid {color}28;">
+        <div class="dept-badge" style="background:{color}20;color:{color};border:1px solid {color}35;">
           <span class="dept-badge-label">Total</span>
           <span class="dept-badge-val">{total_in_dept}</span>
         </div>
@@ -510,7 +510,7 @@ def build_duty_html(style: str, script: str, parsed: Dict[str, Any], date_obj: d
 
     footer = f"""
   <div class="page-footer">
-    <strong style="color:#475569;">Last Updated:</strong> <strong style="color:#1e40af;">{dt.datetime.now().strftime('%d %b %Y / %H:%M').upper()}</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">{dt.datetime.now().strftime('%d %b %Y / %H:%M').upper()}</strong>
     &nbsp;&middot;&nbsp; {total_emp} employees &nbsp;&middot;&nbsp; {parsed.get('source_filename') or parsed['sheet']}
   </div>
 """
@@ -526,59 +526,169 @@ def build_duty_html(style: str, script: str, parsed: Dict[str, Any], date_obj: d
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Import Duty Roster</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-*{{box-sizing:border-box;margin:0;padding:0}}
-body{{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#eef2f7;color:#0f172a;min-height:100vh}}
-.wrap{{max-width:860px;margin:0 auto;padding:14px}}
-.header{{position:relative;overflow:hidden;background:linear-gradient(135deg,#1d4ed8 0%,#1e40af 55%,#1e3a8a 100%);border-radius:20px;padding:22px 20px 18px;margin-bottom:14px;color:#fff;box-shadow:0 8px 32px rgba(29,78,216,.38)}}
-.header::before{{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none}}
-.header::after{{content:'';position:absolute;bottom:-80px;left:30px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none}}
+:root{{
+  --bg:#080c14;--surface:rgba(255,255,255,.045);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.15);
+  --ink:#e8eef8;--muted:#8899b4;--dim:#4a5568;
+  --accent:#4f8eff;--accent2:#7c5cff;--green:#00d4a0;
+  --r:14px;--r-lg:20px;
+}}
+*{{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}}
+body{{
+  font-family:'Outfit',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%,rgba(79,142,255,.18) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(124,92,255,.14) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 30% at 60% 40%,rgba(0,212,160,.07) 0%,transparent 50%);
+  -webkit-font-smoothing:antialiased;
+}}
+.wrap{{max-width:860px;margin:0 auto;padding:16px}}
+
+/* ─── HEADER ─── */
+.header{{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(31,58,120,.95) 0%,rgba(20,34,80,.98) 55%,rgba(12,18,50,.99) 100%);
+  border-radius:var(--r-lg);padding:24px 20px 20px;margin-bottom:16px;color:#fff;
+  border:1px solid rgba(79,142,255,.2);
+  box-shadow:0 0 0 1px rgba(79,142,255,.08),0 20px 60px rgba(0,0,0,.6),0 8px 24px rgba(79,142,255,.15);
+}}
+.header::before{{
+  content:'';position:absolute;top:-80px;right:-80px;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(79,142,255,.18) 0%,transparent 70%);pointer-events:none;
+}}
+.header::after{{
+  content:'';position:absolute;bottom:-100px;left:20px;width:320px;height:320px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,92,255,.12) 0%,transparent 70%);pointer-events:none;
+}}
+/* Animated shimmer line at top of header */
+.header-shimmer{{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#4f8eff,#7c5cff,#00d4a0,transparent);
+  background-size:200% 100%;animation:shimmer 3s ease infinite;pointer-events:none;
+}}
+@keyframes shimmer{{0%{{background-position:200% 0}}100%{{background-position:-200% 0}}}}
+
 .hdr-row{{display:flex;align-items:flex-end;gap:8px;direction:ltr;position:relative;z-index:1}}
 .hdr-left{{flex:0 0 auto}}.hdr-center{{flex:1;text-align:center}}.hdr-right{{flex:0 0 auto}}
-.welcome-wrap{{display:flex;flex-direction:column;align-items:flex-start;gap:2px;cursor:pointer;padding:4px 6px;border-radius:10px;transition:background .2s}}
-.welcome-wrap:hover{{background:rgba(255,255,255,.12)}}
-.wave-hand{{font-size:26px;line-height:1;display:block;transform-origin:70% 80%}}
+.welcome-wrap{{display:flex;flex-direction:column;align-items:flex-start;gap:3px;cursor:pointer;padding:6px 8px;border-radius:12px;transition:background .2s}}
+.welcome-wrap:hover{{background:rgba(255,255,255,.1)}}
+.wave-hand{{font-size:28px;line-height:1;display:block;transform-origin:70% 80%}}
 .wave-hand.waving{{animation:waveAnim 1.1s ease-in-out}}
 @keyframes waveAnim{{0%,100%{{transform:rotate(0)}}15%{{transform:rotate(22deg)}}35%{{transform:rotate(-13deg)}}55%{{transform:rotate(18deg)}}75%{{transform:rotate(-9deg)}}90%{{transform:rotate(11deg)}}}}
-.welcome-name{{font-size:11px;font-weight:700;color:rgba(255,255,255,.82);white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}}
-.hdr-title{{font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:10px;line-height:1.2}}
-.date-btn{{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.32);color:#fff;border-radius:12px;padding:8px 16px;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit;direction:ltr;transition:background .2s}}
-.date-btn:hover{{background:rgba(255,255,255,.24)}}
-.lang-btn{{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);color:#fff;border-radius:10px;padding:7px 12px;cursor:pointer;font-size:13px;font-weight:800;font-family:inherit;transition:background .2s}}
-.lang-btn:hover{{background:rgba(255,255,255,.28)}}
-.summary-bar{{display:flex;gap:10px;margin-bottom:14px;justify-content:center;flex-wrap:wrap}}
-.s-chip{{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:13px 22px;text-align:center;min-width:85px;text-decoration:none;color:inherit;box-shadow:0 1px 6px rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}}
-.s-chip:hover{{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1)}}
-.s-val{{font-size:26px;font-weight:800;color:#1d4ed8;line-height:1}}.s-val.green{{color:#059669}}
-.s-label{{font-size:10px;color:#64748b;font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.6px}}
-.dept-card{{background:#fff;border-radius:16px;overflow:hidden;margin-bottom:12px;border:1px solid #e8edf4;box-shadow:0 2px 8px rgba(0,0,0,.05)}}
-.dept-head{{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f1f5f9}}
-.dept-icon{{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto}}
-.dept-title{{font-size:15px;font-weight:800;flex:1}}.dept-badge{{border-radius:10px;padding:5px 12px;text-align:center;flex:0 0 auto}}
-.dept-badge-label{{font-size:9px;opacity:.65;display:block;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}}
-.dept-badge-val{{font-size:18px;font-weight:900}}
-.shift-stack{{padding:0 12px 12px}}.shift-card{{border-radius:11px;overflow:hidden;margin-top:8px}}
-.shift-summary{{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;list-style:none;border-radius:11px 11px 0 0;filter:brightness(.82)}}
+.welcome-name{{font-size:11px;font-weight:700;color:rgba(255,255,255,.75);white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}}
+.hdr-title{{font-size:21px;font-weight:800;letter-spacing:-.3px;margin-bottom:11px;line-height:1.2;text-shadow:0 2px 12px rgba(79,142,255,.4)}}
+.date-btn{{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(79,142,255,.15);border:1.5px solid rgba(79,142,255,.4);
+  color:#fff;border-radius:12px;padding:9px 18px;cursor:pointer;
+  font-size:14px;font-weight:700;font-family:inherit;direction:ltr;
+  transition:all .2s;backdrop-filter:blur(10px);
+}}
+.date-btn:hover{{background:rgba(79,142,255,.28);border-color:rgba(79,142,255,.6);transform:translateY(-1px)}}
+.lang-btn{{
+  background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.9);border-radius:10px;padding:8px 13px;
+  cursor:pointer;font-size:13px;font-weight:800;font-family:inherit;transition:all .2s;
+}}
+.lang-btn:hover{{background:rgba(79,142,255,.2);border-color:rgba(79,142,255,.4);color:#fff}}
+
+/* ─── SUMMARY BAR ─── */
+.summary-bar{{display:flex;gap:10px;margin-bottom:16px;justify-content:center;flex-wrap:wrap}}
+.s-chip{{
+  background:rgba(255,255,255,.055);border:1px solid var(--border2);
+  border-radius:var(--r);padding:14px 24px;text-align:center;min-width:90px;
+  text-decoration:none;color:inherit;
+  box-shadow:0 4px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.07);
+  transition:transform .15s,box-shadow .15s,background .15s;
+  backdrop-filter:blur(12px);
+}}
+.s-chip:hover{{transform:translateY(-3px);background:rgba(255,255,255,.09);box-shadow:0 8px 32px rgba(0,0,0,.4)}}
+.s-val{{font-size:28px;font-weight:900;color:var(--accent);line-height:1;letter-spacing:-.5px}}
+.s-val.green{{color:var(--green)}}
+.s-label{{font-size:10px;color:var(--muted);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.8px}}
+
+/* ─── DEPT CARDS ─── */
+.dept-card{{
+  background:rgba(255,255,255,.042);
+  border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;
+  border:1px solid var(--border);
+  box-shadow:0 4px 24px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .2s,box-shadow .2s;backdrop-filter:blur(8px);
+  animation:cardIn .35s cubic-bezier(.22,1,.36,1) both;
+}}
+@keyframes cardIn{{from{{opacity:0;transform:translateY(12px)}}to{{opacity:1;transform:translateY(0)}}}}
+.dept-card:hover{{transform:translateY(-2px);box-shadow:0 8px 36px rgba(0,0,0,.4)}}
+.dept-head{{display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--border)}}
+.dept-icon{{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;box-shadow:0 4px 12px rgba(0,0,0,.3)}}
+.dept-title{{font-size:15px;font-weight:800;flex:1;letter-spacing:-.2px}}
+.dept-badge{{border-radius:10px;padding:6px 14px;text-align:center;flex:0 0 auto}}
+.dept-badge-label{{font-size:9px;opacity:.6;display:block;text-transform:uppercase;letter-spacing:.6px;margin-bottom:1px;font-weight:600}}
+.dept-badge-val{{font-size:20px;font-weight:900;letter-spacing:-.5px}}
+
+/* ─── SHIFT CARDS ─── */
+.shift-stack{{padding:0 14px 14px}}
+.shift-card{{border-radius:12px;overflow:hidden;margin-top:10px;border:1px solid transparent}}
+.shift-summary{{
+  display:flex;align-items:center;gap:9px;padding:11px 15px;
+  cursor:pointer;list-style:none;
+  border-radius:12px 12px 0 0;
+  transition:filter .15s;
+}}
 .shift-summary::-webkit-details-marker{{display:none}}
-.shift-card:not([open]) .shift-summary{{border-radius:11px}}
-.shift-icon{{font-size:17px}}.shift-label{{font-weight:800;font-size:14px;flex:1}}
-.shift-count{{border-radius:20px;padding:3px 9px;font-size:12px;font-weight:800}}
-.shift-body{{padding:8px 12px 10px}}
-.emp-row{{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px}}
-.emp-row:nth-child(even){{background:rgba(0,0,0,.035)}}
-.emp-name{{font-weight:600;flex:1;color:#1e293b}}.emp-code{{font-weight:800;font-family:monospace;font-size:12px}}
-.cta-wrap{{text-align:center;margin:14px 0}}
-.cta-btn{{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;border-radius:14px;padding:13px 30px;font-size:15px;font-weight:700;text-decoration:none;font-family:inherit;box-shadow:0 4px 16px rgba(29,78,216,.3);transition:transform .15s,box-shadow .15s}}
-.cta-btn:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(29,78,216,.4)}}
-.page-footer{{text-align:center;font-size:11px;color:#94a3b8;padding:14px}}
+.shift-card:not([open]) .shift-summary{{border-radius:12px}}
+.shift-card:not([open]) .shift-summary:hover{{filter:brightness(1.12)}}
+.shift-icon{{font-size:18px}}
+.shift-label{{font-weight:800;font-size:14px;flex:1;letter-spacing:-.1px}}
+.shift-count{{
+  border-radius:20px;padding:3px 10px;font-size:12px;font-weight:800;
+  backdrop-filter:blur(8px);
+}}
+.shift-body{{padding:10px 14px 12px;background:rgba(0,0,0,.15)}}
+.emp-row{{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 11px;border-radius:9px;font-size:13px;
+  transition:background .15s;
+}}
+.emp-row:hover{{background:rgba(255,255,255,.06)}}
+.emp-row:nth-child(even){{background:rgba(255,255,255,.03)}}
+.emp-row:nth-child(even):hover{{background:rgba(255,255,255,.07)}}
+.emp-name{{font-weight:600;flex:1;color:var(--ink)}}.emp-code{{font-weight:800;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px}}
+
+/* ─── CTA ─── */
+.cta-wrap{{text-align:center;margin:16px 0}}
+.cta-btn{{
+  display:inline-flex;align-items:center;gap:9px;
+  background:linear-gradient(135deg,#4f8eff 0%,#7c5cff 100%);
+  color:#fff;border-radius:14px;padding:14px 34px;font-size:15px;font-weight:700;
+  text-decoration:none;font-family:inherit;
+  box-shadow:0 4px 20px rgba(79,142,255,.4),0 0 0 1px rgba(79,142,255,.2);
+  transition:transform .15s,box-shadow .15s;letter-spacing:-.1px;
+}}
+.cta-btn:hover{{transform:translateY(-3px);box-shadow:0 10px 36px rgba(79,142,255,.5),0 0 0 1px rgba(79,142,255,.3)}}
+.cta-btn:active{{transform:translateY(0)}}
+
+/* ─── FOOTER ─── */
+.page-footer{{
+  text-align:center;font-size:11px;color:var(--dim);padding:16px;
+  border-top:1px solid var(--border);margin-top:8px;
+}}
+.page-footer strong{{color:var(--muted)!important}}
+
 body.ar .wrap>*:not(.header){{direction:rtl}}
-@media(max-width:500px){{.s-val{{font-size:22px}}.hdr-title{{font-size:17px}}.date-btn{{font-size:13px;padding:7px 12px}}.welcome-name{{max-width:65px}}}}
+@media(max-width:500px){{
+  .s-val{{font-size:24px}}.hdr-title{{font-size:18px}}
+  .date-btn{{font-size:13px;padding:8px 13px}}.welcome-name{{max-width:65px}}
+  .dept-card{{border-radius:16px}}
+}}
   </style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
+    <div class="header-shimmer"></div>
     <div class="hdr-row">
       <div class="hdr-left">
         <div class="welcome-wrap" onclick="goToMySchedule()" title="\u062c\u062f\u0648\u0644\u064a">
