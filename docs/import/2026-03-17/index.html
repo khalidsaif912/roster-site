@@ -69,41 +69,71 @@ body{
 
 /* ─── LIGHT THEME ─── */
 body.light{
-  --bg:#c8d4ee;--surface:rgba(255,255,255,.85);--surface2:rgba(255,255,255,.95);
-  --border:rgba(29,78,216,.18);--border2:rgba(29,78,216,.28);
-  --ink:#0a0f1e;--muted:#2e3d6b;--dim:#5a6a96;
-  --accent:#1a42c4;--accent2:#6020c0;--green:#047857;
+  --accent:#1e40af;--accent2:#6d28d9;--green:#065f46;
+  --ink:#0f172a;--muted:#334155;--dim:#64748b;
+  --border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.18);
+  background:#dde3f0;
   background-image:
-    radial-gradient(ellipse 80% 50% at 20% -10%,rgba(29,78,216,.28) 0%,transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 110%,rgba(109,40,217,.18) 0%,transparent 55%),
-    radial-gradient(ellipse 40% 30% at 60% 40%,rgba(4,120,87,.12) 0%,transparent 50%);
-  background-color:#c8d4ee;
+    radial-gradient(ellipse 70% 50% at 15% 0%,rgba(37,99,235,.2) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 100%,rgba(109,40,217,.14) 0%,transparent 50%);
+}
+body.light .header{
+  background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 50%,#1d4ed8 100%);
+  border-color:rgba(255,255,255,.15);
+  box-shadow:0 8px 32px rgba(30,58,138,.5),0 2px 8px rgba(0,0,0,.3);
 }
 body.light .dept-card{
-  background:rgba(210,220,245,.75);border-color:rgba(29,78,216,.22);
-  box-shadow:0 4px 24px rgba(29,78,216,.16),inset 0 1px 0 rgba(255,255,255,.6);
+  background:#ffffff;
+  border:1px solid rgba(0,0,0,.14);
+  box-shadow:0 2px 12px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.08);
+  backdrop-filter:none;
 }
-body.light .dept-card:hover{box-shadow:0 8px 36px rgba(29,78,216,.26)}
-body.light .dept-head{border-bottom-color:rgba(29,78,216,.15)}
-body.light .dept-icon{box-shadow:0 4px 12px rgba(29,78,216,.2)!important}
-body.light .shift-body{background:rgba(0,0,30,.06)}
-body.light .emp-row:hover{background:rgba(29,78,216,.1)}
-body.light .emp-row:nth-child(even){background:rgba(29,78,216,.06)}
-body.light .emp-row:nth-child(even):hover{background:rgba(29,78,216,.12)}
-body.light .emp-name{color:#0a0f1e}
+body.light .dept-card:hover{
+  box-shadow:0 6px 24px rgba(30,64,175,.18),0 2px 6px rgba(0,0,0,.1);
+  transform:translateY(-2px);
+}
+body.light .dept-head{
+  background:#f8faff;
+  border-bottom:1px solid rgba(0,0,0,.1);
+}
+body.light .dept-title{color:#0f172a;font-weight:800}
+body.light .dept-icon{box-shadow:0 3px 8px rgba(0,0,0,.15)!important}
+body.light .shift-body{background:#f1f5f9}
+body.light .shift-summary{filter:brightness(.96)}
+body.light .shift-card{border:1px solid rgba(0,0,0,.1)!important}
+body.light .shift-card:not([open]) .shift-summary:hover{filter:brightness(.9)}
+body.light .emp-row{color:#0f172a}
+body.light .emp-row:hover{background:rgba(30,64,175,.07)}
+body.light .emp-row:nth-child(even){background:rgba(0,0,0,.03)}
+body.light .emp-row:nth-child(even):hover{background:rgba(30,64,175,.08)}
+body.light .emp-name{color:#0f172a;font-weight:700}
+body.light .emp-code{color:#1e40af!important}
 body.light .s-chip{
-  background:rgba(200,215,245,.7);border-color:rgba(29,78,216,.28);
-  box-shadow:0 4px 20px rgba(29,78,216,.18),inset 0 1px 0 rgba(255,255,255,.5);
+  background:#ffffff;
+  border:1px solid rgba(0,0,0,.15);
+  box-shadow:0 2px 10px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.07);
+  backdrop-filter:none;
 }
-body.light .s-chip:hover{background:rgba(190,208,242,.85);box-shadow:0 8px 32px rgba(29,78,216,.28)}
-body.light .s-val{color:#1a42c4}
-body.light .s-val.green{color:#047857}
-body.light .s-label{color:#2e3d6b}
-body.light .welcome-name-chip{color:#2e3d6b}
-body.light .dept-title{color:#0a0f1e}
-body.light .page-footer{border-top-color:rgba(29,78,216,.18);color:#3d4f7a}
-body.light .cta-btn{box-shadow:0 4px 20px rgba(29,78,216,.4),0 0 0 1px rgba(29,78,216,.25)}
-body.light .cta-btn:hover{box-shadow:0 10px 36px rgba(29,78,216,.5)}
+body.light .s-chip:hover{
+  background:#f0f6ff;
+  box-shadow:0 6px 20px rgba(30,64,175,.15);
+}
+body.light .s-val{color:#1e40af}
+body.light .s-val.green{color:#065f46}
+body.light .s-label{color:#334155;font-weight:700}
+body.light .welcome-name-chip{color:#334155}
+body.light .page-footer{
+  border-top:1px solid rgba(0,0,0,.12);
+  color:#475569;
+}
+body.light .page-footer strong{color:#1e40af!important}
+body.light .cta-btn{
+  background:linear-gradient(135deg,#1e40af 0%,#1e3a8a 100%);
+  box-shadow:0 4px 16px rgba(30,64,175,.4),0 1px 4px rgba(0,0,0,.2);
+}
+body.light .cta-btn:hover{
+  box-shadow:0 8px 28px rgba(30,64,175,.5);
+}
 
 /* ─── THEME TOGGLE ─── */
 .theme-btn{
@@ -113,11 +143,10 @@ body.light .cta-btn:hover{box-shadow:0 10px 36px rgba(29,78,216,.5)}
   display:grid;place-items:center;transition:all .2s;flex:0 0 auto;
 }
 .theme-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.08)}
-body.light .theme-btn{background:rgba(29,78,216,.12);border-color:rgba(29,78,216,.28);color:#1a42c4}
-body.light .theme-btn:hover{background:rgba(29,78,216,.22)}
-body.light .shift-card{border-color:rgba(0,0,0,.12)!important}
-body.light .shift-summary{filter:brightness(.88)!important}
-body.light .shift-card:not([open]) .shift-summary:hover{filter:brightness(.82)!important}
+body.light .theme-btn{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.35);color:#fff}
+body.light .theme-btn:hover{background:rgba(255,255,255,.32)}
+body.light .lang-btn{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff}
+body.light .lang-btn:hover{background:rgba(255,255,255,.28)}
 
 /* ─── SUMMARY BAR ─── */
 .summary-bar{display:flex;gap:10px;margin-bottom:16px;justify-content:center;flex-wrap:wrap}
@@ -654,7 +683,7 @@ body.ar .wrap>*:not(.header){direction:rtl}
   </div>
   
   <div class="page-footer">
-    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 13:34</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">01 MAR 2026 / 13:37</strong>
     &nbsp;&middot;&nbsp; 78 employees &nbsp;&middot;&nbsp; MARCH ROSTER MID.xlsx
   </div>
 
