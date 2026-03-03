@@ -186,6 +186,17 @@ jobs:
             echo "generate_employee_schedules.py not found, skipping..."
           fi
 
+      - name: Generate roster.json for offload monitor
+        if: steps.check_changes.outputs.should_process == 'true'
+        run: |
+          if [ -f "xlsx_to_roster_json.py" ]; then
+            echo "Generating roster.json..."
+            python xlsx_to_roster_json.py
+            echo "Done!"
+          else
+            echo "xlsx_to_roster_json.py not found, skipping..."
+          fi
+
       - name: Commit updated docs
         if: steps.check_changes.outputs.should_process == 'true'
         run: |
