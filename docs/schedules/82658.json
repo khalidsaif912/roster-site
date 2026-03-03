@@ -796,27 +796,27 @@
         "day": 29,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-30",
         "day": 30,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-31",
         "day": 31,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       }
     ]
   }

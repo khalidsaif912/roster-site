@@ -607,9 +607,9 @@
         "day": 8,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "AE14",
-        "shift_label": "🌆 Afternoon (AE14)",
-        "shift_group": "Afternoon"
+        "shift_code": "NE22",
+        "shift_label": "🌙 Night (NE22)",
+        "shift_group": "Night"
       },
       {
         "date": "2026-03-09",
