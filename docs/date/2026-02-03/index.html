@@ -1389,6 +1389,24 @@ function goToMySchedule() {
   var base = 'https://khalidsaif912.github.io/roster-site/my-schedules/index.html';
   location.href = id ? base + '?emp=' + encodeURIComponent(id) : base;
 }
+
+// ✅ فتح المناوبة الصحيحة في الصفحة الرئيسية بناءً على توقيت مسقط
+(function() {
+  var now = new Date();
+  var muscatHour    = parseInt(now.toLocaleString('en-US', {timeZone:'Asia/Muscat', hour:'2-digit', hour12:false}));
+  var muscatMinute  = parseInt(now.toLocaleString('en-US', {timeZone:'Asia/Muscat', minute:'2-digit'}));
+  var t = muscatHour * 60 + muscatMinute;
+  var activeShift = (t >= 21*60+1 || t < 6*60) ? 'Night' : (t >= 13*60+1) ? 'Afternoon' : 'Morning';
+
+  // أغلق كل المناوبات أولاً
+  document.querySelectorAll('details.shiftCard').forEach(function(el) {
+    el.removeAttribute('open');
+  });
+  // افتح المناوبة الصحيحة فقط
+  document.querySelectorAll('details.shiftCard[data-shift="' + activeShift + '"]').forEach(function(el) {
+    el.setAttribute('open', '');
+  });
+})();
 </script>
 
 </body>
