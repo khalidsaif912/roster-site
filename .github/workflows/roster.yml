@@ -1,4 +1,4 @@
-name: Import Roster Site (WO/Export)
+name: EXPORT Roster Site 
 on:
   workflow_dispatch: {}
   schedule:
