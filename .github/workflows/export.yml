@@ -1,4 +1,4 @@
-name: EXPORT Roster Site
+name: export Roster Site
 
 on:
   workflow_dispatch: {}
