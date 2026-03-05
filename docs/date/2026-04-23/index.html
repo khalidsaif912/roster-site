@@ -533,16 +533,15 @@ window.openDatePicker = function() {
     shiftGroups[shiftType].push(card);
   });
   
-  // Determine current shift based on time
+  // Determine current shift based on Muscat time (Asia/Muscat = UTC+4)
   function getCurrentShift(){
     var now = new Date();
-    var muscatTime = new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
-    var hour = muscatTime.getHours();
-    var minute = muscatTime.getMinutes();
-    var t = hour * 60 + minute;
+    var muscatHour = parseInt(now.toLocaleString('en-US', {timeZone:'Asia/Muscat', hour:'2-digit', hour12:false}));
+    var muscatMinute = parseInt(now.toLocaleString('en-US', {timeZone:'Asia/Muscat', minute:'2-digit'}));
+    var t = muscatHour * 60 + muscatMinute;
     
-    if(t >= 21 * 60 || t < 5 * 60) return 'Night';
-    if(t >= 13 * 60) return 'Afternoon';
+    if(t >= 21 * 60 + 1 || t < 6 * 60) return 'Night';
+    if(t >= 13 * 60 + 1) return 'Afternoon';
     return 'Morning';
   }
   

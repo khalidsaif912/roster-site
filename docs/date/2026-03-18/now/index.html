@@ -407,7 +407,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -467,7 +467,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -484,7 +484,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -555,7 +555,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -592,7 +592,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -692,7 +692,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -759,7 +759,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -881,7 +881,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
       <summary class="shiftSummary" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -930,7 +930,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
       <summary class="shiftSummary" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -1150,16 +1150,15 @@ window.openDatePicker = function() {
     shiftGroups[shiftType].push(card);
   });
   
-  // Determine current shift based on time
+  // Determine current shift based on Muscat time (Asia/Muscat = UTC+4)
   function getCurrentShift(){
     var now = new Date();
-    var muscatTime = new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
-    var hour = muscatTime.getHours();
-    var minute = muscatTime.getMinutes();
-    var t = hour * 60 + minute;
+    var muscatHour = parseInt(now.toLocaleString('en-US', {timeZone:'Asia/Muscat', hour:'2-digit', hour12:false}));
+    var muscatMinute = parseInt(now.toLocaleString('en-US', {timeZone:'Asia/Muscat', minute:'2-digit'}));
+    var t = muscatHour * 60 + muscatMinute;
     
-    if(t >= 21 * 60 || t < 5 * 60) return 'Night';
-    if(t >= 13 * 60) return 'Afternoon';
+    if(t >= 21 * 60 + 1 || t < 6 * 60) return 'Night';
+    if(t >= 13 * 60 + 1) return 'Afternoon';
     return 'Morning';
   }
   
