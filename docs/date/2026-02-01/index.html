@@ -1016,8 +1016,16 @@
     <strong style="color:#475569;font-size:13px;">Last Updated:</strong> <strong style="color:#1e40af;">01FEB2026 / 00:00</strong>
     <br>Total: <strong>80 employees</strong>
      &nbsp;·&nbsp; Source: <strong>Export New Roster February 2026 - RAMADAN Version-5.xlsx</strong>
+    <br>
+    <span id="secretTrigger" style="cursor:default;user-select:none;color:transparent;font-size:10px;">·</span>
+    <div id="statsPanel" style="display:none;margin-top:10px;padding:12px 16px;background:#1e293b;border-radius:10px;color:#e2e8f0;font-size:13px;text-align:center;">
+      <div style="font-size:11px;color:#94a3b8;margin-bottom:6px;">📊 إحصائيات الزيارات</div>
+      <div style="display:flex;gap:20px;justify-content:center;">
+        <div><div id="statToday" style="font-size:22px;font-weight:bold;color:#60a5fa;">—</div><div style="font-size:11px;color:#94a3b8;">اليوم</div></div>
+        <div><div id="statTotal" style="font-size:22px;font-weight:bold;color:#34d399;">—</div><div style="font-size:11px;color:#94a3b8;">الإجمالي</div></div>
+      </div>
+    </div>
   </div>
-
 </div>
 
 <script>
@@ -1375,15 +1383,88 @@ function goToMySchedule() {
   var muscatMinute  = parseInt(now.toLocaleString('en-US', {timeZone:'Asia/Muscat', minute:'2-digit'}));
   var t = muscatHour * 60 + muscatMinute;
   var activeShift = (t >= 21*60+1 || t < 6*60) ? 'Night' : (t >= 13*60+1) ? 'Afternoon' : 'Morning';
-
-  // أغلق كل المناوبات أولاً
   document.querySelectorAll('details.shiftCard').forEach(function(el) {
     el.removeAttribute('open');
   });
-  // افتح المناوبة الصحيحة فقط
   document.querySelectorAll('details.shiftCard[data-shift="' + activeShift + '"]').forEach(function(el) {
     el.setAttribute('open', '');
   });
+})();
+
+// ✅ تسجيل الزيارة في Supabase
+(function() {
+  var SUPA_URL = 'https://tqfoiliyhlhidrrjfczq.supabase.co';
+  var SUPA_KEY = 'sb_publishable_TQCEVXnTOEzoQsYAVVxidA_gUCx7Uez';
+
+  // تسجيل الزيارة
+  fetch(SUPA_URL + '/rest/v1/page_views', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ page: 'export' })
+  }).catch(function(){});
+
+  // ✅ الكود السري — اكتب 8715 في أي مكان بالصفحة لفتح الإحصائيات
+  var secretCode = '8715';
+  var typed = '';
+  document.addEventListener('keypress', function(e) {
+    typed += e.key;
+    if(typed.length > secretCode.length) typed = typed.slice(-secretCode.length);
+    if(typed === secretCode) {
+      typed = '';
+      loadStats();
+    }
+  });
+
+  function loadStats() {
+    var panel = document.getElementById('statsPanel');
+    if(!panel) return;
+
+    // توقيت مسقط UTC+4
+    var now = new Date();
+    var muscat = new Date(now.getTime() + (4 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60 * 1000));
+    var todayStr = muscat.getFullYear() + '-' +
+      String(muscat.getMonth()+1).padStart(2,'0') + '-' +
+      String(muscat.getDate()).padStart(2,'0');
+    var todayStart = todayStr + 'T00:00:00+04:00';
+    var todayEnd   = todayStr + 'T23:59:59+04:00';
+
+    panel.style.display = 'block';
+    document.getElementById('statToday').textContent = '...';
+    document.getElementById('statTotal').textContent = '...';
+
+    // عدد زيارات اليوم
+    fetch(SUPA_URL + '/rest/v1/page_views?select=id&page=eq.export&visited_at=gte.' + todayStart + '&visited_at=lte.' + todayEnd, {
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Prefer': 'count=exact',
+        'Range': '0-0'
+      }
+    }).then(function(r) {
+      var count = r.headers.get('content-range');
+      var total = count ? count.split('/')[1] : '?';
+      document.getElementById('statToday').textContent = total;
+    }).catch(function() { document.getElementById('statToday').textContent = '!'; });
+
+    // الإجمالي الكلي
+    fetch(SUPA_URL + '/rest/v1/page_views?select=id&page=eq.export', {
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Prefer': 'count=exact',
+        'Range': '0-0'
+      }
+    }).then(function(r) {
+      var count = r.headers.get('content-range');
+      var total = count ? count.split('/')[1] : '?';
+      document.getElementById('statTotal').textContent = total;
+    }).catch(function() { document.getElementById('statTotal').textContent = '!'; });
+  }
 })();
 </script>
 
