@@ -99,146 +99,92 @@
       background:rgba(255,255,255,.25);
       transform:translateY(-1px);
     }
-    /* الـ input مخفي تماماً - نستخدم custom picker بدلاً منه */
-    #datePicker {
-      position:absolute;
-      width:1px; height:1px;
-      opacity:0; pointer-events:none;
-      font-size:16px;
-      border:none; z-index:-1;
-    }
+    /* الـ input مخفي تماماً — custom picker يحل محله */
+#datePicker {
+  position:absolute; width:1px; height:1px;
+  opacity:0; pointer-events:none;
+  font-size:16px; border:none; z-index:-1;
+}
 
     /* ═══ CUSTOM DATE PICKER ═══ */
     .cdp-overlay {
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,.4);
+      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
       z-index:9998;
-      align-items:flex-end;
-      justify-content:center;
-      padding-bottom:env(safe-area-inset-bottom,0px);
+      align-items:flex-end; justify-content:center;
     }
-    .cdp-overlay.open { display:flex; animation:cdpFadeIn .2s ease; }
+    .cdp-overlay.cdp-open { display:flex; animation:cdpFadeIn .18s ease; }
     @keyframes cdpFadeIn { from{opacity:0} to{opacity:1} }
-
     .cdp-sheet {
-      background:#fff;
-      border-radius:24px 24px 0 0;
-      width:100%;
-      max-width:420px;
-      box-shadow:0 -8px 40px rgba(15,23,42,.18);
-      overflow:hidden;
-      animation:cdpSlideUp .28s cubic-bezier(.22,1,.36,1);
-      padding-bottom:env(safe-area-inset-bottom,16px);
+      background:#fff; border-radius:22px 22px 0 0;
+      width:100%; max-width:400px;
+      box-shadow:0 -6px 32px rgba(15,23,42,.15);
+      animation:cdpSlideUp .26s cubic-bezier(.22,1,.36,1);
+      padding-bottom:max(16px, env(safe-area-inset-bottom));
     }
     @keyframes cdpSlideUp {
-      from { transform:translateY(100%); opacity:0; }
-      to   { transform:translateY(0);    opacity:1; }
+      from{transform:translateY(100%);opacity:0}
+      to{transform:translateY(0);opacity:1}
     }
-
     .cdp-handle {
-      width:40px; height:4px;
-      background:#e2e8f0;
-      border-radius:2px;
-      margin:12px auto 0;
+      width:36px; height:4px; background:#e2e8f0;
+      border-radius:2px; margin:12px auto 0;
     }
-
     .cdp-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:14px 20px 10px;
+      display:flex; align-items:center;
+      justify-content:space-between; padding:12px 16px 8px;
     }
     .cdp-nav {
-      width:38px; height:38px;
-      border-radius:10px;
-      border:1.5px solid #e2e8f0;
-      background:#f8fafc;
-      font-size:16px;
-      cursor:pointer;
+      width:36px; height:36px; border-radius:10px;
+      border:1.5px solid #e2e8f0; background:#f8fafc;
+      font-size:18px; cursor:pointer; color:#475569;
       display:flex; align-items:center; justify-content:center;
-      transition:all .15s;
-      color:#475569;
-      -webkit-tap-highlight-color:transparent;
+      transition:all .12s; -webkit-tap-highlight-color:transparent;
     }
     .cdp-nav:hover { background:#e2e8f0; color:#1e293b; }
-    .cdp-nav:active { transform:scale(.93); }
-    .cdp-nav:disabled { opacity:.3; cursor:default; }
-
+    .cdp-nav:active { transform:scale(.9); }
+    .cdp-nav:disabled { opacity:.25; cursor:default; pointer-events:none; }
     .cdp-month-label {
-      font-size:15px;
-      font-weight:700;
-      color:#1e293b;
-      letter-spacing:-.2px;
+      font-size:15px; font-weight:700; color:#1e293b; letter-spacing:-.2px;
     }
-
     .cdp-days-head {
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      padding:0 12px;
-      margin-bottom:4px;
+      display:grid; grid-template-columns:repeat(7,1fr);
+      padding:0 10px; margin-bottom:2px;
     }
     .cdp-days-head span {
-      text-align:center;
-      font-size:10.5px;
-      font-weight:700;
-      color:#94a3b8;
-      text-transform:uppercase;
-      letter-spacing:.4px;
-      padding:4px 0;
+      text-align:center; font-size:10px; font-weight:700;
+      color:#94a3b8; text-transform:uppercase;
+      letter-spacing:.3px; padding:3px 0;
     }
-
-    .cdp-days-grid {
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:2px;
-      padding:0 12px 16px;
+    .cdp-grid {
+      display:grid; grid-template-columns:repeat(7,1fr);
+      gap:2px; padding:0 10px 14px;
     }
     .cdp-day {
-      aspect-ratio:1;
-      border-radius:10px;
-      border:none;
-      background:transparent;
-      font-size:14px;
-      font-weight:600;
-      color:#334155;
-      cursor:pointer;
+      aspect-ratio:1; border-radius:9px; border:none;
+      background:transparent; font-size:14px; font-weight:600;
+      color:#334155; cursor:pointer;
       display:flex; align-items:center; justify-content:center;
-      transition:all .12s;
+      transition:background .1s,transform .1s;
       -webkit-tap-highlight-color:transparent;
-    }
-    .cdp-day:hover:not(:disabled):not(.cdp-day-selected) {
-      background:#f1f5f9;
-    }
-    .cdp-day:active:not(:disabled) { transform:scale(.88); }
-    .cdp-day.cdp-day-today {
-      color:#1e40af;
-      font-weight:800;
       position:relative;
     }
-    .cdp-day.cdp-day-today::after {
-      content:'';
-      position:absolute;
-      bottom:4px; left:50%;
-      transform:translateX(-50%);
-      width:4px; height:4px;
-      background:#1e40af;
-      border-radius:50%;
+    .cdp-day:hover:not([disabled]):not(.cdp-sel) { background:#f1f5f9; }
+    .cdp-day:active:not([disabled]) { transform:scale(.85); }
+    .cdp-day[disabled] { opacity:.25; cursor:default; pointer-events:none; }
+    .cdp-day.cdp-today { color:#1e40af; font-weight:800; }
+    .cdp-day.cdp-today::after {
+      content:''; position:absolute; bottom:3px; left:50%;
+      transform:translateX(-50%); width:4px; height:4px;
+      background:#1e40af; border-radius:50%;
     }
-    .cdp-day.cdp-day-selected {
+    .cdp-day.cdp-sel {
       background:linear-gradient(135deg,#1e40af,#3b82f6);
-      color:#fff !important;
-      box-shadow:0 4px 12px rgba(30,64,175,.35);
+      color:#fff; box-shadow:0 3px 10px rgba(30,64,175,.3);
     }
-    .cdp-day.cdp-day-selected::after { display:none; }
-    .cdp-day:disabled {
-      opacity:.28;
-      cursor:default;
-    }
-    .cdp-day-empty { pointer-events:none; }
+    .cdp-day.cdp-sel.cdp-today::after { background:#fff; }
+    .cdp-empty { pointer-events:none; }
 
 
     /* ═══════ SUMMARY BAR ═══════ */
@@ -481,20 +427,20 @@
     </div>
   </div>
 
-  <!-- ═══ CUSTOM DATE PICKER OVERLAY ═══ -->
-  <div class="cdp-overlay" id="cdpOverlay" onclick="cdpOverlayClick(event)">
-    <div class="cdp-sheet" id="cdpSheet">
+  <!-- ═══ CUSTOM DATE PICKER ═══ -->
+  <div class="cdp-overlay" id="cdpOverlay" onclick="cdpBgClick(event)">
+    <div class="cdp-sheet">
       <div class="cdp-handle"></div>
       <div class="cdp-header">
-        <button class="cdp-nav" id="cdpPrev" onclick="cdpShiftMonth(-1)">‹</button>
-        <span class="cdp-month-label" id="cdpMonthLabel"></span>
-        <button class="cdp-nav" id="cdpNext" onclick="cdpShiftMonth(1)">›</button>
+        <button class="cdp-nav" id="cdpPrev" onclick="cdpMove(-1)" type="button">‹</button>
+        <span class="cdp-month-label" id="cdpLabel"></span>
+        <button class="cdp-nav" id="cdpNext" onclick="cdpMove(1)"  type="button">›</button>
       </div>
       <div class="cdp-days-head">
-        <span>Sun</span><span>Mon</span><span>Tue</span>
-        <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span>
+        <span>Th</span><span>Fr</span><span>Sa</span>
       </div>
-      <div class="cdp-days-grid" id="cdpGrid"></div>
+      <div class="cdp-grid" id="cdpGrid"></div>
     </div>
   </div>
 
@@ -1245,114 +1191,89 @@
 // فتح الـ date picker - يعمل على iOS و Android و Desktop
 // ═══════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════
-// CUSTOM DATE PICKER — يعمل على iOS/Android/Desktop
+// CUSTOM DATE PICKER — iOS / Android / Desktop
 // ═══════════════════════════════════════════════════
 (function() {
-  var MIN_DATE = '2026-02-01';
-  var MAX_DATE = '2026-04-30';
-  var CUR_DATE = '2026-03-16';
+  var MIN_D = '2026-02-01';
+  var MAX_D = '2026-04-30';
+  var SEL_D = '2026-03-16';
+  var cy, cm;
+  var MN = ['January','February','March','April','May','June',
+            'July','August','September','October','November','December'];
 
-  var cdpYear, cdpMonth;
-  var MONTHS = ['January','February','March','April','May','June',
-                'July','August','September','October','November','December'];
-
-  function parseDate(str) {
-    if (!str) return null;
-    var p = str.split('-');
-    return p.length === 3 ? {y:+p[0], m:+p[1], d:+p[2]} : null;
+  function dim(y,m)  { return new Date(y,m,0).getDate(); }
+  function dow(y,m)  { return new Date(y,m-1,1).getDay(); }
+  function pad(n)    { return String(n).padStart(2,'0'); }
+  function ds(y,m,d) { return y+'-'+pad(m)+'-'+pad(d); }
+  function today() {
+    var n=new Date(), ms=new Date(n.getTime()+(4*3600000)+(n.getTimezoneOffset()*60000));
+    return ds(ms.getFullYear(),ms.getMonth()+1,ms.getDate());
   }
-  function dateStr(y,m,d) {
-    return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  }
-  function muscatToday() {
-    var now = new Date();
-    var ms  = new Date(now.getTime() + (4*3600000) + (now.getTimezoneOffset()*60000));
-    return dateStr(ms.getFullYear(), ms.getMonth()+1, ms.getDate());
-  }
-  function daysInMonth(y,m) { return new Date(y,m,0).getDate(); }
-  function firstDow(y,m)    { return new Date(y,m-1,1).getDay(); }
 
-  function renderGrid() {
-    var grid  = document.getElementById('cdpGrid');
-    var label = document.getElementById('cdpMonthLabel');
-    var prev  = document.getElementById('cdpPrev');
-    var next  = document.getElementById('cdpNext');
-    if (!grid) return;
+  function render() {
+    document.getElementById('cdpLabel').textContent = MN[cm-1]+' '+cy;
+    var pv=document.getElementById('cdpPrev'), nx=document.getElementById('cdpNext');
+    var mn=MIN_D?MIN_D.slice(0,7):'', mx=MAX_D?MAX_D.slice(0,7):'';
+    var cur=cy+'-'+pad(cm);
+    pv.disabled = mn && cur<=mn;
+    nx.disabled = mx && cur>=mx;
 
-    label.textContent = MONTHS[cdpMonth-1] + ' ' + cdpYear;
-
-    var minD = parseDate(MIN_DATE);
-    var maxD = parseDate(MAX_DATE);
-    var today = muscatToday();
-    var selD  = parseDate(CUR_DATE);
-
-    // حدود التنقل
-    prev.disabled = minD && (cdpYear < minD.y || (cdpYear===minD.y && cdpMonth<=minD.m));
-    next.disabled = maxD && (cdpYear > maxD.y || (cdpYear===maxD.y && cdpMonth>=maxD.m));
-
-    var html = '';
-    var fd = firstDow(cdpYear, cdpMonth);
-    var dim = daysInMonth(cdpYear, cdpMonth);
-
-    // خلايا فارغة قبل أول يوم
-    for (var i=0; i<fd; i++) html += '<div class="cdp-day cdp-day-empty"></div>';
-
-    for (var d=1; d<=dim; d++) {
-      var ds  = dateStr(cdpYear, cdpMonth, d);
-      var dis = (minD && ds < dateStr(minD.y,minD.m,minD.d)) ||
-                (maxD && ds > dateStr(maxD.y,maxD.m,maxD.d));
-      var cls = 'cdp-day';
-      if (ds === today) cls += ' cdp-day-today';
-      if (selD && ds === dateStr(selD.y,selD.m,selD.d)) cls += ' cdp-day-selected';
-      html += '<button class="'+cls+'" '+(dis?'disabled':'')+
-              ' onclick="cdpSelect(''+ds+'')" type="button">'+d+'</button>';
+    var td=today(), html='';
+    var blanks=dow(cy,cm);
+    for(var i=0;i<blanks;i++) html+='<div class="cdp-day cdp-empty"></div>';
+    var days=dim(cy,cm);
+    for(var d=1;d<=days;d++) {
+      var dstr=ds(cy,cm,d);
+      var dis=(MIN_D&&dstr<MIN_D)||(MAX_D&&dstr>MAX_D);
+      var cls='cdp-day';
+      if(dstr===td)  cls+=' cdp-today';
+      if(dstr===SEL_D) cls+=' cdp-sel';
+      html+='<button class="'+cls+'" type="button"'+(dis?' disabled':'')+
+            ' onclick="cdpPick(''+dstr+'')">'+d+'</button>';
     }
-    grid.innerHTML = html;
+    document.getElementById('cdpGrid').innerHTML=html;
   }
 
-  window.cdpShiftMonth = function(delta) {
-    cdpMonth += delta;
-    if (cdpMonth > 12) { cdpMonth=1; cdpYear++; }
-    if (cdpMonth < 1)  { cdpMonth=12; cdpYear--; }
-    renderGrid();
+  window.cdpMove=function(d){
+    cm+=d;
+    if(cm>12){cm=1;cy++;} if(cm<1){cm=12;cy--;}
+    render();
   };
 
-  window.cdpSelect = function(ds) {
-    closeCdp();
-    // نفس منطق picker.addEventListener('change')
+  window.cdpPick=function(dstr){
+    document.getElementById('cdpOverlay').classList.remove('cdp-open');
+    document.body.style.overflow='';
+    // نفس منطق التنقل القديم
     sessionStorage.removeItem('pageLoaded');
-    var path = window.location.pathname || '/';
-    var isNowPage = path.includes('/now');
-    var base = path
-      .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/, '/')
-      .replace(/\/now\/.*$/, '/')
-      .replace(/\/+$/, '');
-    var target = base + '/date/' + ds + '/';
-    if (isNowPage) target += 'now/';
-    window.location.href = target;
+    var path=window.location.pathname||'/';
+    var isNow=path.includes('/now');
+    var base=path
+      .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/')
+      .replace(/\/now\/.*$/,'/')
+      .replace(/\/+$/,'');
+    window.location.href=base+'/date/'+dstr+'/'+(isNow?'now/':'');
   };
 
-  window.openDatePicker = function() {
-    var cur = parseDate(CUR_DATE) || parseDate(muscatToday());
-    cdpYear  = cur ? cur.y : new Date().getFullYear();
-    cdpMonth = cur ? cur.m : new Date().getMonth()+1;
-    renderGrid();
-    document.getElementById('cdpOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
+  window.openDatePicker=function(){
+    var p=SEL_D||today(), parts=p.split('-');
+    cy=+parts[0]; cm=+parts[1];
+    render();
+    document.getElementById('cdpOverlay').classList.add('cdp-open');
+    document.body.style.overflow='hidden';
   };
 
-  function closeCdp() {
-    document.getElementById('cdpOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  window.cdpOverlayClick = function(e) {
-    if (e.target === document.getElementById('cdpOverlay')) closeCdp();
+  window.cdpBgClick=function(e){
+    if(e.target===document.getElementById('cdpOverlay')){
+      document.getElementById('cdpOverlay').classList.remove('cdp-open');
+      document.body.style.overflow='';
+    }
   };
 
-  // Escape key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeCdp();
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      document.getElementById('cdpOverlay').classList.remove('cdp-open');
+      document.body.style.overflow='';
+    }
   });
 })();
 
