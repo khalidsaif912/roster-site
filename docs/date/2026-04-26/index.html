@@ -99,18 +99,146 @@
       background:rgba(255,255,255,.25);
       transform:translateY(-1px);
     }
-    /* الـ input مخفي بصرياً - نفتحه برمجياً عبر الزر */
-#datePicker {
-  position: absolute;
-  top: 0; left: 0;
-  width: 1px; height: 1px;
-  opacity: 0;
-  pointer-events: none;
-  font-size: 16px;   /* مهم جداً لمنع zoom على iOS */
-  border: none;
-  -webkit-appearance: none;
-  z-index: -1;
-}
+    /* الـ input مخفي تماماً - نستخدم custom picker بدلاً منه */
+    #datePicker {
+      position:absolute;
+      width:1px; height:1px;
+      opacity:0; pointer-events:none;
+      font-size:16px;
+      border:none; z-index:-1;
+    }
+
+    /* ═══ CUSTOM DATE PICKER ═══ */
+    .cdp-overlay {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.35);
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+      z-index:9998;
+      align-items:flex-end;
+      justify-content:center;
+      padding-bottom:env(safe-area-inset-bottom,0px);
+    }
+    .cdp-overlay.open { display:flex; animation:cdpFadeIn .2s ease; }
+    @keyframes cdpFadeIn { from{opacity:0} to{opacity:1} }
+
+    .cdp-sheet {
+      background:#fff;
+      border-radius:24px 24px 0 0;
+      width:100%;
+      max-width:420px;
+      box-shadow:0 -8px 40px rgba(15,23,42,.18);
+      overflow:hidden;
+      animation:cdpSlideUp .28s cubic-bezier(.22,1,.36,1);
+      padding-bottom:env(safe-area-inset-bottom,16px);
+    }
+    @keyframes cdpSlideUp {
+      from { transform:translateY(100%); opacity:0; }
+      to   { transform:translateY(0);    opacity:1; }
+    }
+
+    .cdp-handle {
+      width:40px; height:4px;
+      background:#e2e8f0;
+      border-radius:2px;
+      margin:12px auto 0;
+    }
+
+    .cdp-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 20px 10px;
+    }
+    .cdp-nav {
+      width:38px; height:38px;
+      border-radius:10px;
+      border:1.5px solid #e2e8f0;
+      background:#f8fafc;
+      font-size:16px;
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:all .15s;
+      color:#475569;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .cdp-nav:hover { background:#e2e8f0; color:#1e293b; }
+    .cdp-nav:active { transform:scale(.93); }
+    .cdp-nav:disabled { opacity:.3; cursor:default; }
+
+    .cdp-month-label {
+      font-size:15px;
+      font-weight:700;
+      color:#1e293b;
+      letter-spacing:-.2px;
+    }
+
+    .cdp-days-head {
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      padding:0 12px;
+      margin-bottom:4px;
+    }
+    .cdp-days-head span {
+      text-align:center;
+      font-size:10.5px;
+      font-weight:700;
+      color:#94a3b8;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      padding:4px 0;
+    }
+
+    .cdp-days-grid {
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:2px;
+      padding:0 12px 16px;
+    }
+    .cdp-day {
+      aspect-ratio:1;
+      border-radius:10px;
+      border:none;
+      background:transparent;
+      font-size:14px;
+      font-weight:600;
+      color:#334155;
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:all .12s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .cdp-day:hover:not(:disabled):not(.cdp-day-selected) {
+      background:#f1f5f9;
+    }
+    .cdp-day:active:not(:disabled) { transform:scale(.88); }
+    .cdp-day.cdp-day-today {
+      color:#1e40af;
+      font-weight:800;
+      position:relative;
+    }
+    .cdp-day.cdp-day-today::after {
+      content:'';
+      position:absolute;
+      bottom:4px; left:50%;
+      transform:translateX(-50%);
+      width:4px; height:4px;
+      background:#1e40af;
+      border-radius:50%;
+    }
+    .cdp-day.cdp-day-selected {
+      background:linear-gradient(135deg,#1e40af,#3b82f6);
+      color:#fff !important;
+      box-shadow:0 4px 12px rgba(30,64,175,.35);
+    }
+    .cdp-day.cdp-day-selected::after { display:none; }
+    .cdp-day:disabled {
+      opacity:.28;
+      cursor:default;
+    }
+    .cdp-day-empty { pointer-events:none; }
 
 
     /* ═══════ SUMMARY BAR ═══════ */
@@ -353,6 +481,23 @@
     </div>
   </div>
 
+  <!-- ═══ CUSTOM DATE PICKER OVERLAY ═══ -->
+  <div class="cdp-overlay" id="cdpOverlay" onclick="cdpOverlayClick(event)">
+    <div class="cdp-sheet" id="cdpSheet">
+      <div class="cdp-handle"></div>
+      <div class="cdp-header">
+        <button class="cdp-nav" id="cdpPrev" onclick="cdpShiftMonth(-1)">‹</button>
+        <span class="cdp-month-label" id="cdpMonthLabel"></span>
+        <button class="cdp-nav" id="cdpNext" onclick="cdpShiftMonth(1)">›</button>
+      </div>
+      <div class="cdp-days-head">
+        <span>Sun</span><span>Mon</span><span>Tue</span>
+        <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div class="cdp-days-grid" id="cdpGrid"></div>
+    </div>
+  </div>
+
   <div class='deptCard' style='padding:14px;border:1px dashed rgba(15,23,42,.20);background:#fff;'>ℹ️ لا توجد بيانات لهذا التاريخ في الروستر.</div>
 
   <!-- ════ SUMMARY CHIPS ════ -->
@@ -466,37 +611,117 @@
 // ═══════════════════════════════════════════════════
 // فتح الـ date picker - يعمل على iOS و Android و Desktop
 // ═══════════════════════════════════════════════════
-function openDatePicker() {
-  var picker = document.getElementById('datePicker');
-  if (!picker) return;
-  // إعادة تفعيل pointer-events مؤقتاً لفتح الـ picker
-  picker.style.pointerEvents = 'auto';
-  picker.style.position = 'fixed';
-  picker.style.top = '50%';
-  picker.style.left = '50%';
-  picker.style.width = '1px';
-  picker.style.height = '1px';
-  picker.style.opacity = '0';
-  picker.style.zIndex = '9999';
-  picker.focus();
-  try {
-    if (picker.showPicker) {
-      picker.showPicker(); // الطريقة الحديثة (Chrome/Safari 16+)
-    } else {
-      picker.click(); // fallback للإصدارات القديمة
-    }
-  } catch(e) {
-    picker.click();
+// ═══════════════════════════════════════════════════
+// CUSTOM DATE PICKER — يعمل على iOS/Android/Desktop
+// ═══════════════════════════════════════════════════
+(function() {
+  var MIN_DATE = '2026-02-01';
+  var MAX_DATE = '2026-04-30';
+  var CUR_DATE = '2026-04-26';
+
+  var cdpYear, cdpMonth;
+  var MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+  function parseDate(str) {
+    if (!str) return null;
+    var p = str.split('-');
+    return p.length === 3 ? {y:+p[0], m:+p[1], d:+p[2]} : null;
   }
-  // إعادة الإخفاء بعد فتح الـ picker
-  setTimeout(function() {
-    picker.style.pointerEvents = 'none';
-    picker.style.position = 'absolute';
-    picker.style.top = '0';
-    picker.style.left = '0';
-    picker.style.zIndex = '-1';
-  }, 500);
-}
+  function dateStr(y,m,d) {
+    return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  }
+  function muscatToday() {
+    var now = new Date();
+    var ms  = new Date(now.getTime() + (4*3600000) + (now.getTimezoneOffset()*60000));
+    return dateStr(ms.getFullYear(), ms.getMonth()+1, ms.getDate());
+  }
+  function daysInMonth(y,m) { return new Date(y,m,0).getDate(); }
+  function firstDow(y,m)    { return new Date(y,m-1,1).getDay(); }
+
+  function renderGrid() {
+    var grid  = document.getElementById('cdpGrid');
+    var label = document.getElementById('cdpMonthLabel');
+    var prev  = document.getElementById('cdpPrev');
+    var next  = document.getElementById('cdpNext');
+    if (!grid) return;
+
+    label.textContent = MONTHS[cdpMonth-1] + ' ' + cdpYear;
+
+    var minD = parseDate(MIN_DATE);
+    var maxD = parseDate(MAX_DATE);
+    var today = muscatToday();
+    var selD  = parseDate(CUR_DATE);
+
+    // حدود التنقل
+    prev.disabled = minD && (cdpYear < minD.y || (cdpYear===minD.y && cdpMonth<=minD.m));
+    next.disabled = maxD && (cdpYear > maxD.y || (cdpYear===maxD.y && cdpMonth>=maxD.m));
+
+    var html = '';
+    var fd = firstDow(cdpYear, cdpMonth);
+    var dim = daysInMonth(cdpYear, cdpMonth);
+
+    // خلايا فارغة قبل أول يوم
+    for (var i=0; i<fd; i++) html += '<div class="cdp-day cdp-day-empty"></div>';
+
+    for (var d=1; d<=dim; d++) {
+      var ds  = dateStr(cdpYear, cdpMonth, d);
+      var dis = (minD && ds < dateStr(minD.y,minD.m,minD.d)) ||
+                (maxD && ds > dateStr(maxD.y,maxD.m,maxD.d));
+      var cls = 'cdp-day';
+      if (ds === today) cls += ' cdp-day-today';
+      if (selD && ds === dateStr(selD.y,selD.m,selD.d)) cls += ' cdp-day-selected';
+      html += '<button class="'+cls+'" '+(dis?'disabled':'')+
+              ' onclick="cdpSelect(''+ds+'')" type="button">'+d+'</button>';
+    }
+    grid.innerHTML = html;
+  }
+
+  window.cdpShiftMonth = function(delta) {
+    cdpMonth += delta;
+    if (cdpMonth > 12) { cdpMonth=1; cdpYear++; }
+    if (cdpMonth < 1)  { cdpMonth=12; cdpYear--; }
+    renderGrid();
+  };
+
+  window.cdpSelect = function(ds) {
+    closeCdp();
+    // نفس منطق picker.addEventListener('change')
+    sessionStorage.removeItem('pageLoaded');
+    var path = window.location.pathname || '/';
+    var isNowPage = path.includes('/now');
+    var base = path
+      .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/, '/')
+      .replace(/\/now\/.*$/, '/')
+      .replace(/\/+$/, '');
+    var target = base + '/date/' + ds + '/';
+    if (isNowPage) target += 'now/';
+    window.location.href = target;
+  };
+
+  window.openDatePicker = function() {
+    var cur = parseDate(CUR_DATE) || parseDate(muscatToday());
+    cdpYear  = cur ? cur.y : new Date().getFullYear();
+    cdpMonth = cur ? cur.m : new Date().getMonth()+1;
+    renderGrid();
+    document.getElementById('cdpOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  function closeCdp() {
+    document.getElementById('cdpOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  window.cdpOverlayClick = function(e) {
+    if (e.target === document.getElementById('cdpOverlay')) closeCdp();
+  };
+
+  // Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeCdp();
+  });
+})();
 
 // ═══════════════════════════════════════════════════
 // Shift Filter (NOW PAGE ONLY)
