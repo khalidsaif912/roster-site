@@ -1,6 +1,15 @@
 name: Roster Site + Email
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force_generate:
+        description: "إجبار توليد الصفحة (حتى لو لم يتغير الملف)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
   schedule:
     - cron: "*/10 * * * *"
 
@@ -34,6 +43,7 @@ jobs:
         id: check_changes
         env:
           SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
+          FORCE_GENERATE: ${{ github.event.inputs.force_generate || 'false' }}
         run: |
           python << 'EOF'
           import os
@@ -44,6 +54,11 @@ jobs:
           
           def main():
               try:
+                  # ✅ إجبار التوليد إذا طلبه المستخدم يدوياً
+                  force_generate = os.getenv('FORCE_GENERATE', 'false').lower() == 'true'
+                  if force_generate:
+                      print("⚡ Force generate enabled by user")
+
                   source_url = os.getenv('SOURCE_NAME_URL')
                   if not source_url:
                       print("SOURCE_NAME_URL not found")
@@ -86,18 +101,18 @@ jobs:
                   current_hour = now.hour
                   print(f"Muscat time: {now.strftime('%H:%M')}")
 
-                  # ✅ ساعات التحديث الإجباري للصفحات (بدون تغيير)
                   mandatory_update_hours = [0, 5, 6, 13, 14, 20, 21]
                   is_mandatory_update = (current_hour in mandatory_update_hours)
 
-                  # ✅ الإيميل: الساعة 7 أو 8 صباحاً (نطاق لتجنب تأخير GitHub Actions)
                   is_morning_email = (current_hour in [7, 8])
                   is_manual = os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch'
 
-                  should_process    = changed or is_mandatory_update or is_manual
+                  # ✅ force_generate يُجبر التوليد بغض النظر عن أي شرط آخر
+                  should_process    = changed or is_mandatory_update or is_manual or force_generate
                   should_send_email = changed or is_morning_email or is_manual
                   
                   print(f"File changed:      {changed}")
+                  print(f"Force generate:    {force_generate}")
                   print(f"Mandatory update:  {is_mandatory_update}")
                   print(f"Morning email:     {is_morning_email}")
                   print(f"Manual trigger:    {is_manual}")
@@ -106,6 +121,7 @@ jobs:
                   
                   with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                       f.write(f"changed={str(changed).lower()}\n")
+                      f.write(f"force_generate={str(force_generate).lower()}\n")
                       f.write(f"should_process={str(should_process).lower()}\n")
                       f.write(f"should_send_email={str(should_send_email).lower()}\n")
                       f.write(f"is_morning_email={str(is_morning_email).lower()}\n")
@@ -115,6 +131,7 @@ jobs:
                   
                   print("=" * 60)
                   print(f"  File changed:      {changed}")
+                  print(f"  Force generate:    {force_generate}")
                   print(f"  Mandatory update:  {is_mandatory_update}")
                   print(f"  Morning email:     {is_morning_email}")
                   print(f"  Should process:    {should_process}")
@@ -143,6 +160,7 @@ jobs:
           echo "Check Report:"
           echo "========================================"
           echo "File changed:      ${{ steps.check_changes.outputs.changed }}"
+          echo "Force generate:    ${{ steps.check_changes.outputs.force_generate }}"
           echo "Morning email:     ${{ steps.check_changes.outputs.is_morning_email }}"
           echo "Should process:    ${{ steps.check_changes.outputs.should_process }}"
           echo "Should send email: ${{ steps.check_changes.outputs.should_send_email }}"
@@ -164,10 +182,11 @@ jobs:
           MAIL_TO: ${{ secrets.MAIL_TO }}
           SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }}
           SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
-          # ✅ نخبر السكريبت بعدم إرسال الإيميل — الـ YML يتحكم بذلك
           SEND_EMAIL: "false"
         run: |
-          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+          if [ "${{ steps.check_changes.outputs.force_generate }}" == "true" ]; then
+            echo "⚡ Force generating: ${{ steps.check_changes.outputs.filename }}"
+          elif [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
             echo "Processing (change detected): ${{ steps.check_changes.outputs.filename }}"
           else
             echo "Processing (scheduled update): ${{ steps.check_changes.outputs.filename }}"
@@ -189,7 +208,6 @@ jobs:
           MAIL_TO: ${{ secrets.MAIL_TO }}
           SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }}
           SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
-          # ✅ نخبر السكريبت بإرسال الإيميل فقط
           SEND_EMAIL: "true"
           CHANGED: ${{ steps.check_changes.outputs.changed }}
           IS_MORNING_EMAIL: ${{ steps.check_changes.outputs.is_morning_email }}
@@ -220,7 +238,9 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            if [ "${{ steps.check_changes.outputs.force_generate }}" == "true" ]; then
+              git commit -m "⚡ Force generated: ${{ steps.check_changes.outputs.filename }}"
+            elif [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
               git commit -m "Update roster: ${{ steps.check_changes.outputs.filename }}"
             else
               git commit -m "Scheduled update"
