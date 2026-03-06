@@ -99,20 +99,17 @@
       background:rgba(255,255,255,.25);
       transform:translateY(-1px);
     }
-    /* الـ input مخفي تماماً - لا يُرى ولا يُضغط عليه */
+    /* الـ input مخفي بصرياً لكن قابل للتفاعل عند الحاجة */
 #datePicker {
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 1px;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   opacity: 0;
-  pointer-events: none;
+  cursor: pointer;
   font-size: 16px;   /* مهم جداً لمنع zoom على iOS */
   border: none;
-  /* ← أضف هذا: */
   -webkit-appearance: none;
+  z-index: 2;
 }
 
 
@@ -338,8 +335,8 @@
     <div class="welcomeMsg" id="welcomeMsg" onclick="goToMySchedule()" title="انقر للذهاب لجدولك"></div>
     <h1 id="pageTitle">📋 Duty Roster</h1>
     <div class="datePickerWrapper">
-      <button class="dateTag" id="dateTag" onclick="openDatePicker()" type="button">📅 27 April 2026</button>
-      <input id="datePicker" type="date" value="2026-04-27" min="2026-02-01" max="2026-04-30" tabindex="-1" aria-hidden="true" />
+      <button class="dateTag" id="dateTag" type="button">📅 27 April 2026</button>
+      <input id="datePicker" type="date" value="2026-04-27" min="2026-02-01" max="2026-04-30" />
     </div>
   </div>
 
@@ -381,8 +378,10 @@
   <!-- ════ FOOTER ════ -->
   <div class="footer">
     <strong style="color:#475569;font-size:13px;" id="lastUpdatedTrigger">Last Updated:</strong> <strong style="color:#1e40af;">27APR2026 / 00:00</strong>
-    <br><span id="totalTrigger" onclick="showStatsModal()" style="cursor:pointer;user-select:none;-webkit-user-select:none;">Total: <strong>0 employees</strong></span>
-     &nbsp;·&nbsp; Source: <strong>Export New Roster April 2026 HR.xls.xlsx</strong>
+    <br>
+    <span style="font-size:11px;color:#94a3b8;display:inline-block;margin-top:4px;">
+      👥 <strong style="color:#64748b;">0</strong> employees &nbsp;·&nbsp; 🏢 <strong style="color:#64748b;">0</strong> depts &nbsp;·&nbsp; 📄 <strong style="color:#64748b;">Export New Roster April 2026 HR.xls.xlsx</strong>
+    </span>
   </div>
 </div>
 
@@ -390,69 +389,6 @@
 (function(){
   var picker = document.getElementById('datePicker');
   if(!picker) return;
-
-  // ═══════════════════════════════════════════════════
-  // فتح الـ date picker - يعمل على Desktop + iOS + Android
-  // ═══════════════════════════════════════════════════
-window.openDatePicker = function() {
-  var picker = document.getElementById('datePicker');
-  if (!picker) return;
-
-  // احسب موقع زر التاريخ وضع العنصر المخفي تحته مباشرة
-  var btn = document.getElementById('dateTag');
-  if (btn) {
-    var rect = btn.getBoundingClientRect();
-    var btnCenterX = rect.left + rect.width / 2;
-    var btnBottom  = rect.bottom + 6; // 6px تحت الزر
-
-    // تأكد أن النافذة لن تخرج من يمين الشاشة
-    var pickerWidth = 280; // تقدير عرض نافذة التقويم
-    var leftPos = Math.min(btnCenterX - pickerWidth / 2, window.innerWidth - pickerWidth - 10);
-    leftPos = Math.max(leftPos, 10);
-
-    picker.style.position = 'fixed';
-    picker.style.top  = btnBottom + 'px';
-    picker.style.left = (btnCenterX) + 'px';
-    picker.style.transform = 'translateX(-50%)';
-  } else {
-    // fallback: وسط الشاشة
-    picker.style.position = 'fixed';
-    picker.style.top = '50%';
-    picker.style.left = '50%';
-    picker.style.transform = 'translate(-50%, -50%)';
-  }
-
-  picker.style.width = '1px';
-  picker.style.height = '1px';
-  picker.style.opacity = '0';
-  picker.style.pointerEvents = 'auto';
-  picker.style.zIndex = '9999';
-
-  picker.focus();
-
-  if (typeof picker.showPicker === 'function') {
-    try { picker.showPicker(); } catch(e) {}
-  } else {
-    picker.click();
-  }
-
-  function restore() {
-    picker.style.position = 'absolute';
-    picker.style.top = '100%';
-    picker.style.left = '50%';
-    picker.style.transform = '';
-    picker.style.width = '1px';
-    picker.style.height = '1px';
-    picker.style.opacity = '0';
-    picker.style.pointerEvents = 'none';
-    picker.style.zIndex = '';
-    picker.removeEventListener('change', restore);
-    picker.removeEventListener('blur', restore);
-  }
-
-  picker.addEventListener('change', restore);
-  picker.addEventListener('blur', restore);
-};
 
   // ═══════════════════════════════════════════════════
   // التحقق من التاريخ وإعادة التوجيه للـ today
@@ -749,19 +685,17 @@ function goToMySchedule() {
   });
 })();
 
-// ✅ تسجيل الزيارة + العداد السري
+// ✅ تسجيل الزيارة
 (function() {
   var SUPA_URL = 'https://tqfoiliyhlhidrrjfczq.supabase.co';
   var SUPA_KEY = 'sb_publishable_TQCEVXnTOEzoQsYAVVxidA_gUCx7Uez';
 
-  // توليد visitor_id فريد يبقى في localStorage
   var visitorId = localStorage.getItem('_vid');
   if(!visitorId) {
     visitorId = 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     localStorage.setItem('_vid', visitorId);
   }
 
-  // تسجيل الزيارة مرة واحدة يومياً لكل زائر
   var now = new Date();
   var muscat = new Date(now.getTime() + (4*60*60*1000) + (now.getTimezoneOffset()*60*1000));
   var todayStr = muscat.getFullYear() + '-' +
@@ -783,94 +717,7 @@ function goToMySchedule() {
       localStorage.setItem('_lastVisit', todayStr);
     }).catch(function(){});
   }
-
-  // ✅ الكود السري — اكتب 8715 لفتح النافذة (كيبورد)
-  var secretCode = '8715';
-  var typed = '';
-  document.addEventListener('keypress', function(e) {
-    typed += e.key;
-    if(typed.length > secretCode.length) typed = typed.slice(-secretCode.length);
-    if(typed === secretCode) { typed = ''; showStatsModal(); }
-  });
-
-  // ✅ ضغط 3 مرات على "Last Updated" لفتح النافذة (هاتف)
-  var tapCount = 0, tapTimer = null;
-  var trigger = document.getElementById('lastUpdatedTrigger');
-  if(trigger) {
-    trigger.addEventListener('click', function() {
-      tapCount++;
-      if(tapTimer) clearTimeout(tapTimer);
-      tapTimer = setTimeout(function() { tapCount = 0; }, 600);
-      if(tapCount >= 3) {
-        tapCount = 0;
-        clearTimeout(tapTimer);
-        showStatsModal();
-      }
-    });
-  }
-  }
-
 })();
-
-// ✅ showStatsModal في النطاق العام حتى يمكن استدعاؤها من onclick
-var _SUPA_URL = 'https://tqfoiliyhlhidrrjfczq.supabase.co';
-var _SUPA_KEY = 'sb_publishable_TQCEVXnTOEzoQsYAVVxidA_gUCx7Uez';
-function showStatsModal() {
-  var existing = document.getElementById('_statsModal');
-  if(existing) { existing.remove(); return; }
-
-  var now = new Date();
-  var muscat = new Date(now.getTime() + (4*60*60*1000) + (now.getTimezoneOffset()*60*1000));
-  var todayStr = muscat.getFullYear() + '-' +
-    String(muscat.getMonth()+1).padStart(2,'0') + '-' +
-    String(muscat.getDate()).padStart(2,'0');
-  var todayStart = todayStr + 'T00:00:00+04:00';
-  var todayEnd   = todayStr + 'T23:59:59+04:00';
-
-  var modal = document.createElement('div');
-  modal.id = '_statsModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = '<div style="background:#0f172a;border:1px solid #334155;border-radius:16px;padding:28px 36px;min-width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);">' +
-    '<div style="font-size:13px;color:#64748b;margin-bottom:16px;letter-spacing:1px;">📊 إحصائيات الزيارات</div>' +
-    '<div style="display:flex;gap:32px;justify-content:center;margin-bottom:20px;">' +
-      '<div>' +
-        '<div id="_statTodayV" style="font-size:36px;font-weight:800;color:#60a5fa;">...</div>' +
-        '<div style="font-size:11px;color:#64748b;margin-top:4px;">زوار اليوم</div>' +
-      '</div>' +
-      '<div style="width:1px;background:#1e293b;"></div>' +
-      '<div>' +
-        '<div id="_statTotalV" style="font-size:36px;font-weight:800;color:#34d399;">...</div>' +
-        '<div style="font-size:11px;color:#64748b;margin-top:4px;">إجمالي الزوار</div>' +
-      '</div>' +
-    '</div>' +
-    '<div style="font-size:10px;color:#334155;margin-bottom:16px;">كل شخص يُحسب مرة واحدة يومياً</div>' +
-    '<button onclick="document.getElementById('_statsModal').remove()" ' +
-      'style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:8px;padding:8px 20px;cursor:pointer;font-size:13px;">✕ إغلاق</button>' +
-  '</div>';
-
-  modal.addEventListener('click', function(e) {
-    if(e.target === modal) modal.remove();
-  });
-  document.body.appendChild(modal);
-
-  // زوار اليوم الفريدين
-  fetch(_SUPA_URL + '/rest/v1/page_views?select=visitor_id&page=eq.export&visited_at=gte.' + todayStart + '&visited_at=lte.' + todayEnd, {
-    headers: { 'apikey': _SUPA_KEY, 'Authorization': 'Bearer ' + _SUPA_KEY }
-  }).then(function(r) { return r.json(); })
-  .then(function(data) {
-    var unique = new Set((data||[]).map(function(r){return r.visitor_id;})).size;
-    document.getElementById('_statTodayV').textContent = unique;
-  }).catch(function() { document.getElementById('_statTodayV').textContent = '!'; });
-
-  // إجمالي الزوار الفريدين كل الأيام
-  fetch(_SUPA_URL + '/rest/v1/page_views?select=visitor_id&page=eq.export', {
-    headers: { 'apikey': _SUPA_KEY, 'Authorization': 'Bearer ' + _SUPA_KEY }
-  }).then(function(r) { return r.json(); })
-  .then(function(data) {
-    var unique = new Set((data||[]).map(function(r){return r.visitor_id;})).size;
-    document.getElementById('_statTotalV').textContent = unique;
-  }).catch(function() { document.getElementById('_statTotalV').textContent = '!'; });
-}
 </script>
 
 </body>
