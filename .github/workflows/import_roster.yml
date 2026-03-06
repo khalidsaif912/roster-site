@@ -1,0 +1,363 @@
+name: Import Roster Site (WO/Export)
+on:
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: "Force regenerate pages (even if Excel unchanged)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build_import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check if Import Excel file changed
+        id: check_import_changes
+        env:
+          IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          FORCE_RUN: ${{ github.event.inputs.force_run || 'false' }}
+        run: |
+          python << 'EOF'
+          import os
+          import base64
+          import hashlib
+          import requests
+          from pathlib import Path
+          import sys
+          from datetime import datetime, timezone, timedelta
+          from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
+
+          def candidate_urls(url):
+              candidates = []
+              u = urlparse(url)
+              host = (u.netloc or "").lower()
+              if not ("sharepoint.com" in host or "onedrive.live.com" in host or "1drv.ms" in host):
+                  return [url]
+              encoded = base64.b64encode(url.encode("utf-8")).decode("utf-8")
+              encoded = encoded.rstrip("=").replace("/", "_").replace("+", "-")
+              candidates.append(f"https://api.onedrive.com/v1.0/shares/u!{encoded}/root/content")
+              qs = dict(parse_qsl(u.query, keep_blank_values=True))
+              qs["download"] = "1"
+              candidates.append(urlunparse(u._replace(query=urlencode(qs, doseq=True))))
+              candidates.append(url)
+              return candidates
+
+          def download_excel(url):
+              headers = {
+                  "User-Agent": "Mozilla/5.0 (GitHub Actions) roster-site",
+                  "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*",
+              }
+              for i, dl_url in enumerate(candidate_urls(url), 1):
+                  try:
+                      print(f"  [Strategy {i}] {dl_url[:80]}...")
+                      r = requests.get(dl_url, headers=headers, timeout=60, allow_redirects=True)
+                      r.raise_for_status()
+                      data = r.content or b""
+                      if data.startswith(b"PK"):
+                          print(f"  ✅ Strategy {i} succeeded!")
+                          return data
+                      print(f"  ⚠️  Strategy {i}: not xlsx, trying next...")
+                  except Exception as e:
+                      print(f"  ⚠️  Strategy {i} failed: {e}")
+              return None
+
+          def main():
+              try:
+                  is_manual = os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch'
+                  force_run = os.getenv('FORCE_RUN', 'false').lower() == 'true'
+                  excel_url = os.getenv('IMPORT_EXCEL_URL')
+                  if not excel_url:
+                      print("IMPORT_EXCEL_URL not found")
+                      sys.exit(1)
+
+                  print(f"Checking: {excel_url[:60]}...")
+                  data = download_excel(excel_url)
+
+                  if not data:
+                      print("❌ Could not download Excel file")
+                      sys.exit(1)
+
+                  current_hash = hashlib.md5(data).hexdigest()
+                  print(f"Excel MD5: {current_hash}")
+
+                  cache_file = "import_last_filename.txt"
+                  changed = True
+                  old_hash = "none"
+
+                  if Path(cache_file).exists():
+                      old_hash = Path(cache_file).read_text(encoding='utf-8').strip()
+                      if old_hash == current_hash:
+                          print("No changes detected")
+                          changed = False
+                      else:
+                          print(f"Change detected! (hash changed)")
+                  else:
+                      print("First run")
+
+                  Path(cache_file).write_text(current_hash, encoding='utf-8')
+
+                  muscat_tz = timezone(timedelta(hours=4))
+                  now = datetime.now(muscat_tz)
+                  print(f"Muscat time: {now.strftime('%H:%M')}")
+
+                  # ✅ ساعة 7 صباحاً فقط للتحديث الإجباري اليومي
+                  is_morning_update = (now.hour == 7)
+                  should_process = changed or is_morning_update or is_manual or force_run
+
+                  # ✅ إرسال الإيميل: عند تغيير الروستر أو الساعة 7 صباحاً
+                  should_send_email = changed or is_morning_update or is_manual or force_run
+
+                  print(f"File changed:      {changed}")
+                  print(f"Morning update:    {is_morning_update}")
+                  print(f"Force run:         {force_run}")
+                  print(f"Manual trigger:    {is_manual}")
+                  print(f"Should process:    {should_process}")
+                  print(f"Should send email: {should_send_email}")
+
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write(f"changed={str(changed).lower()}\n")
+                      f.write(f"should_process={str(should_process).lower()}\n")
+                      f.write(f"should_send_email={str(should_send_email).lower()}\n")
+                      f.write(f"filename={current_hash}\n")
+                      f.write(f"old_filename={old_hash}\n")
+                      f.write(f"muscat_time={now.strftime('%H:%M')}\n")
+                      f.write(f"muscat_date={now.strftime('%Y-%m-%d')}\n")
+
+                  print("=" * 60)
+                  print(f"  File changed:      {changed}")
+                  print(f"  Morning update:    {is_morning_update}")
+                  print(f"  Manual trigger:    {is_manual}")
+                  print(f"  Should process:    {should_process}")
+                  print(f"  Should send email: {should_send_email}")
+                  print("=" * 60)
+
+              except Exception as e:
+                  print(f"Unexpected error: {e}")
+                  import traceback
+                  traceback.print_exc()
+                  sys.exit(1)
+
+          if __name__ == "__main__":
+              main()
+          EOF
+
+      - name: Display change info
+        run: |
+          echo "========================================"
+          echo "Import Check Report:"
+          echo "========================================"
+          echo "File changed:      ${{ steps.check_import_changes.outputs.changed }}"
+          echo "Should process:    ${{ steps.check_import_changes.outputs.should_process }}"
+          echo "Should send email: ${{ steps.check_import_changes.outputs.should_send_email }}"
+          echo "Current file:      ${{ steps.check_import_changes.outputs.filename }}"
+          echo "Previous file:     ${{ steps.check_import_changes.outputs.old_filename }}"
+          echo "Muscat time:       ${{ steps.check_import_changes.outputs.muscat_time }}"
+          echo "========================================"
+
+      - name: Generate Import pages
+        if: steps.check_import_changes.outputs.should_process == 'true'
+        env:
+          IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
+          IMPORT_SOURCE_NAME_URL: ${{ secrets.IMPORT_SOURCE_NAME_URL }}
+          PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
+        run: |
+          pip install pandas openpyxl requests --quiet
+          echo "Generating /docs/import ..."
+          python generate_and_send_import.py
+          echo "Done!"
+
+      - name: Send Email Notification
+        if: steps.check_import_changes.outputs.should_send_email == 'true'
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
+        run: |
+          python << 'EOF'
+          import os
+          import smtplib
+          from email.mime.multipart import MIMEMultipart
+          from email.mime.text import MIMEText
+
+          smtp_server   = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+          smtp_port     = int(os.getenv("SMTP_PORT", "587"))
+          smtp_user     = os.getenv("SMTP_USER", "")
+          smtp_password = os.getenv("SMTP_PASSWORD", "")
+          email_from    = os.getenv("EMAIL_FROM", smtp_user)
+          email_to_raw  = os.getenv("EMAIL_TO", "")
+          pages_url     = os.getenv("PAGES_BASE_URL", "").rstrip("/")
+
+          roster_url   = f"{pages_url}/import/" if pages_url else "#"
+          changed      = "${{ steps.check_import_changes.outputs.changed }}" == "true"
+          muscat_date  = "${{ steps.check_import_changes.outputs.muscat_date }}"
+          muscat_time  = "${{ steps.check_import_changes.outputs.muscat_time }}"
+          is_manual    = "${{ github.event_name }}" == "workflow_dispatch"
+
+          if changed:
+              subject = f"📋 Import Roster Updated — {muscat_date}"
+              reason  = "تم تحديث جدول الإيمبورت"
+              badge   = "#e53e3e"
+              badge_text = "تحديث جديد"
+          elif is_manual:
+              subject = f"📋 Import Roster (Manual) — {muscat_date}"
+              reason  = "تشغيل يدوي"
+              badge   = "#805ad5"
+              badge_text = "يدوي"
+          else:
+              subject = f"📋 Import Roster — صباح الخير {muscat_date}"
+              reason  = "التحديث الصباحي اليومي — الساعة 7:00 صباحاً"
+              badge   = "#2b6cb0"
+              badge_text = "تحديث صباحي"
+
+          html_body = f"""
+          <!DOCTYPE html>
+          <html dir="rtl" lang="ar">
+          <head><meta charset="UTF-8"></head>
+          <body style="margin:0;padding:0;background:#f7fafc;font-family:Arial,sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7fafc;padding:30px 0;">
+              <tr><td align="center">
+                <table width="600" cellpadding="0" cellspacing="0"
+                       style="background:#ffffff;border-radius:12px;overflow:hidden;
+                              box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+                  <!-- Header -->
+                  <tr>
+                    <td style="background:#1a365d;padding:28px 32px;text-align:center;">
+                      <h1 style="color:#ffffff;margin:0;font-size:22px;">📋 Import Duty Roster</h1>
+                      <p style="color:#90cdf4;margin:6px 0 0;font-size:14px;">{muscat_date} &nbsp;|&nbsp; {muscat_time}</p>
+                    </td>
+                  </tr>
+
+                  <!-- Badge -->
+                  <tr>
+                    <td style="padding:20px 32px 0;text-align:center;">
+                      <span style="display:inline-block;background:{badge};color:#fff;
+                                   border-radius:20px;padding:6px 18px;font-size:13px;font-weight:bold;">
+                        {badge_text}
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding:24px 32px;text-align:right;">
+                      <p style="font-size:16px;color:#2d3748;margin:0 0 16px;">
+                        {reason}
+                      </p>
+                      <p style="font-size:14px;color:#718096;margin:0 0 24px;">
+                        اضغط على الزر أدناه للاطلاع على جدول العمل لليوم.
+                      </p>
+                      <div style="text-align:center;">
+                        <a href="{roster_url}"
+                           style="display:inline-block;background:#2b6cb0;color:#ffffff;
+                                  text-decoration:none;padding:14px 36px;border-radius:8px;
+                                  font-size:15px;font-weight:bold;">
+                          عرض جدول اليوم ←
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background:#f7fafc;padding:16px 32px;text-align:center;
+                               border-top:1px solid #e2e8f0;">
+                      <p style="color:#a0aec0;font-size:12px;margin:0;">
+                        هذا البريد تلقائي — يُرسل عند تحديث الروستر أو الساعة 7:00 صباحاً يومياً
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td></tr>
+            </table>
+          </body>
+          </html>
+          """
+
+          recipients = [e.strip() for e in email_to_raw.split(",") if e.strip()]
+          if not recipients:
+              print("⚠️  EMAIL_TO is empty — skipping email send")
+              exit(0)
+
+          if not smtp_user or not smtp_password:
+              print("⚠️  SMTP credentials missing — skipping email send")
+              exit(0)
+
+          msg = MIMEMultipart("alternative")
+          msg["Subject"] = subject
+          msg["From"]    = email_from
+          msg["To"]      = ", ".join(recipients)
+          msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+          try:
+              with smtplib.SMTP(smtp_server, smtp_port) as server:
+                  server.ehlo()
+                  server.starttls()
+                  server.login(smtp_user, smtp_password)
+                  server.sendmail(email_from, recipients, msg.as_string())
+              print(f"✅ Email sent to: {', '.join(recipients)}")
+          except Exception as e:
+              print(f"❌ Failed to send email: {e}")
+              exit(1)
+          EOF
+
+      - name: Commit updated Import docs
+        if: steps.check_import_changes.outputs.should_process == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/import import-rosters import_last_filename.txt
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            if [ "${{ steps.check_import_changes.outputs.changed }}" == "true" ]; then
+              git commit -m "Update IMPORT roster: ${{ steps.check_import_changes.outputs.filename }}"
+            else
+              git commit -m "Scheduled IMPORT update"
+            fi
+            git pull --rebase
+            git push
+            echo "Pushed!"
+          fi
+
+      - name: Skip - No action needed
+        if: steps.check_import_changes.outputs.should_process == 'false'
+        run: |
+          echo "========================================"
+          echo "No action needed"
+          echo "Current file: ${{ steps.check_import_changes.outputs.filename }}"
+          echo "========================================"
