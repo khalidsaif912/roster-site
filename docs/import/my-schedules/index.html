@@ -306,7 +306,57 @@
   async function captureExportCanvas(){var source=document.getElementById('exportArea')||document.querySelector('.main');if(!source)throw new Error('no export area');var clone=source.cloneNode(true);var wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-9999px;top:0;width:420px;padding:16px;box-sizing:border-box;';wrap.style.background=getComputedStyle(document.body).backgroundColor||'#0d1117';wrap.appendChild(clone);document.body.appendChild(wrap);await new Promise(function(r){requestAnimationFrame(r);});var canvas=await html2canvas(wrap,{scale:3,backgroundColor:null,useCORS:true});document.body.removeChild(wrap);return canvas;}
   async function dlIMG(){try{var canvas=await captureExportCanvas();var a=document.createElement('a');a.download='import-'+data.id+'-'+month+'.png';a.href=canvas.toDataURL('image/png');a.click();}catch(e){alert(lang==='ar'?'تعذر حفظ الصورة.':'Image export failed.');}}
   async function dlPDF(){try{var canvas=await captureExportCanvas();var imgData=canvas.toDataURL('image/png');var jsPDF=window.jspdf.jsPDF;var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});var pageW=210,pageH=297,margin=10,imgW=pageW-margin*2,imgH=(canvas.height*imgW)/canvas.width;pdf.addImage(imgData,'PNG',margin,margin,imgW,imgH);var rem=imgH-(pageH-margin*2);while(rem>0){pdf.addPage();pdf.addImage(imgData,'PNG',margin,margin-(imgH-rem),imgW,imgH);rem-=(pageH-margin*2);}pdf.save('import-'+data.id+'-'+month+'.pdf');}catch(e){alert(lang==='ar'?'تعذر حفظ PDF.':'PDF export failed.');}}
-  function dlICS(){var sched=data.schedules[month]||[];var parts=month.split('-');var yr=parseInt(parts[0]),mo=parseInt(parts[1]);var pad=function(n){return String(n).padStart(2,'0');};var lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ImportMySchedule//EN','CALSCALE:GREGORIAN'];sched.forEach(function(d){var dt2=yr+''+pad(mo)+''+pad(d.day);var dn=new Date(yr,mo-1,d.day+1);var dtE=dn.getFullYear()+''+pad(dn.getMonth()+1)+''+pad(dn.getDate());lines.push('BEGIN:VEVENT','DTSTART;VALUE=DATE:'+dt2,'DTEND;VALUE=DATE:'+dtE,'SUMMARY:'+(d.shift_code||d.shift_group),'UID:'+dt2+'-'+data.id+'@import','END:VEVENT');});lines.push('END:VCALENDAR');var blob=new Blob([lines.join('\r\n')],{type:'text/calendar'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='import-'+data.id+'-'+month+'.ics';a.click();URL.revokeObjectURL(a.href);}
+  function dlICS(){
+    var sched=data.schedules[month]||[];
+    var parts=month.split('-');
+    var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
+    var pad=function(n){return String(n).padStart(2,'0');};
+    var lines=[
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//ImportMySchedule//App//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH'
+    ];
+    sched.forEach(function(d){
+      var dt2=yr+''+pad(mo)+''+pad(d.day);
+      var dn=new Date(yr,mo-1,d.day+1);
+      var dtE=dn.getFullYear()+''+pad(dn.getMonth()+1)+''+pad(dn.getDate());
+      var summary=(d.shift_code||d.shift_group||'').replace(/[\r\n,;\\\\]/g,' ');
+      var uid=dt2+'-'+data.id+'-'+Math.random().toString(36).slice(2,7)+'@importschedule';
+      lines.push(
+        'BEGIN:VEVENT',
+        'DTSTART;VALUE=DATE:'+dt2,
+        'DTEND;VALUE=DATE:'+dtE,
+        'SUMMARY:'+summary,
+        'UID:'+uid,
+        'STATUS:CONFIRMED',
+        'TRANSP:OPAQUE',
+        'END:VEVENT'
+      );
+    });
+    lines.push('END:VCALENDAR');
+    var icsContent=lines.join('\\r\\n');
+    var filename='import-'+data.id+'-'+month+'.ics';
+    var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+    if(isIOS){
+      window.location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(icsContent);
+      return;
+    }
+    var blob=new Blob([icsContent],{type:'text/calendar;charset=utf-8'});
+    if(navigator.canShare&&navigator.canShare({files:[new File([blob],filename,{type:'text/calendar'})]})){
+      navigator.share({files:[new File([blob],filename,{type:'text/calendar'})],title:filename}).catch(function(){_dlICSBlob(blob,filename);});
+      return;
+    }
+    _dlICSBlob(blob,filename);
+  }
+  function _dlICSBlob(blob,filename){
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},5000);
+  }
   function shareS(){var base=location.pathname.includes('/roster-site/')?'/roster-site':'';var url=location.origin+base+'/import/my-schedules/?emp='+encodeURIComponent(data.id);if(navigator.share)navigator.share({title:'Import - My Schedule',text:'Schedule: '+data.name,url:url});else{navigator.clipboard.writeText(url);alert(lang==='ar'?'تم نسخ الرابط ✅':'Link copied ✅');}}
   (function(){var cal=document.getElementById('brandCal'),q=document.getElementById('brandQ');if(!cal||!q)return;var sc=true;setInterval(function(){sc=!sc;cal.classList.toggle('show',sc);q.classList.toggle('show',!sc);},2600);})();
   (function(){var topbar=document.querySelector('.topbar'),aI=document.getElementById('auroraBarInner'),aB=document.getElementById('auroraBar');if(!topbar)return;function sp(){var h=topbar.offsetHeight||62;if(aB)aB.style.top=h+'px';}window.addEventListener('scroll',function(){if(aI)aI.classList.toggle('visible',window.scrollY>5);},{passive:true});setTimeout(sp,100);window.addEventListener('resize',sp);})();
