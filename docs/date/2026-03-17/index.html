@@ -992,7 +992,7 @@
   <!-- ════ FOOTER ════ -->
   <div class="footer">
     <strong style="color:#475569;font-size:13px;" id="lastUpdatedTrigger">Last Updated:</strong> <strong style="color:#1e40af;">17MAR2026 / 00:00</strong>
-    <br>Total: <strong>80 employees</strong>
+    <br><span id="totalTrigger" onclick="showStatsModal()" style="cursor:pointer;user-select:none;-webkit-user-select:none;">Total: <strong>80 employees</strong></span>
      &nbsp;·&nbsp; Source: <strong>Export New Roster March 2026 - RAMADAN VER2.xlsx</strong>
   </div>
 </div>
@@ -1421,59 +1421,67 @@ function goToMySchedule() {
   }
   }
 
-  function showStatsModal() {
-    // إنشاء النافذة المنبثقة
-    var existing = document.getElementById('_statsModal');
-    if(existing) { existing.remove(); return; }
-
-    var todayStart = todayStr + 'T00:00:00+04:00';
-    var todayEnd   = todayStr + 'T23:59:59+04:00';
-
-    var modal = document.createElement('div');
-    modal.id = '_statsModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;';
-    modal.innerHTML = '<div style="background:#0f172a;border:1px solid #334155;border-radius:16px;padding:28px 36px;min-width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);">' +
-      '<div style="font-size:13px;color:#64748b;margin-bottom:16px;letter-spacing:1px;">📊 إحصائيات الزيارات</div>' +
-      '<div style="display:flex;gap:32px;justify-content:center;margin-bottom:20px;">' +
-        '<div>' +
-          '<div id="_statTodayV" style="font-size:36px;font-weight:800;color:#60a5fa;">...</div>' +
-          '<div style="font-size:11px;color:#64748b;margin-top:4px;">زوار اليوم</div>' +
-        '</div>' +
-        '<div style="width:1px;background:#1e293b;"></div>' +
-        '<div>' +
-          '<div id="_statTotalV" style="font-size:36px;font-weight:800;color:#34d399;">...</div>' +
-          '<div style="font-size:11px;color:#64748b;margin-top:4px;">إجمالي الزوار</div>' +
-        '</div>' +
-      '</div>' +
-      '<div style="font-size:10px;color:#334155;margin-bottom:16px;">كل شخص يُحسب مرة واحدة يومياً</div>' +
-      '<button onclick="document.getElementById('_statsModal').remove()" ' +
-        'style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:8px;padding:8px 20px;cursor:pointer;font-size:13px;">✕ إغلاق</button>' +
-    '</div>';
-
-    modal.addEventListener('click', function(e) {
-      if(e.target === modal) modal.remove();
-    });
-    document.body.appendChild(modal);
-
-    // زوار اليوم الفريدين
-    fetch(SUPA_URL + '/rest/v1/page_views?select=visitor_id&page=eq.export&visited_at=gte.' + todayStart + '&visited_at=lte.' + todayEnd, {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-    }).then(function(r) { return r.json(); })
-    .then(function(data) {
-      var unique = new Set((data||[]).map(function(r){return r.visitor_id;})).size;
-      document.getElementById('_statTodayV').textContent = unique;
-    }).catch(function() { document.getElementById('_statTodayV').textContent = '!'; });
-
-    // إجمالي الزوار الفريدين كل الأيام
-    fetch(SUPA_URL + '/rest/v1/page_views?select=visitor_id&page=eq.export', {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-    }).then(function(r) { return r.json(); })
-    .then(function(data) {
-      var unique = new Set((data||[]).map(function(r){return r.visitor_id;})).size;
-      document.getElementById('_statTotalV').textContent = unique;
-    }).catch(function() { document.getElementById('_statTotalV').textContent = '!'; });
-  }
 })();
+
+// ✅ showStatsModal في النطاق العام حتى يمكن استدعاؤها من onclick
+var _SUPA_URL = 'https://tqfoiliyhlhidrrjfczq.supabase.co';
+var _SUPA_KEY = 'sb_publishable_TQCEVXnTOEzoQsYAVVxidA_gUCx7Uez';
+function showStatsModal() {
+  var existing = document.getElementById('_statsModal');
+  if(existing) { existing.remove(); return; }
+
+  var now = new Date();
+  var muscat = new Date(now.getTime() + (4*60*60*1000) + (now.getTimezoneOffset()*60*1000));
+  var todayStr = muscat.getFullYear() + '-' +
+    String(muscat.getMonth()+1).padStart(2,'0') + '-' +
+    String(muscat.getDate()).padStart(2,'0');
+  var todayStart = todayStr + 'T00:00:00+04:00';
+  var todayEnd   = todayStr + 'T23:59:59+04:00';
+
+  var modal = document.createElement('div');
+  modal.id = '_statsModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = '<div style="background:#0f172a;border:1px solid #334155;border-radius:16px;padding:28px 36px;min-width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);">' +
+    '<div style="font-size:13px;color:#64748b;margin-bottom:16px;letter-spacing:1px;">📊 إحصائيات الزيارات</div>' +
+    '<div style="display:flex;gap:32px;justify-content:center;margin-bottom:20px;">' +
+      '<div>' +
+        '<div id="_statTodayV" style="font-size:36px;font-weight:800;color:#60a5fa;">...</div>' +
+        '<div style="font-size:11px;color:#64748b;margin-top:4px;">زوار اليوم</div>' +
+      '</div>' +
+      '<div style="width:1px;background:#1e293b;"></div>' +
+      '<div>' +
+        '<div id="_statTotalV" style="font-size:36px;font-weight:800;color:#34d399;">...</div>' +
+        '<div style="font-size:11px;color:#64748b;margin-top:4px;">إجمالي الزوار</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="font-size:10px;color:#334155;margin-bottom:16px;">كل شخص يُحسب مرة واحدة يومياً</div>' +
+    '<button onclick="document.getElementById('_statsModal').remove()" ' +
+      'style="background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:8px;padding:8px 20px;cursor:pointer;font-size:13px;">✕ إغلاق</button>' +
+  '</div>';
+
+  modal.addEventListener('click', function(e) {
+    if(e.target === modal) modal.remove();
+  });
+  document.body.appendChild(modal);
+
+  // زوار اليوم الفريدين
+  fetch(_SUPA_URL + '/rest/v1/page_views?select=visitor_id&page=eq.export&visited_at=gte.' + todayStart + '&visited_at=lte.' + todayEnd, {
+    headers: { 'apikey': _SUPA_KEY, 'Authorization': 'Bearer ' + _SUPA_KEY }
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    var unique = new Set((data||[]).map(function(r){return r.visitor_id;})).size;
+    document.getElementById('_statTodayV').textContent = unique;
+  }).catch(function() { document.getElementById('_statTodayV').textContent = '!'; });
+
+  // إجمالي الزوار الفريدين كل الأيام
+  fetch(_SUPA_URL + '/rest/v1/page_views?select=visitor_id&page=eq.export', {
+    headers: { 'apikey': _SUPA_KEY, 'Authorization': 'Bearer ' + _SUPA_KEY }
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    var unique = new Set((data||[]).map(function(r){return r.visitor_id;})).size;
+    document.getElementById('_statTotalV').textContent = unique;
+  }).catch(function() { document.getElementById('_statTotalV').textContent = '!'; });
+}
 </script>
 
 </body>
