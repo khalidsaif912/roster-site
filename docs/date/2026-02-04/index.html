@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="x-apple-disable-message-reformatting">
   <title>Duty Roster</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     /* ═══════ RESET ═══════ */
     body {
@@ -63,168 +60,19 @@
     .empRow, .empName, .empStatus { direction:ltr !important; unicode-bidi:embed; text-align:left !important; }
 
     /* رسالة الترحيب */
-    .welcomeMsg { display:none !important; }
+    .welcomeMsg {
+      position:absolute; top:14px; left:16px; z-index:10;
+      background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25);
+      border-radius:20px; padding:4px 10px;
+      color:#fff; font-size:11px; font-weight:700;
+      display:none; align-items:center; gap:5px;
+      max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      cursor:pointer; transition:all .25s;
+    }
+    .welcomeMsg:hover { background:rgba(255,255,255,.28); }
+    .welcomeMsg.visible { display:flex; }
 
-    /* ═══════ WELCOME CHIP ═══════ */
-    .welcomeChip {
-      background:#fff; border:1px solid rgba(15,23,42,.1);
-      border-radius:14px; padding:10px 14px;
-      box-shadow:0 2px 8px rgba(15,23,42,.06);
-      transition:all .25s ease; min-width:80px;
-      cursor:pointer; display:none;
-      flex-direction:column; align-items:center; gap:1px;
-    }
-    .welcomeChip.visible { display:flex; }
-    .welcomeChip:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(99,102,241,.18); }
-    .welcomeChipIcon {
-      font-size:20px; display:block;
-      animation:waveHand 2.8s ease-in-out infinite;
-      transform-origin:70% 80%;
-    }
-    @keyframes waveHand {
-      0%,55%,100% { transform:rotate(0deg); }
-      10%  { transform:rotate(20deg); }
-      20%  { transform:rotate(-10deg); }
-      30%  { transform:rotate(18deg); }
-      40%  { transform:rotate(-8deg); }
-      50%  { transform:rotate(12deg); }
-    }
-    .welcomeChipName {
-      font-size:13px; font-weight:900; color:#1e293b;
-      font-family:'Outfit',system-ui,sans-serif;
-      letter-spacing:-.4px; white-space:nowrap;
-      max-width:90px; overflow:hidden; text-overflow:ellipsis;
-      margin-top:1px;
-    }
-    .welcomeChipLabel {
-      font-size:8.5px; font-weight:600; color:#64748b;
-      text-transform:uppercase; letter-spacing:.5px; white-space:nowrap;
-    }
-
-    /* ═══════ FLIP CHIP (موظفون ↔ أقسام) ═══════ */
-    .flipChip {
-      background:#fff; border:1px solid rgba(15,23,42,.1);
-      border-radius:14px; padding:10px 12px;
-      box-shadow:0 2px 8px rgba(15,23,42,.06);
-      transition:box-shadow .25s,transform .25s;
-      min-width:72px; position:relative;
-      overflow:hidden; perspective:600px;
-    }
-    .flipChip:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(15,23,42,.12); }
-    .flipChipInner {
-      position:relative; width:100%; height:44px;
-      transform-style:preserve-3d;
-      transition:transform .7s cubic-bezier(.4,0,.2,1);
-    }
-    .flipChipInner.flipped { transform:rotateX(180deg); }
-    .flipChipFace {
-      position:absolute; inset:0;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:2px;
-      backface-visibility:hidden; -webkit-backface-visibility:hidden;
-    }
-    .flipChipBack { transform:rotateX(180deg); }
-    .flipChipVal {
-      font-size:22px; font-weight:900; color:#1e40af; line-height:1;
-    }
-    .flipChipVal.green { color:#059669; }
-    .flipChipLabel {
-      font-size:9.5px; font-weight:600; color:#64748b;
-      text-transform:uppercase; letter-spacing:.4px; white-space:nowrap;
-    }
-
-    /* ═══════ CUSTOM DATE PICKER ═══════ */
-    #datePicker {
-      position:absolute; width:1px; height:1px;
-      opacity:0; pointer-events:none; font-size:16px;
-      border:none; z-index:-1;
-    }
-    .cdp-overlay {
-      display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,.4);
-      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
-      z-index:9998; align-items:flex-end; justify-content:center;
-    }
-    .cdp-overlay.cdp-open { display:flex; animation:cdpFadeIn .18s ease; }
-    @keyframes cdpFadeIn { from{opacity:0} to{opacity:1} }
-    .cdp-sheet {
-      background:#fff; border-radius:22px 22px 0 0;
-      width:100%; max-width:400px;
-      box-shadow:0 -6px 32px rgba(15,23,42,.15);
-      animation:cdpSlideUp .26s cubic-bezier(.22,1,.36,1);
-      padding-bottom:max(16px,env(safe-area-inset-bottom));
-    }
-    @keyframes cdpSlideUp {
-      from{transform:translateY(100%);opacity:0}
-      to{transform:translateY(0);opacity:1}
-    }
-    .cdp-handle {
-      width:36px; height:4px; background:#e2e8f0;
-      border-radius:2px; margin:12px auto 0;
-    }
-    .cdp-header {
-      display:flex; align-items:center;
-      justify-content:space-between; padding:12px 16px 8px;
-    }
-    .cdp-nav {
-      width:36px; height:36px; border-radius:10px;
-      border:1.5px solid #e2e8f0; background:#f8fafc;
-      font-size:18px; cursor:pointer; color:#475569;
-      display:flex; align-items:center; justify-content:center;
-      transition:all .12s; -webkit-tap-highlight-color:transparent;
-    }
-    .cdp-nav:hover { background:#e2e8f0; color:#1e293b; }
-    .cdp-nav:active { transform:scale(.9); }
-    .cdp-nav:disabled { opacity:.25; cursor:default; pointer-events:none; }
-    .cdp-month-label {
-      font-size:15px; font-weight:700; color:#1e293b; letter-spacing:-.2px;
-    }
-    .cdp-days-head {
-      display:grid; grid-template-columns:repeat(7,1fr);
-      padding:0 10px; margin-bottom:2px;
-    }
-    .cdp-days-head span {
-      text-align:center; font-size:10px; font-weight:700;
-      color:#94a3b8; text-transform:uppercase;
-      letter-spacing:.3px; padding:3px 0;
-    }
-    .cdp-grid {
-      display:grid; grid-template-columns:repeat(7,1fr);
-      gap:2px; padding:0 10px 14px;
-    }
-    .cdp-day {
-      aspect-ratio:1; border-radius:9px; border:none;
-      background:transparent; font-size:14px; font-weight:600;
-      color:#334155; cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      transition:background .1s,transform .1s;
-      -webkit-tap-highlight-color:transparent; position:relative;
-    }
-    .cdp-day:hover:not([disabled]):not(.cdp-sel) { background:#f1f5f9; }
-    .cdp-day:active:not([disabled]) { transform:scale(.85); }
-    .cdp-day[disabled] { opacity:.25; cursor:default; pointer-events:none; }
-    .cdp-day.cdp-today { color:#1e40af; font-weight:800; }
-    .cdp-day.cdp-today::after {
-      content:''; position:absolute; bottom:3px; left:50%;
-      transform:translateX(-50%); width:4px; height:4px;
-      background:#1e40af; border-radius:50%;
-    }
-    .cdp-day.cdp-sel {
-      background:linear-gradient(135deg,#1e40af,#3b82f6);
-      color:#fff; box-shadow:0 3px 10px rgba(30,64,175,.3);
-    }
-    .cdp-day.cdp-sel.cdp-today::after { background:#fff; }
-    .cdp-empty { pointer-events:none; }
-
-    /* responsive */
-    @media (max-width:600px) {
-      .welcomeChip { min-width:64px; padding:8px 10px; }
-      .welcomeChipName { font-size:11px; max-width:68px; }
-      .flipChip { min-width:60px; padding:8px 8px; }
-      .flipChipVal { font-size:18px; }
-      .flipChipLabel { font-size:8.5px; }
-      .flipChipInner { height:38px; }
-    }
+    /* Date Picker Wrapper */
     .datePickerWrapper {
       position:relative;
       display:inline-block;
@@ -251,7 +99,18 @@
       background:rgba(255,255,255,.25);
       transform:translateY(-1px);
     }
-    /* Date Picker Wrapper */
+    /* الـ input مخفي بصرياً - نفتحه برمجياً عبر الزر */
+#datePicker {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 16px;   /* مهم جداً لمنع zoom على iOS */
+  border: none;
+  -webkit-appearance: none;
+  z-index: -1;
+}
 
 
     /* ═══════ SUMMARY BAR ═══════ */
@@ -466,19 +325,6 @@
     }
 
   </style>
-  <!-- Google Analytics - Export Page Tracking -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQVWSXQVB5"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-RQVWSXQVB5');
-    gtag('event', 'page_view', {
-      'page_title': 'Export Duty Roster',
-      'page_section': 'export',
-      'page_date': '2026-02-04'
-    });
-  </script>
 </head>
 <body>
 <div class="wrap">
@@ -486,7 +332,7 @@
   <!-- ════ HEADER ════ -->
   <div class="header">
     <button class="langToggle" id="langToggle" onclick="toggleLang()">ع</button>
-    <div class="welcomeMsg" id="welcomeMsg"></div>
+    <div class="welcomeMsg" id="welcomeMsg" onclick="goToMySchedule()" title="انقر للذهاب لجدولك"></div>
     <h1 id="pageTitle">📋 Duty Roster</h1>
     <div class="datePickerWrapper">
       <button class="dateTag" id="dateTag" type="button" onclick="openDatePicker()">📅 4 February 2026</button>
@@ -494,49 +340,18 @@
     </div>
   </div>
 
-  <!-- ═══ CUSTOM DATE PICKER OVERLAY ═══ -->
-  <div class="cdp-overlay" id="cdpOverlay" onclick="cdpBgClick(event)">
-    <div class="cdp-sheet">
-      <div class="cdp-handle"></div>
-      <div class="cdp-header">
-        <button class="cdp-nav" id="cdpPrev" onclick="cdpMove(-1)" type="button">‹</button>
-        <span class="cdp-month-label" id="cdpLabel"></span>
-        <button class="cdp-nav" id="cdpNext" onclick="cdpMove(1)"  type="button">›</button>
-      </div>
-      <div class="cdp-days-head">
-        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span>
-        <span>Th</span><span>Fr</span><span>Sa</span>
-      </div>
-      <div class="cdp-grid" id="cdpGrid"></div>
-    </div>
-  </div>
-
   
 
   <!-- ════ SUMMARY CHIPS ════ -->
   <div class="summaryBar">
-
-    <!-- Welcome Chip -->
-    <div class="welcomeChip" id="welcomeChip" onclick="goToMySchedule()" title="انقر للذهاب لجدولك">
-      <span class="welcomeChipIcon">👋</span>
-      <span class="welcomeChipName" id="welcomeChipName"></span>
-      <span class="welcomeChipLabel" data-key="welcome">Hello</span>
+    <div class="summaryChip">
+      <div class="chipVal">80</div>
+      <div class="chipLabel" data-key="employees">Employees</div>
     </div>
-
-    <!-- Flip Chip: موظفون ↔ أقسام -->
-    <div class="flipChip">
-      <div class="flipChipInner" id="flipChipInner">
-        <div class="flipChipFace">
-          <div class="flipChipVal">80</div>
-          <div class="flipChipLabel" data-key="employees">Employees</div>
-        </div>
-        <div class="flipChipFace flipChipBack">
-          <div class="flipChipVal green">5</div>
-          <div class="flipChipLabel" data-key="departments">Depts</div>
-        </div>
-      </div>
+    <div class="summaryChip">
+      <div class="chipVal" style="color:#059669;">5</div>
+      <div class="chipLabel" data-key="departments">Departments</div>
     </div>
-
     <a href="https://khalidsaif912.github.io/roster-site/my-schedules/index.html" id="myScheduleBtn" class="summaryChip" style="cursor:pointer;text-decoration:none;" onclick="goToMySchedule(event)">
       <div class="chipVal">🗓️</div>
       <div class="chipLabel" data-key="mySchedule">My Schedule</div>
@@ -1271,12 +1086,40 @@
 // ═══════════════════════════════════════════════════
 // فتح الـ date picker - يعمل على iOS و Android و Desktop
 // ═══════════════════════════════════════════════════
-function goToMySchedule(e) {
-  if (e && e.preventDefault) e.preventDefault();
-  var id = localStorage.getItem('savedEmpId');
-  var base = 'https://khalidsaif912.github.io/roster-site/my-schedules/index.html';
-  location.href = id ? base + '?emp=' + encodeURIComponent(id) : base;
+function openDatePicker() {
+  var picker = document.getElementById('datePicker');
+  if (!picker) return;
+  // إعادة تفعيل pointer-events مؤقتاً لفتح الـ picker
+  picker.style.pointerEvents = 'auto';
+  picker.style.position = 'fixed';
+  picker.style.top = '50%';
+  picker.style.left = '50%';
+  picker.style.width = '1px';
+  picker.style.height = '1px';
+  picker.style.opacity = '0';
+  picker.style.zIndex = '9999';
+  picker.focus();
+  try {
+    if (picker.showPicker) {
+      picker.showPicker(); // الطريقة الحديثة (Chrome/Safari 16+)
+    } else {
+      picker.click(); // fallback للإصدارات القديمة
+    }
+  } catch(e) {
+    picker.click();
+  }
+  // إعادة الإخفاء بعد فتح الـ picker
+  setTimeout(function() {
+    picker.style.pointerEvents = 'none';
+    picker.style.position = 'absolute';
+    picker.style.top = '0';
+    picker.style.left = '0';
+    picker.style.zIndex = '-1';
+  }, 500);
 }
+
+// ═══════════════════════════════════════════════════
+// Shift Filter (NOW PAGE ONLY)
 // ═══════════════════════════════════════════════════
 (function(){
   var filterBtns = document.querySelectorAll('.shiftFilterBtn');
@@ -1468,98 +1311,32 @@ function toggleLang() { applyLang(LANG==='en'?'ar':'en'); }
 applyLang(LANG);
 
 // ═══════════════════════════════════════════════════
-// FLIP CHIP + WELCOME CHIP + CUSTOM DATE PICKER
+// رسالة الترحيب — تقرأ اسم الموظف من schedules JSON
 // ═══════════════════════════════════════════════════
 (function() {
-
-  // ── 1. Flip Chip: يتبدل كل 3 ثوانٍ ──
-  var inner = document.getElementById('flipChipInner');
-  if (inner) setInterval(function() { inner.classList.toggle('flipped'); }, 3000);
-
-  // ── 2. Welcome Chip ──
   var empId = localStorage.getItem('savedEmpId');
-  if (empId) {
-    var origin = location.origin;
-    var base = location.pathname.includes('/roster-site/') ? origin+'/roster-site/' : origin+'/';
-    fetch(base+'schedules/'+empId+'.json')
-      .then(function(r){ return r.ok?r.json():null; })
-      .then(function(d){
-        if(!d||!d.name) return;
-        var chip=document.getElementById('welcomeChip');
-        var nameEl=document.getElementById('welcomeChipName');
-        if(chip&&nameEl){
-          nameEl.textContent=d.name.split(' ')[0];
-          chip.classList.add('visible');
-        }
-      }).catch(function(){});
-  }
-
-  // ── 3. Custom Date Picker ──
-  var MIN_D='2026-02-01', MAX_D='2026-04-30', SEL_D='2026-02-04';
-  var cy, cm;
-  var MN=['January','February','March','April','May','June',
-          'July','August','September','October','November','December'];
-
-  function pad(n)   { return String(n).padStart(2,'0'); }
-  function ds(y,m,d){ return y+'-'+pad(m)+'-'+pad(d); }
-  function today()  {
-    var n=new Date(),ms=new Date(n.getTime()+(4*3600000)+(n.getTimezoneOffset()*60000));
-    return ds(ms.getFullYear(),ms.getMonth()+1,ms.getDate());
-  }
-
-  function render() {
-    document.getElementById('cdpLabel').textContent=MN[cm-1]+' '+cy;
-    var pv=document.getElementById('cdpPrev'), nx=document.getElementById('cdpNext');
-    var cur=cy+'-'+pad(cm);
-    pv.disabled = !!(MIN_D && cur<=MIN_D.slice(0,7));
-    nx.disabled = !!(MAX_D && cur>=MAX_D.slice(0,7));
-    var td=today(), html='';
-    var fd=new Date(cy,cm-1,1).getDay();
-    var dim=new Date(cy,cm,0).getDate();
-    for(var i=0;i<fd;i++) html+='<div class="cdp-day cdp-empty"></div>';
-    for(var d=1;d<=dim;d++) {
-      var dstr=ds(cy,cm,d);
-      var dis=(MIN_D&&dstr<MIN_D)||(MAX_D&&dstr>MAX_D);
-      var cls='cdp-day'+(dstr===td?' cdp-today':'')+(dstr===SEL_D?' cdp-sel':'');
-      html+='<button class="'+cls+'" type="button"'+(dis?' disabled':'')+
-            ' onclick="cdpPick(''+dstr+'')">'+d+'</button>';
-    }
-    document.getElementById('cdpGrid').innerHTML=html;
-  }
-
-  window.cdpMove=function(d){
-    cm+=d; if(cm>12){cm=1;cy++;} if(cm<1){cm=12;cy--;} render();
-  };
-  window.cdpPick=function(dstr){
-    document.getElementById('cdpOverlay').classList.remove('cdp-open');
-    document.body.style.overflow='';
-    sessionStorage.removeItem('pageLoaded');
-    var path=window.location.pathname||'/';
-    var isNow=path.includes('/now');
-    var base=path.replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/,'/')
-                 .replace(/\/now\/.*$/,'/').replace(/\/+$/,'');
-    window.location.href=base+'/date/'+dstr+'/'+(isNow?'now/':'');
-  };
-  window.openDatePicker=function(){
-    var p=SEL_D||today(), pts=p.split('-');
-    cy=+pts[0]; cm=+pts[1]; render();
-    document.getElementById('cdpOverlay').classList.add('cdp-open');
-    document.body.style.overflow='hidden';
-  };
-  window.cdpBgClick=function(e){
-    if(e.target===document.getElementById('cdpOverlay')){
-      document.getElementById('cdpOverlay').classList.remove('cdp-open');
-      document.body.style.overflow='';
-    }
-  };
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){
-      document.getElementById('cdpOverlay').classList.remove('cdp-open');
-      document.body.style.overflow='';
-    }
-  });
-
+  if (!empId) return;
+  // استخدام مسار مطلق يعمل من أي صفحة
+  var origin = location.origin;
+  var base = location.pathname.includes('/roster-site/') ? origin + '/roster-site/' : origin + '/';
+  fetch(base + 'schedules/' + empId + '.json')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) {
+      if (!d || !d.name) return;
+      var firstName = d.name.split(' ')[0];
+      var msg = document.getElementById('welcomeMsg');
+      if (msg) {
+        msg.textContent = '👋 ' + firstName;
+        msg.classList.add('visible');
+      }
+    }).catch(function() {});
 })();
+
+function goToMySchedule() {
+  var id = localStorage.getItem('savedEmpId');
+  var base = 'https://khalidsaif912.github.io/roster-site/my-schedules/index.html';
+  location.href = id ? base + '?emp=' + encodeURIComponent(id) : base;
+}
 
 // ✅ فتح المناوبة الصحيحة في الصفحة الرئيسية بناءً على توقيت مسقط
 (function() {
