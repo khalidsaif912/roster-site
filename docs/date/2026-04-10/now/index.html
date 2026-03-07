@@ -579,7 +579,7 @@
 
   <!-- ════ FOOTER ════ -->
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;" id="lastUpdatedTrigger">Last Updated:</strong> <strong style="color:#1e40af;">07MAR2026 / 14:57</strong>
+    <strong style="color:#475569;font-size:13px;" id="lastUpdatedTrigger">Last Updated:</strong> <strong style="color:#1e40af;">10APR2026 / 00:00</strong>
     <br>
     <span style="font-size:11px;color:#94a3b8;display:inline-block;margin-top:4px;">
       📄 <strong style="color:#64748b;">Export New Roster April 2026 HR.xls.xlsx</strong>
@@ -611,9 +611,8 @@
 
       if (pageDate !== todayStr) {
         var isPageLoad = sessionStorage.getItem('pageLoaded');
-        if (!isPageLoad) {
-          // ✅ إصلاح: أول زيارة → احفظ وأعد التوجيه فوراً لليوم الصحيح
-          sessionStorage.setItem('pageLoaded', 'true');
+        if (isPageLoad) {
+          sessionStorage.removeItem('pageLoaded');
           var basePath = path
             .replace(/\/date\/\d{4}-\d{2}-\d{2}\/.*$/, '/')
             .replace(/\/now\/.*$/, '/')
@@ -621,8 +620,7 @@
           window.location.href = basePath + '/date/' + todayStr + '/' + (isNowPage ? 'now/' : '');
           return true;
         } else {
-          // زيارة ثانية (بعد redirect) → امسح العلامة
-          sessionStorage.removeItem('pageLoaded');
+          sessionStorage.setItem('pageLoaded', 'true');
         }
       }
     }
@@ -907,10 +905,15 @@ applyLang(LANG);
       var dstr=ds(cy,cm,d);
       var dis=(MIN_D&&dstr<MIN_D)||(MAX_D&&dstr>MAX_D);
       var cls='cdp-day'+(dstr===td?' cdp-today':'')+(dstr===SEL_D?' cdp-sel':'');
-      html+='<button class="'+cls+'" type="button"'+(dis?' disabled':'')+
-            ' onclick="cdpPick(''+dstr+'')">'+d+'</button>';
+      html+='<button class="'+cls+'" type="button" data-date="'+dstr+'"'+(dis?' disabled':'')+'>'+d+'</button>';
     }
-    document.getElementById('cdpGrid').innerHTML=html;
+    var grid=document.getElementById('cdpGrid');
+    grid.innerHTML=html;
+    grid.onclick=function(e){
+      var btn=e.target;
+      while(btn&&btn.tagName!=='BUTTON') btn=btn.parentElement;
+      if(btn&&btn.dataset.date&&!btn.disabled) window.cdpPick(btn.dataset.date);
+    };
   }
 
   window.cdpMove=function(d){
