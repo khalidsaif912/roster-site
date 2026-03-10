@@ -688,9 +688,9 @@
         "day": 17,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "AE14",
+        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-03-18",

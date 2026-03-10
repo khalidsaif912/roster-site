@@ -589,18 +589,18 @@
         "day": 6,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "AE14",
-        "shift_label": "🌆 Afternoon (AE14)",
-        "shift_group": "Afternoon"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-07",
         "day": 7,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "AE14",
-        "shift_label": "🌆 Afternoon (AE14)",
-        "shift_group": "Afternoon"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-08",

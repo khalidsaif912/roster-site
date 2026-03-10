@@ -625,18 +625,18 @@
         "day": 10,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-11",
         "day": 11,
         "day_name_ar": "الأربعاء",
         "day_name_en": "Wednesday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-12",
@@ -778,9 +778,9 @@
         "day": 27,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-03-28",

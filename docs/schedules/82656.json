@@ -634,9 +634,9 @@
         "day": 11,
         "day_name_ar": "الأربعاء",
         "day_name_en": "Wednesday",
-        "shift_code": "AE14",
-        "shift_label": "🌆 Afternoon (AE14)",
-        "shift_group": "Afternoon"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-03-12",

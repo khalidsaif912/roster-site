@@ -787,9 +787,9 @@
         "day": 28,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "NN21",
-        "shift_label": "🌙 Night (NN21)",
-        "shift_group": "Night"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-03-29",

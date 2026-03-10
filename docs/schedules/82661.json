@@ -670,9 +670,9 @@
         "day": 15,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "TR",
-        "shift_label": "📚 Training",
-        "shift_group": "Training"
+        "shift_code": "AE14",
+        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-03-16",

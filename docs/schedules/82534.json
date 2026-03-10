@@ -706,54 +706,54 @@
         "day": 19,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-20",
         "day": 20,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-21",
         "day": 21,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-22",
         "day": 22,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "NN21",
-        "shift_label": "🌙 Night (NN21)",
-        "shift_group": "Night"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-23",
         "day": 23,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "NN21",
-        "shift_label": "🌙 Night (NN21)",
-        "shift_group": "Night"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-24",
         "day": 24,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-03-25",
