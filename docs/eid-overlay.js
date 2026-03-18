@@ -31,7 +31,7 @@
     // 'always'   → يظهر في كل زيارة
     // 'once'     → يظهر مرة واحدة فقط (يحفظ في localStorage)
     // 'session'  → يظهر مرة لكل جلسة (يحفظ في sessionStorage)
-    showMode: 'once',
+    showMode: 'always',
     storageKey: 'eid_overlay_seen_2025',
   };
 
