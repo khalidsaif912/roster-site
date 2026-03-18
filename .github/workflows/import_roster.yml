@@ -129,11 +129,8 @@ jobs:
                   now = datetime.now(muscat_tz)
                   print(f"Muscat time: {now.strftime('%H:%M')}")
 
-                  # ✅ ساعة 7 صباحاً فقط للتحديث الإجباري اليومي
                   is_morning_update = (now.hour == 7)
                   should_process = changed or is_morning_update or is_manual or force_run
-
-                  # ✅ إرسال الإيميل: عند تغيير الروستر أو الساعة 7 صباحاً
                   should_send_email = changed or is_morning_update or is_manual or force_run
 
                   print(f"File changed:      {changed}")
@@ -198,12 +195,12 @@ jobs:
       - name: Inject Eid overlay into Import HTML pages
         if: steps.check_import_changes.outputs.should_process == 'true'
         run: |
-          # حذف أي سكريبت قديم أولاً
-          sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/import/index.html || true
-          sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/import/index.html || true
-          # حقن السكريبت الصحيح
-          sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/import/index.html || true
-          echo "✅ Eid overlay injected into Import pages!"
+          find docs/import -name "index.html" | while read f; do
+            sed -i 's|<script src="/eid-overlay.js"></script>||g' "$f" || true
+            sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' "$f" || true
+            sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' "$f" || true
+          done
+          echo "✅ Eid overlay injected into all Import pages!"
 
       - name: Send Email Notification
         if: steps.check_import_changes.outputs.should_send_email == 'true'
@@ -262,16 +259,12 @@ jobs:
                 <table width="600" cellpadding="0" cellspacing="0"
                        style="background:#ffffff;border-radius:12px;overflow:hidden;
                               box-shadow:0 2px 12px rgba(0,0,0,0.08);">
-
-                  <!-- Header -->
                   <tr>
                     <td style="background:#1a365d;padding:28px 32px;text-align:center;">
                       <h1 style="color:#ffffff;margin:0;font-size:22px;">📋 Import Duty Roster</h1>
                       <p style="color:#90cdf4;margin:6px 0 0;font-size:14px;">{muscat_date} &nbsp;|&nbsp; {muscat_time}</p>
                     </td>
                   </tr>
-
-                  <!-- Badge -->
                   <tr>
                     <td style="padding:20px 32px 0;text-align:center;">
                       <span style="display:inline-block;background:{badge};color:#fff;
@@ -280,13 +273,9 @@ jobs:
                       </span>
                     </td>
                   </tr>
-
-                  <!-- Body -->
                   <tr>
                     <td style="padding:24px 32px;text-align:right;">
-                      <p style="font-size:16px;color:#2d3748;margin:0 0 16px;">
-                        {reason}
-                      </p>
+                      <p style="font-size:16px;color:#2d3748;margin:0 0 16px;">{reason}</p>
                       <p style="font-size:14px;color:#718096;margin:0 0 24px;">
                         اضغط على الزر أدناه للاطلاع على جدول العمل لليوم.
                       </p>
@@ -300,8 +289,6 @@ jobs:
                       </div>
                     </td>
                   </tr>
-
-                  <!-- Footer -->
                   <tr>
                     <td style="background:#f7fafc;padding:16px 32px;text-align:center;
                                border-top:1px solid #e2e8f0;">
@@ -310,7 +297,6 @@ jobs:
                       </p>
                     </td>
                   </tr>
-
                 </table>
               </td></tr>
             </table>
