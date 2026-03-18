@@ -197,17 +197,9 @@ jobs:
       - name: Inject Eid overlay into HTML pages
         if: steps.check_changes.outputs.should_process == 'true'
         run: |
-          echo "=== قبل الحقن ==="
-          grep -n "</body>" docs/index.html || echo "❌ لم يجد </body> في index.html"
-          grep -n "</body>" docs/now/index.html || echo "❌ لم يجد </body> في now/index.html"
-
-          sed -i 's|</body>|<script src="/eid-overlay.js"></script></body>|g' docs/index.html || true
-          sed -i 's|</body>|<script src="../eid-overlay.js"></script></body>|g' docs/now/index.html || true
-
-          echo "=== بعد الحقن ==="
-          grep -n "eid-overlay" docs/index.html || echo "❌ لم يُحقن في index.html"
-          grep -n "eid-overlay" docs/now/index.html || echo "❌ لم يُحقن في now/index.html"
-          echo "✅ Done!"
+          sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/index.html || true
+          sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/now/index.html || true
+          echo "✅ Eid overlay injected!"
 
       - name: Send Email Notification
         if: steps.check_changes.outputs.should_send_email == 'true'
