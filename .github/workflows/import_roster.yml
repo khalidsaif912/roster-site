@@ -195,6 +195,16 @@ jobs:
           python generate_and_send_import.py
           echo "Done!"
 
+      - name: Inject Eid overlay into Import HTML pages
+        if: steps.check_import_changes.outputs.should_process == 'true'
+        run: |
+          # حذف أي سكريبت قديم أولاً
+          sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/import/index.html || true
+          sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/import/index.html || true
+          # حقن السكريبت الصحيح
+          sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/import/index.html || true
+          echo "✅ Eid overlay injected into Import pages!"
+
       - name: Send Email Notification
         if: steps.check_import_changes.outputs.should_send_email == 'true'
         env:
