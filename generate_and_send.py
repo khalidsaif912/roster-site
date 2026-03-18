@@ -1705,7 +1705,7 @@ applyLang(LANG);
   }}
 }})();
 </script>
-<script src="/eid-overlay.js"></script>
+<script src="/roster-site/eid-overlay.js"></script>
 </body>
 </html>"""
 
