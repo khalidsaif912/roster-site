@@ -113,7 +113,6 @@
 
     '#eid-stars{position:absolute;inset:0;pointer-events:none;}',
 
-    /* زر الإغلاق */
     '#eid-close{',
       'position:absolute;top:16px;left:16px;z-index:20;',
       'width:38px;height:38px;border-radius:50%;',
@@ -125,7 +124,6 @@
     '}',
     '#eid-close:hover{background:rgba(255,255,255,.25);color:#fff;transform:scale(1.1);}',
 
-    /* أيقونة الصوت في الزاوية */
     '#eid-sound-icon{',
       'position:absolute;top:16px;right:16px;z-index:20;',
       'width:38px;height:38px;border-radius:50%;',
@@ -154,6 +152,7 @@
       'text-shadow:0 0 20px rgba(255,200,50,.9),0 2px 6px rgba(0,0,0,.6);',
       'letter-spacing:1px;position:relative;z-index:2;',
       'margin-bottom:4px;transition:opacity .5s ease;pointer-events:none;',
+      'direction:rtl;',
     '}',
 
     '#eid-msg{',
@@ -165,7 +164,6 @@
       'transition:opacity .4s ease;pointer-events:none;',
     '}',
 
-    /* تلميح النقر */
     '#eid-tap-hint{',
       'margin-top:20px;',
       'font-family:system-ui,sans-serif;',
@@ -226,7 +224,8 @@
   document.body.appendChild(overlay);
 
   // ════════════════════════════════════════════
-  //  👤 اسم الموظف
+  //  👤 اسم الموظف — الاسم في النهاية
+  //  النتيجة: "🎊 Khalid عيدك مبارك يا"
   // ════════════════════════════════════════════
   var empId = localStorage.getItem('savedEmpId');
   if (empId) {
@@ -327,7 +326,6 @@
   overlay.addEventListener('click', function(e) {
     if (e.target === closeBtn) return;
 
-    // تفعيل الصوت عند أول نقرة
     if (!audioUnlocked) {
       unlockAudio();
       if (audioUnlocked) {
