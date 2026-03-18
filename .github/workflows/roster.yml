@@ -197,6 +197,13 @@ jobs:
       - name: Inject Eid overlay into HTML pages
         if: steps.check_changes.outputs.should_process == 'true'
         run: |
+          # حذف أي سكريبت قديم للـ eid-overlay أولاً
+          sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/index.html || true
+          sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/now/index.html || true
+          sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/index.html || true
+          sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/now/index.html || true
+
+          # حقن السكريبت الصحيح
           sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/index.html || true
           sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/now/index.html || true
           echo "✅ Eid overlay injected!"
