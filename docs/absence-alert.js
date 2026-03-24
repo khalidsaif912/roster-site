@@ -69,46 +69,47 @@
       /* --- الخطوط والاتجاه --- */
       ".abs-font { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; direction: rtl; }",
 
-      /* --- النقطة الحمراء (Pulse Dot) --- */
-      "#abs-dot { position: fixed; left: 20px; top: 20px; z-index: 999999; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); display: none; border: 2px solid #fff; animation: absPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; transition: transform 0.2s ease; }",
-      "#abs-dot:hover { transform: scale(1.2); }",
-      "@keyframes absPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }",
+      /* --- أيقونة التنبيه (المثلث النابض) --- */
+      "#abs-alert-icon { position: fixed; left: 20px; top: 20px; z-index: 999999; font-size: 32px; cursor: pointer; display: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); animation: alertPulse 1.5s ease-in-out infinite; user-select: none; }",
+      "#abs-alert-icon:hover { animation-play-state: paused; transform: scale(1.1); }",
+      "@keyframes alertPulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }",
 
       /* --- النافذة الرئيسية (Main Modal) --- */
       "#abs-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; animation: fadeIn 0.3s ease forwards; }",
       "@keyframes fadeIn { to { opacity: 1; } }",
-      "#abs-modal { background: #ffffff; border-radius: 24px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; transform: scale(0.95); animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }",
+      /* تم تصغير max-width هنا إلى 340px */
+      "#abs-modal { background: #ffffff; border-radius: 20px; max-width: 340px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; transform: scale(0.95); animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }",
       "@keyframes scaleUp { to { transform: scale(1); } }",
       
-      /* هيدر النافذة الرئيسية */
-      "#abs-head { background: linear-gradient(135deg, #ef4444, #b91c1c); padding: 32px 24px 24px; text-align: center; color: #fff; position: relative; }",
-      "#abs-head::before { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; }",
-      ".abs-icon-circle { width: 64px; height: 64px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); position: relative; z-index: 1; }",
-      "#abs-head h2 { margin: 0 0 8px; font-size: 22px; font-weight: 800; position: relative; z-index: 1; }",
-      "#abs-head p { margin: 0; font-size: 14px; opacity: 0.9; font-weight: 500; position: relative; z-index: 1; }",
+      /* هيدر النافذة الرئيسية (تم تصغير المساحات والأحجام) */
+      "#abs-head { background: linear-gradient(135deg, #ef4444, #b91c1c); padding: 24px 20px 20px; text-align: center; color: #fff; position: relative; }",
+      "#abs-head::before { content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; }",
+      ".abs-icon-circle { width: 50px; height: 50px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); position: relative; z-index: 1; }",
+      "#abs-head h2 { margin: 0 0 6px; font-size: 18px; font-weight: 800; position: relative; z-index: 1; }",
+      "#abs-head p { margin: 0; font-size: 13px; opacity: 0.9; font-weight: 500; position: relative; z-index: 1; }",
 
-      /* محتوى النافذة الرئيسية */
-      ".abs-body { padding: 24px; }",
-      ".abs-greeting { font-size: 15px; color: #334155; margin-bottom: 16px; font-weight: 600; line-height: 1.5; }",
-      ".abs-list { max-height: 180px; overflow-y: auto; margin-bottom: 24px; padding-left: 4px; }",
-      ".abs-list::-webkit-scrollbar { width: 6px; }",
+      /* محتوى النافذة الرئيسية (تم تقليل الـ padding) */
+      ".abs-body { padding: 20px; }",
+      ".abs-greeting { font-size: 14px; color: #334155; margin-bottom: 14px; font-weight: 600; line-height: 1.5; }",
+      ".abs-list { max-height: 160px; overflow-y: auto; margin-bottom: 20px; padding-left: 4px; }",
+      ".abs-list::-webkit-scrollbar { width: 5px; }",
       ".abs-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }",
       
       /* صفوف الغياب */
-      ".ab-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; margin-bottom: 10px; transition: transform 0.2s ease; }",
+      ".ab-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 10px; margin-bottom: 8px; transition: transform 0.2s ease; }",
       ".ab-row:hover { transform: translateX(-4px); border-color: #fca5a5; }",
-      ".ab-date { color: #b91c1c; font-size: 13px; font-weight: 800; background: #fecaca; padding: 6px 12px; border-radius: 8px; letter-spacing: 0.5px; }",
-      ".ab-badge { color: #ef4444; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }",
+      ".ab-date { color: #b91c1c; font-size: 12px; font-weight: 800; background: #fecaca; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; }",
+      ".ab-badge { color: #ef4444; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; }",
 
       /* زر الاختيار (Checkbox) */
-      ".abs-checkbox-wrapper { display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border-radius: 14px; cursor: pointer; margin-bottom: 24px; border: 1px solid #e2e8f0; transition: all 0.2s ease; }",
+      ".abs-checkbox-wrapper { display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8fafc; border-radius: 12px; cursor: pointer; margin-bottom: 20px; border: 1px solid #e2e8f0; transition: all 0.2s ease; }",
       ".abs-checkbox-wrapper:hover { border-color: #cbd5e1; background: #f1f5f9; }",
-      ".abs-checkbox-wrapper input { width: 20px; height: 20px; accent-color: #ef4444; cursor: pointer; }",
-      ".abs-checkbox-text { font-size: 13px; color: #475569; font-weight: 600; user-select: none; }",
+      ".abs-checkbox-wrapper input { width: 18px; height: 18px; accent-color: #ef4444; cursor: pointer; flex-shrink: 0; }",
+      ".abs-checkbox-text { font-size: 12px; color: #475569; font-weight: 600; user-select: none; line-height: 1.4; }",
 
       /* زر الإغلاق الرئيسي */
-      "#abs-main-close { width: 100%; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(to right, #ef4444, #dc2626); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px -6px rgba(239, 68, 68, 0.5); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }",
-      "#abs-main-close:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(239, 68, 68, 0.6); }",
+      "#abs-main-close { width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(to right, #ef4444, #dc2626); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px -4px rgba(239, 68, 68, 0.5); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }",
+      "#abs-main-close:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -6px rgba(239, 68, 68, 0.6); }",
       "#abs-main-close:active { transform: translateY(0); scale: 0.98; }",
 
       /* --- النافذة المطوية (Sidebar) --- */
@@ -131,10 +132,12 @@
 
   // ── UI BUILDERS ──────────────────────────────────────────────────────────
   function buildUI() {
-    // 1. إنشاء النقطة (الخفية مبدئياً)
-    var dot = document.createElement("div");
-    dot.id = "abs-dot";
-    document.body.appendChild(dot);
+    // 1. إنشاء الأيقونة (المثلث) - الخفية مبدئياً
+    var alertIcon = document.createElement("div");
+    alertIcon.id = "abs-alert-icon";
+    alertIcon.innerHTML = "⚠️";
+    alertIcon.title = "يوجد تنبيه غياب";
+    document.body.appendChild(alertIcon);
 
     // 2. إنشاء الشريط الجانبي المطوي
     var sb = document.createElement("div");
@@ -161,23 +164,23 @@
     var isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
     
     if (isDismissed) {
-      dot.style.display = "block"; 
+      alertIcon.style.display = "block"; // إظهار المثلث
     } else {
-      showMainModal(); 
+      showMainModal(); // إظهار النافذة الكبيرة
     }
 
     // 4. ربط الأحداث (Events)
-    dot.onclick = function() { sb.classList.add("open"); };
+    alertIcon.onclick = function() { sb.classList.add("open"); };
     document.getElementById("sb-close-btn").onclick = function() { sb.classList.remove("open"); };
     document.getElementById("sb-restore").onclick = function() {
       localStorage.removeItem("absDismissed_" + mState.empId); // إزالة الحظر
       sb.classList.remove("open"); // إغلاق الجانبية
-      dot.style.display = "none"; // إخفاء النقطة
-      setTimeout(showMainModal, 300); // إظهار الرئيسية بعد أن تُغلق الجانبية بانسيابية
+      alertIcon.style.display = "none"; // إخفاء المثلث
+      setTimeout(showMainModal, 300); // إظهار الرئيسية بعد أن تُغلق الجانبية
     };
   }
 
-  // دالة إظهار النافذة الكبيرة الاحترافية
+  // دالة إظهار النافذة الكبيرة
   function showMainModal() {
     if (document.getElementById("abs-overlay")) return;
     
@@ -201,7 +204,7 @@
           '<div class="abs-list">' + rows + '</div>' +
           '<label class="abs-checkbox-wrapper">' +
             '<input type="checkbox" id="abs-hide-check">' +
-            '<span class="abs-checkbox-text">عدم إظهار هذه النافذة مجدداً (تحويلها لنقطة تنبيه جانبية)</span>' +
+            '<span class="abs-checkbox-text">عدم الإظهار مجدداً (تصغير إلى مثلث تنبيه)</span>' +
           '</label>' +
           '<button id="abs-main-close">حسناً، فهمت</button>' +
         '</div>' +
@@ -220,7 +223,7 @@
       setTimeout(function() {
         if (isChecked) {
           localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
-          document.getElementById("abs-dot").style.display = "block"; // إظهار النقطة الدائمة
+          document.getElementById("abs-alert-icon").style.display = "block"; // إظهار المثلث النابض
         }
         ov.remove();
       }, 300);
