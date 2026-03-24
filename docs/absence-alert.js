@@ -1,56 +1,79 @@
 (function () {
   "use strict";
 
-  // ── DATA URL ──────────────────────────────────────────────────────────────
-  var DATA_URL = (function () {
-    var origin = location.origin;
-    var base = location.pathname.includes("/roster-site/") ? origin + "/roster-site" : origin;
+  // ─── الإعدادات والبيانات الأساسية ──────────────────────────────────────────
+  
+  const PATH_ROSTER = "/roster-site/";
+  const DATA_URL = (function () {
+    const origin = location.origin;
+    const base = location.pathname.includes(PATH_ROSTER) ? origin + PATH_ROSTER : origin;
     return base + "/absence-data.json";
   })();
 
-  var mState = { empName: "", absences: [], empId: "", hash: "" };
+  let mState = {
+    empName: "",
+    absences: [],
+    empId: "",
+    hash: ""
+  };
 
-  // ── HELPERS ───────────────────────────────────────────────────────────────
-  function norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, " ").replace(/\s+/g, " ").trim(); }
+  // ─── وظائف المساعدة (Helpers) ──────────────────────────────────────────────
+  
+  const norm = (s) => (s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06ff]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
   function nameMatch(a, b) {
-    var na = norm(a), nb = norm(b);
+    const na = norm(a), nb = norm(b);
     if (na === nb) return true;
-    var wa = na.split(" ").filter(function (w) { return w.length > 3; });
-    var wb = nb.split(" ").filter(function (w) { return w.length > 3; });
-    return wa.length && wb.length && wa.filter(function (w) { return wb.indexOf(w) !== -1; }).length >= 2;
+
+    const wa = na.split(" ").filter(w => w.length > 3);
+    const wb = nb.split(" ").filter(w => w.length > 3);
+    
+    return wa.length && wb.length && wa.filter(w => wb.indexOf(w) !== -1).length >= 2;
   }
 
   function findAbsences(empId, empName, records) {
-    var results = [];
-    var cleanName = (empName || "").replace(/-\s*\d+\s*$/, "").trim();
-    records.forEach(function (rec) {
-      var m = false;
+    const results = [];
+    const cleanName = (empName || "").replace(/-\s*\d+\s*$/, "").trim();
+
+    records.forEach(rec => {
+      let matched = false;
+      // البحث عن طريق الرقم الوظيفي
       if (empId && rec.empNos && rec.empNos.indexOf(String(empId)) !== -1) {
         results.push({ date: rec.date });
-        m = true;
+        matched = true;
       }
-      if (!m && cleanName) {
-        rec.names.forEach(function (n, idx) { if (nameMatch(cleanName, n)) results.push({ date: rec.date }); });
+      // البحث عن طريق الاسم إذا لم يتطابق الرقم
+      if (!matched && cleanName) {
+        rec.names.forEach(n => {
+          if (nameMatch(cleanName, n)) results.push({ date: rec.date });
+        });
       }
     });
     return results;
   }
 
-  // ── INIT ──────────────────────────────────────────────────────────────────
+  // ─── التشغيل والتحميل (Init) ────────────────────────────────────────────────
+  
   function init() {
-    var empId = localStorage.getItem("savedEmpId");
+    const empId = localStorage.getItem("savedEmpId");
     if (!empId) return;
 
-    var base = location.pathname.includes("/roster-site/") ? location.origin + "/roster-site/" : location.origin + "/";
+    const base = location.pathname.includes(PATH_ROSTER) 
+                 ? location.origin + PATH_ROSTER 
+                 : location.origin + "/";
 
     Promise.all([
-      fetch(base + "schedules/" + empId + ".json").then(r => r.ok ? r.json() : null),
-      fetch(DATA_URL + "?v=" + Date.now()).then(r => r.ok ? r.json() : null),
-    ]).then(function (res) {
-      var emp = res[0], absData = res[1];
+      fetch(`${base}schedules/${empId}.json`).then(r => r.ok ? r.json() : null),
+      fetch(`${DATA_URL}?v=${Date.now()}`).then(r => r.ok ? r.json() : null),
+    ]).then(res => {
+      const [emp, absData] = res;
       if (!emp || !emp.name || !absData || !absData.records) return;
 
-      var absences = findAbsences(empId, emp.name, absData.records);
+      const absences = findAbsences(empId, emp.name, absData.records);
       if (!absences.length) return;
 
       mState = {
@@ -65,140 +88,145 @@
     });
   }
 
-  // ── STYLES ────────────────────────────────────────────────────────────────
+  // ─── التنسيقات الجمالية (Styles) ───────────────────────────────────────────
+  
   function injectStyles() {
     if (document.getElementById("abs-premium-styles")) return;
-    var s = document.createElement("style");
+    const s = document.createElement("style");
     s.id = "abs-premium-styles";
     s.textContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+      
       .abs-font { font-family: 'Tajawal', sans-serif; direction: rtl; }
 
-      /* 🔺 Triangle Icon */
+      /* أيقونة التنبيه العائمة */
       #abs-dot {
-        position: fixed;
-        left: 16px;
-        top: 16px;
-        z-index: 999999;
-        width: 0;
-        height: 0;
-        border-left: 14px solid transparent;
-        border-right: 14px solid transparent;
-        border-bottom: 24px solid #dc2626;
-        cursor: pointer;
-        display: none;
-        animation: pulse 2s infinite;
+        position: fixed; left: 20px; bottom: 20px; z-index: 999999;
+        width: 45px; height: 45px; background: #dc2626;
+        border-radius: 50%; cursor: pointer; display: none;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        animation: absPulse 2s infinite;
+        display: flex; align-items: center; justify-content: center;
       }
-      #abs-dot::after {
-        content: '!';
-        position: absolute;
-        top: 6px;
-        left: -4px;
-        color: #fff;
-        font-weight: bold;
-      }
-      @keyframes pulse {
-        0%,100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
+      #abs-dot::before {
+        content: '!'; color: white; font-weight: bold; font-size: 24px;
       }
 
-      /* Overlay */
+      @keyframes absPulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4); }
+        50% { transform: scale(1.1); box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6); }
+      }
+
+      /* الغطاء الخلفي */
       #abs-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        z-index:1000000;
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1000000; backdrop-filter: blur(4px);
       }
 
-      /* Modal */
+      /* النافذة المنبثقة */
       #abs-modal {
-        background:#fff;
-        border-radius:20px;
-        padding:20px;
-        width:90%;
-        max-width:380px;
+        background: #fff; border-radius: 24px; padding: 25px;
+        width: 90%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+        animation: modalShow 0.3s ease-out;
       }
 
+      @keyframes modalShow {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .abs-header { text-align: center; margin-bottom: 20px; }
+      .abs-header h3 { margin: 0; color: #dc2626; font-size: 20px; }
+      
       .ab-row {
-        padding:10px;
-        margin-bottom:8px;
-        background:#f5f5f5;
-        border-radius:10px;
+        padding: 12px 15px; margin-bottom: 10px;
+        background: #fef2f2; border-right: 4px solid #dc2626;
+        border-radius: 8px; font-weight: 500; color: #444;
+      }
+
+      .abs-footer { margin-top: 20px; }
+      
+      .abs-hide-option {
+        display: flex; align-items: center; gap: 8px;
+        margin-bottom: 15px; font-size: 14px; color: #666; cursor: pointer;
       }
 
       #abs-main-close {
-        width:100%;
-        margin-top:15px;
-        padding:12px;
-        background:#dc2626;
-        color:#fff;
-        border:none;
-        border-radius:12px;
-        font-weight:bold;
+        width: 100%; padding: 12px; background: #dc2626;
+        color: #fff; border: none; border-radius: 12px;
+        font-weight: bold; font-size: 16px; cursor: pointer;
+        transition: background 0.2s;
       }
+      #abs-main-close:hover { background: #b91c1c; }
     `;
     document.head.appendChild(s);
   }
 
-  // ── UI ────────────────────────────────────────────────────────────────────
+  // ─── واجهة المستخدم (UI) ───────────────────────────────────────────────────
+  
   function buildUI() {
-    var dot = document.createElement("div");
+    const dot = document.createElement("div");
     dot.id = "abs-dot";
     document.body.appendChild(dot);
 
-    var isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
-
+    const isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
+    
     if (isDismissed) {
-      dot.style.display = "block";
+      dot.style.display = "flex";
     } else {
       showMainModal();
     }
 
-    // 🔥 التعديل: يفتح النافذة مباشرة
-    dot.onclick = function () {
-      showMainModal();
-    };
+    dot.onclick = () => showMainModal();
   }
 
   function showMainModal() {
     if (document.getElementById("abs-overlay")) return;
 
-    var rows = mState.absences.map(a => `<div class="ab-row">📅 ${a.date}</div>`).join("");
+    const rows = mState.absences.map(a => `
+      <div class="ab-row">
+        📅 تاريخ الغياب: ${a.date}
+      </div>
+    `).join("");
 
-    var ov = document.createElement("div");
+    const ov = document.createElement("div");
     ov.id = "abs-overlay";
     ov.className = "abs-font";
-
     ov.innerHTML = `
       <div id="abs-modal">
-        <h3>تنبيه غياب</h3>
-        ${rows}
-        <label>
-          <input type="checkbox" id="abs-hide-check">
-          عدم الإظهار مرة أخرى
-        </label>
-        <button id="abs-main-close">موافق</button>
+        <div class="abs-header">
+          <h3>تنبيه غياب جديد</h3>
+        </div>
+        <div class="abs-body">
+          ${rows}
+        </div>
+        <div class="abs-footer">
+          <label class="abs-hide-option">
+            <input type="checkbox" id="abs-hide-check">
+            عدم الإظهار لهذا الغياب مرة أخرى
+          </label>
+          <button id="abs-main-close">إغلاق التنبيه</button>
+        </div>
       </div>
     `;
 
     document.body.appendChild(ov);
 
     document.getElementById("abs-main-close").onclick = function () {
-      var checked = document.getElementById("abs-hide-check").checked;
-
+      const checked = document.getElementById("abs-hide-check").checked;
       if (checked) {
         localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
-        document.getElementById("abs-dot").style.display = "block";
       }
-
+      // دائماً نظهر الأيقونة بعد إغلاق النافذة للرجوع إليها
+      document.getElementById("abs-dot").style.display = "flex";
       ov.remove();
     };
   }
 
+  // التحميل النهائي
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () { setTimeout(init, 500); });
+    document.addEventListener("DOMContentLoaded", () => setTimeout(init, 500));
   } else {
     setTimeout(init, 500);
   }
