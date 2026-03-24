@@ -3,9 +3,6 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * يقرأ absence-data.json (المُولَّد بـ process_absence.py من ملف xlsb)
  * ويعرض للموظف المُعرَّف (savedEmpId) نافذة منبثقة + شريط جانبي منطوي.
- *
- * الإضافة: سطر واحد فقط قبل </body>:
- *   <script src="/absence-alert.js"></script>
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -40,11 +37,6 @@
     return wa.filter(function (w) { return wb.indexOf(w) !== -1; }).length >= 2;
   }
 
-  /**
-   * يبحث عن غيابات الموظف بطريقتين:
-   * 1. تطابق رقم الموظف (empNo) — الأدق
-   * 2. تطابق الاسم (nameMatch) — احتياطي
-   */
   function findAbsences(empId, empName, records) {
     var results = [];
     var cleanName = (empName || "").replace(/-\s*\d+\s*$/, "").trim();
@@ -104,11 +96,27 @@
       if (!absData || !absData.records || !absData.records.length) return;
 
       var absences = findAbsences(empId, emp.name, absData.records);
-      if (!absences.length) return;
+      
+      // مسح الإعداد القديم إذا لم يعد هناك غيابات
+      if (!absences.length) {
+        localStorage.removeItem("absDismissed_" + empId);
+        return;
+      }
+
+      // إنشاء "بصمة" للغيابات الحالية لمعرفة ما إذا كان هناك تحديث جديد
+      var currentHash = absences.map(function(a){ return a.date; }).join("|");
+      var dismissedHash = localStorage.getItem("absDismissed_" + empId);
 
       injectStyles();
-      buildModal(emp.name, absences, absData.source_file);
       buildSidebar(emp.name, absences);
+
+      // عرض النافذة فقط إذا لم يقم المستخدم بإخفائها لهذه الغيابات (التحديث) تحديداً
+      if (dismissedHash !== currentHash) {
+        buildModal(emp.name, absences, absData.source_file, empId, currentHash);
+      } else {
+        openSidebar(); // إظهار الشريط الجانبي فقط
+      }
+
     }).catch(function () {});
   }
 
@@ -142,16 +150,20 @@
       ".ab-row:last-child{margin-bottom:0}",
       ".ab-date{background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0}",
       ".ab-type{font-size:13px;color:#7f1d1d;font-weight:600;flex:1}",
-      "#abs-notice{background:#fef3c7;border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:12px 14px;font-size:13px;color:#92400e;line-height:1.65;margin-bottom:18px}",
+      "#abs-notice{background:#fef3c7;border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:12px 14px;font-size:13px;color:#92400e;line-height:1.65;margin-bottom:16px}",
       "#abs-notice strong{font-weight:800}",
+      ".abs-dont-show-wrap{margin-bottom:16px;text-align:center;}",
+      ".abs-dont-show-wrap label{font-size:12px;color:#475569;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-weight:600;-webkit-tap-highlight-color:transparent}",
+      ".abs-dont-show-wrap input{width:16px;height:16px;accent-color:#dc2626;cursor:pointer}",
       "#abs-foot{padding:0 20px 20px;display:flex;gap:10px}",
       "#abs-foot button{flex:1;padding:13px;border-radius:14px;border:none;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}",
       "#abs-btn-mail{background:linear-gradient(135deg,#1e40af,#1976d2);color:#fff;box-shadow:0 4px 14px rgba(30,64,175,.3)}",
       "#abs-btn-mail:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(30,64,175,.4)}",
       "#abs-btn-x{background:#f1f5f9;color:#475569}",
       "#abs-btn-x:hover{background:#e2e8f0;color:#1e293b}",
-      /* Sidebar */
-      "#abs-sb{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:99997;display:flex;align-items:center}",
+      
+      /* Sidebar - تم تغيير الموقع للأعلى (top: 15vh) */
+      "#abs-sb{position:fixed;left:0;top:15vh;z-index:99997;display:flex;align-items:center}",
       "#abs-sb-panel{background:linear-gradient(160deg,#991b1b,#dc2626);border-radius:0 16px 16px 0;box-shadow:4px 0 28px rgba(185,28,28,.35);overflow:hidden;width:0;opacity:0;transition:width .4s cubic-bezier(.22,1,.36,1),opacity .3s ease;pointer-events:none;flex-shrink:0}",
       "#abs-sb.open #abs-sb-panel{width:260px;opacity:1;pointer-events:all}",
       "#abs-sb-inner{padding:16px;min-width:260px;color:#fff;position:relative}",
@@ -173,14 +185,29 @@
       "#abs-tab:hover{padding-right:10px}",
       "#abs-tab .ti{font-size:17px}",
       "#abs-tab .tt{writing-mode:vertical-rl;text-orientation:mixed;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase}",
-      "@media(max-width:480px){#abs-modal{border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%}#abs-overlay{align-items:flex-end;padding:0}#abs-foot{flex-direction:column}}",
+      
+      /* Mobile Styles - تم تصغير النافذة المنبثقة وجعلها تتوسط الشاشة */
+      "@media(max-width:480px){",
+        "#abs-overlay{padding:16px;align-items:center;}",
+        "#abs-modal{border-radius:18px;position:relative;max-width:100%;max-height:90vh;display:flex;flex-direction:column;}",
+        "#abs-head{padding:16px 16px 12px;}",
+        "#abs-head .ai{font-size:32px;margin-bottom:4px;}",
+        "#abs-head h2{font-size:15px;}",
+        "#abs-head p{font-size:12px;}",
+        "#abs-body{padding:14px 16px 0;overflow-y:auto;}",
+        ".ab-list{max-height:140px;margin-bottom:10px;}",
+        "#abs-notice{font-size:12px;padding:10px;margin-bottom:14px;}",
+        ".abs-dont-show-wrap{margin-bottom:12px;}",
+        "#abs-foot{padding:12px 16px 16px;flex-direction:column;gap:8px;}",
+        "#abs-foot button{padding:10px;font-size:13px;}",
+      "}"
     ].join("");
     document.head.appendChild(s);
   }
 
   // ── MODAL ─────────────────────────────────────────────────────────────────
 
-  function buildModal(empName, absences, sourceFile) {
+  function buildModal(empName, absences, sourceFile, empId, currentHash) {
     var ov = document.createElement("div");
     ov.id = "abs-overlay";
 
@@ -214,6 +241,9 @@
           + 'Please <strong>visit the administration office</strong> or '
           + '<strong>send an email</strong> explaining your absence(s) as soon as possible.'
           + src + '</div>'
+        + '<div class="abs-dont-show-wrap">'
+          + '<label><input type="checkbox" id="abs-chk-dontshow"> Do not show again until new update</label>'
+        + '</div>'
       + '</div>'
       + '<div id="abs-foot">'
         + '<button id="abs-btn-mail">📧 Send Email</button>'
@@ -223,20 +253,27 @@
 
     document.body.appendChild(ov);
 
-    document.getElementById("abs-btn-x").onclick = function () {
+    function closeModal() {
+      // حفظ اختيار عدم الإظهار عند الإغلاق
+      var chk = document.getElementById("abs-chk-dontshow");
+      if (chk && chk.checked) {
+        localStorage.setItem("absDismissed_" + empId, currentHash);
+      }
       ov.style.animation = "absIn .15s ease reverse forwards";
       setTimeout(function () { ov.remove(); openSidebar(); }, 150);
-    };
+    }
+
+    document.getElementById("abs-btn-x").onclick = closeModal;
     document.getElementById("abs-btn-mail").onclick = function () {
       sendMail(empName, absences);
     };
     ov.onclick = function (e) {
-      if (e.target === ov) document.getElementById("abs-btn-x").click();
+      if (e.target === ov) closeModal();
     };
     document.addEventListener("keydown", function h(e) {
       if (e.key === "Escape") {
-        var btn = document.getElementById("abs-btn-x");
-        if (btn) { btn.click(); document.removeEventListener("keydown", h); }
+        closeModal();
+        document.removeEventListener("keydown", h);
       }
     });
   }
