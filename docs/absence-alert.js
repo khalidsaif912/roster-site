@@ -1,16 +1,18 @@
 /**
- * absence-alert.js  (Dynamic Version)
+ * absence-alert.js
  * ─────────────────────────────────────────────────────────────────────────────
- * يجلب بيانات الغياب من /absence-data.json (يُولَّد بـ process_absence.py)
+ * يقرأ absence-data.json (المُولَّد بـ process_absence.py من ملف xlsb)
  * ويعرض للموظف المُعرَّف (savedEmpId) نافذة منبثقة + شريط جانبي منطوي.
  *
- * الإضافة: سطر واحد فقط قبل </body> في page_shell_html:
+ * الإضافة: سطر واحد فقط قبل </body>:
  *   <script src="/absence-alert.js"></script>
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 (function () {
   "use strict";
+
+  // ── DATA URL ──────────────────────────────────────────────────────────────
 
   var DATA_URL = (function () {
     var origin = location.origin;
@@ -23,7 +25,10 @@
   // ── HELPERS ───────────────────────────────────────────────────────────────
 
   function norm(s) {
-    return (s || "").toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, " ").replace(/\s+/g, " ").trim();
+    return (s || "").toLowerCase()
+      .replace(/[^a-z0-9\u0600-\u06ff]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   function nameMatch(a, b) {
@@ -35,14 +40,45 @@
     return wa.filter(function (w) { return wb.indexOf(w) !== -1; }).length >= 2;
   }
 
-  function findAbsences(rosterName, records) {
-    var cleanName = rosterName.replace(/-\s*\d+\s*$/, "").trim();
+  /**
+   * يبحث عن غيابات الموظف بطريقتين:
+   * 1. تطابق رقم الموظف (empNo) — الأدق
+   * 2. تطابق الاسم (nameMatch) — احتياطي
+   */
+  function findAbsences(empId, empName, records) {
     var results = [];
+    var cleanName = (empName || "").replace(/-\s*\d+\s*$/, "").trim();
+
     records.forEach(function (rec) {
-      rec.names.forEach(function (n) {
-        if (nameMatch(cleanName, n)) results.push({ date: rec.date, absentName: n });
-      });
+      var matchedByEmpNo = false;
+
+      // --- محاولة 1: تطابق رقم الموظف ---
+      if (empId && rec.empNos && rec.empNos.indexOf(String(empId)) !== -1) {
+        var idx = rec.empNos.indexOf(String(empId));
+        results.push({
+          date: rec.date,
+          absentName: rec.names[idx] || cleanName,
+          section: rec.sections ? rec.sections[idx] : "",
+          matchType: "empNo"
+        });
+        matchedByEmpNo = true;
+      }
+
+      // --- محاولة 2: تطابق الاسم (فقط إذا لم يتطابق برقم الموظف) ---
+      if (!matchedByEmpNo && cleanName) {
+        rec.names.forEach(function (n, idx) {
+          if (nameMatch(cleanName, n)) {
+            results.push({
+              date: rec.date,
+              absentName: n,
+              section: rec.sections ? rec.sections[idx] : "",
+              matchType: "name"
+            });
+          }
+        });
+      }
     });
+
     return results;
   }
 
@@ -53,17 +89,23 @@
     if (!empId) return;
 
     var origin = location.origin;
-    var base = location.pathname.includes("/roster-site/") ? origin + "/roster-site/" : origin + "/";
+    var base = location.pathname.includes("/roster-site/")
+      ? origin + "/roster-site/"
+      : origin + "/";
 
     Promise.all([
-      fetch(base + "schedules/" + empId + ".json").then(function (r) { return r.ok ? r.json() : null; }),
-      fetch(DATA_URL + "?v=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }),
+      fetch(base + "schedules/" + empId + ".json")
+        .then(function (r) { return r.ok ? r.json() : null; }),
+      fetch(DATA_URL + "?v=" + Date.now())
+        .then(function (r) { return r.ok ? r.json() : null; }),
     ]).then(function (res) {
       var emp = res[0], absData = res[1];
       if (!emp || !emp.name) return;
       if (!absData || !absData.records || !absData.records.length) return;
-      var absences = findAbsences(emp.name, absData.records);
+
+      var absences = findAbsences(empId, emp.name, absData.records);
       if (!absences.length) return;
+
       injectStyles();
       buildModal(emp.name, absences, absData.source_file);
       buildSidebar(emp.name, absences);
@@ -111,8 +153,8 @@
       /* Sidebar */
       "#abs-sb{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:99997;display:flex;align-items:center}",
       "#abs-sb-panel{background:linear-gradient(160deg,#991b1b,#dc2626);border-radius:0 16px 16px 0;box-shadow:4px 0 28px rgba(185,28,28,.35);overflow:hidden;width:0;opacity:0;transition:width .4s cubic-bezier(.22,1,.36,1),opacity .3s ease;pointer-events:none;flex-shrink:0}",
-      "#abs-sb.open #abs-sb-panel{width:250px;opacity:1;pointer-events:all}",
-      "#abs-sb-inner{padding:16px;min-width:250px;color:#fff;position:relative}",
+      "#abs-sb.open #abs-sb-panel{width:260px;opacity:1;pointer-events:all}",
+      "#abs-sb-inner{padding:16px;min-width:260px;color:#fff;position:relative}",
       "#abs-sb-inner h3{margin:0 0 3px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px}",
       ".sb-sub{font-size:11px;opacity:.75;margin-bottom:12px;font-weight:600}",
       ".sb-list{max-height:220px;overflow-y:auto}",
@@ -122,6 +164,7 @@
       ".sb-row:last-child{margin-bottom:0}",
       ".sb-date{font-size:10px;font-weight:700;opacity:.8;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px}",
       ".sb-type{font-size:12px;font-weight:700}",
+      ".sb-section{font-size:10px;opacity:.65;margin-top:2px}",
       "#abs-sb-mail{display:block;width:100%;margin-top:12px;padding:10px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);border-radius:10px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:background .15s;-webkit-tap-highlight-color:transparent}",
       "#abs-sb-mail:hover{background:rgba(255,255,255,.28)}",
       "#abs-sb-close{position:absolute;top:8px;right:10px;background:rgba(255,255,255,.2);border:none;border-radius:50%;width:22px;height:22px;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background .15s;line-height:1}",
@@ -142,21 +185,40 @@
     ov.id = "abs-overlay";
 
     var rows = absences.map(function (a) {
-      return '<div class="ab-row"><span class="ab-date">📅 ' + a.date + '</span><span class="ab-type">Unauthorized Absence</span></div>';
+      return '<div class="ab-row">'
+        + '<span class="ab-date">📅 ' + a.date + '</span>'
+        + '<span class="ab-type">Unauthorized Absence</span>'
+        + '</div>';
     }).join("");
 
-    var src = sourceFile ? '<span style="font-size:11px;opacity:.7;display:block;margin-top:4px;">📄 ' + sourceFile + "</span>" : "";
+    var src = sourceFile
+      ? '<span style="font-size:11px;opacity:.7;display:block;margin-top:4px;">📄 ' + sourceFile + "</span>"
+      : "";
     var firstName = empName.split(" ")[0];
 
     ov.innerHTML =
       '<div id="abs-modal">'
-      + '<div id="abs-head"><span class="ai">⚠️</span><h2>Important Notice from Management</h2><p>Please review your attendance records</p></div>'
+      + '<div id="abs-head"><span class="ai">⚠️</span>'
+      + '<h2>Important Notice from Management</h2>'
+      + '<p>Please review your attendance records</p></div>'
       + '<div id="abs-body">'
-        + '<div class="ab-badge"><div class="ab-avatar">👤</div><div><div class="ab-name">' + empName + '</div><div class="ab-lbl">Absent Employee</div></div></div>'
+        + '<div class="ab-badge">'
+          + '<div class="ab-avatar">👤</div>'
+          + '<div><div class="ab-name">' + empName + '</div>'
+          + '<div class="ab-lbl">Absent Employee</div></div>'
+        + '</div>'
         + '<div class="ab-list">' + rows + '</div>'
-        + '<div id="abs-notice">📋 Dear <strong>' + firstName + '</strong>, you have <strong>' + absences.length + ' absence record(s)</strong> registered that require explanation.<br><br>Please <strong>visit the administration office</strong> or <strong>send an email</strong> explaining your absence(s) as soon as possible.' + src + '</div>'
+        + '<div id="abs-notice">📋 Dear <strong>' + firstName + '</strong>, '
+          + 'you have <strong>' + absences.length + ' absence record(s)</strong> '
+          + 'registered that require explanation.<br><br>'
+          + 'Please <strong>visit the administration office</strong> or '
+          + '<strong>send an email</strong> explaining your absence(s) as soon as possible.'
+          + src + '</div>'
       + '</div>'
-      + '<div id="abs-foot"><button id="abs-btn-mail">📧 Send Email</button><button id="abs-btn-x">✕ Close</button></div>'
+      + '<div id="abs-foot">'
+        + '<button id="abs-btn-mail">📧 Send Email</button>'
+        + '<button id="abs-btn-x">✕ Close</button>'
+      + '</div>'
       + '</div>';
 
     document.body.appendChild(ov);
@@ -165,10 +227,17 @@
       ov.style.animation = "absIn .15s ease reverse forwards";
       setTimeout(function () { ov.remove(); openSidebar(); }, 150);
     };
-    document.getElementById("abs-btn-mail").onclick = function () { sendMail(empName, absences); };
-    ov.onclick = function (e) { if (e.target === ov) document.getElementById("abs-btn-x").click(); };
+    document.getElementById("abs-btn-mail").onclick = function () {
+      sendMail(empName, absences);
+    };
+    ov.onclick = function (e) {
+      if (e.target === ov) document.getElementById("abs-btn-x").click();
+    };
     document.addEventListener("keydown", function h(e) {
-      if (e.key === "Escape") { document.getElementById("abs-btn-x") && document.getElementById("abs-btn-x").click(); document.removeEventListener("keydown", h); }
+      if (e.key === "Escape") {
+        var btn = document.getElementById("abs-btn-x");
+        if (btn) { btn.click(); document.removeEventListener("keydown", h); }
+      }
     });
   }
 
@@ -182,7 +251,11 @@
     sbEl = sb;
 
     var rows = absences.map(function (a) {
-      return '<div class="sb-row"><div class="sb-date">📅 ' + a.date + '</div><div class="sb-type">Unauthorized Absence</div></div>';
+      return '<div class="sb-row">'
+        + '<div class="sb-date">📅 ' + a.date + '</div>'
+        + '<div class="sb-type">Unauthorized Absence</div>'
+        + (a.section ? '<div class="sb-section">' + a.section + '</div>' : '')
+        + '</div>';
     }).join("");
 
     sb.innerHTML =
@@ -227,4 +300,5 @@
   } else {
     setTimeout(init, 700);
   }
+
 })();
