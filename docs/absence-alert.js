@@ -19,6 +19,17 @@
     return base + "/absence-data.json";
   })();
 
+  // ── STATE ─────────────────────────────────────────────────────────────────
+  
+  var mState = {
+    empName: "",
+    absences: [],
+    sourceFile: "",
+    empId: "",
+    hash: "",
+    isAnimating: false
+  };
+
   // ── HELPERS ───────────────────────────────────────────────────────────────
 
   function norm(s) {
@@ -44,7 +55,7 @@
     records.forEach(function (rec) {
       var matchedByEmpNo = false;
 
-      // --- محاولة 1: تطابق رقم الموظف ---
+      // محاولة 1: تطابق رقم الموظف
       if (empId && rec.empNos && rec.empNos.indexOf(String(empId)) !== -1) {
         var idx = rec.empNos.indexOf(String(empId));
         results.push({
@@ -56,7 +67,7 @@
         matchedByEmpNo = true;
       }
 
-      // --- محاولة 2: تطابق الاسم (فقط إذا لم يتطابق برقم الموظف) ---
+      // محاولة 2: تطابق الاسم
       if (!matchedByEmpNo && cleanName) {
         rec.names.forEach(function (n, idx) {
           if (nameMatch(cleanName, n)) {
@@ -97,24 +108,29 @@
 
       var absences = findAbsences(empId, emp.name, absData.records);
       
-      // مسح الإعداد القديم إذا لم يعد هناك غيابات
       if (!absences.length) {
         localStorage.removeItem("absDismissed_" + empId);
         return;
       }
 
-      // إنشاء "بصمة" للغيابات الحالية لمعرفة ما إذا كان هناك تحديث جديد
       var currentHash = absences.map(function(a){ return a.date; }).join("|");
       var dismissedHash = localStorage.getItem("absDismissed_" + empId);
 
-      injectStyles();
-      buildSidebar(emp.name, absences);
+      // حفظ البيانات في الحالة للوصول إليها لاحقاً
+      mState.empName = emp.name;
+      mState.absences = absences;
+      mState.sourceFile = absData.source_file;
+      mState.empId = empId;
+      mState.hash = currentHash;
 
-      // عرض النافذة فقط إذا لم يقم المستخدم بإخفائها لهذه الغيابات (التحديث) تحديداً
+      injectStyles();
+      buildSidebar();
+
+      // عرض النافذة فقط إذا لم يقم المستخدم بإخفائها
       if (dismissedHash !== currentHash) {
-        buildModal(emp.name, absences, absData.source_file, empId, currentHash);
+        buildModal();
       } else {
-        openSidebar(); // إظهار الشريط الجانبي فقط
+        openSidebar();
       }
 
     }).catch(function () {});
@@ -162,14 +178,14 @@
       "#abs-btn-x{background:#f1f5f9;color:#475569}",
       "#abs-btn-x:hover{background:#e2e8f0;color:#1e293b}",
       
-      /* Sidebar - تم تغيير الموقع للأعلى (top: 15vh) */
-      "#abs-sb{position:fixed;left:0;top:15vh;z-index:99997;display:flex;align-items:center}",
+      /* Sidebar - تم التعديل ليكون أعلى (top: 10vh) وفوق النافذة (z-index: 99999) */
+      "#abs-sb{position:fixed;left:0;top:10vh;z-index:99999;display:flex;align-items:center}",
       "#abs-sb-panel{background:linear-gradient(160deg,#991b1b,#dc2626);border-radius:0 16px 16px 0;box-shadow:4px 0 28px rgba(185,28,28,.35);overflow:hidden;width:0;opacity:0;transition:width .4s cubic-bezier(.22,1,.36,1),opacity .3s ease;pointer-events:none;flex-shrink:0}",
       "#abs-sb.open #abs-sb-panel{width:260px;opacity:1;pointer-events:all}",
       "#abs-sb-inner{padding:16px;min-width:260px;color:#fff;position:relative}",
       "#abs-sb-inner h3{margin:0 0 3px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px}",
       ".sb-sub{font-size:11px;opacity:.75;margin-bottom:12px;font-weight:600}",
-      ".sb-list{max-height:220px;overflow-y:auto}",
+      ".sb-list{max-height:180px;overflow-y:auto}",
       ".sb-list::-webkit-scrollbar{width:3px}",
       ".sb-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3);border-radius:2px}",
       ".sb-row{background:rgba(255,255,255,.14);border-radius:9px;padding:8px 10px;margin-bottom:6px;border:1px solid rgba(255,255,255,.12)}",
@@ -177,16 +193,18 @@
       ".sb-date{font-size:10px;font-weight:700;opacity:.8;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px}",
       ".sb-type{font-size:12px;font-weight:700}",
       ".sb-section{font-size:10px;opacity:.65;margin-top:2px}",
-      "#abs-sb-mail{display:block;width:100%;margin-top:12px;padding:10px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);border-radius:10px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:background .15s;-webkit-tap-highlight-color:transparent}",
-      "#abs-sb-mail:hover{background:rgba(255,255,255,.28)}",
+      ".abs-sb-btn{display:block;width:100%;margin-top:8px;padding:10px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent}",
+      ".abs-sb-btn:hover{background:rgba(255,255,255,.28)}",
       "#abs-sb-close{position:absolute;top:8px;right:10px;background:rgba(255,255,255,.2);border:none;border-radius:50%;width:22px;height:22px;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background .15s;line-height:1}",
       "#abs-sb-close:hover{background:rgba(255,255,255,.35)}",
-      "#abs-tab{background:linear-gradient(180deg,#dc2626,#991b1b);color:#fff;border:none;padding:12px 7px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;transition:padding .2s;box-shadow:4px 0 14px rgba(185,28,28,.35);-webkit-tap-highlight-color:transparent;min-height:90px}",
+      
+      /* الزر المطوي - تم التعديل ليكون شبه شفاف */
+      "#abs-tab{background:linear-gradient(180deg, rgba(220,38,38,0.75), rgba(153,27,27,0.85));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;border:1px solid rgba(255,255,255,0.2);border-left:none;padding:12px 7px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;transition:padding .2s;box-shadow:4px 0 14px rgba(185,28,28,.2);-webkit-tap-highlight-color:transparent;min-height:90px}",
       "#abs-tab:hover{padding-right:10px}",
       "#abs-tab .ti{font-size:17px}",
       "#abs-tab .tt{writing-mode:vertical-rl;text-orientation:mixed;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase}",
       
-      /* Mobile Styles - تم تصغير النافذة المنبثقة وجعلها تتوسط الشاشة */
+      /* Mobile Styles */
       "@media(max-width:480px){",
         "#abs-overlay{padding:16px;align-items:center;}",
         "#abs-modal{border-radius:18px;position:relative;max-width:100%;max-height:90vh;display:flex;flex-direction:column;}",
@@ -207,21 +225,27 @@
 
   // ── MODAL ─────────────────────────────────────────────────────────────────
 
-  function buildModal(empName, absences, sourceFile, empId, currentHash) {
+  function buildModal() {
+    if (document.getElementById("abs-overlay") || mState.isAnimating) return;
+
     var ov = document.createElement("div");
     ov.id = "abs-overlay";
 
-    var rows = absences.map(function (a) {
+    var rows = mState.absences.map(function (a) {
       return '<div class="ab-row">'
         + '<span class="ab-date">📅 ' + a.date + '</span>'
         + '<span class="ab-type">Unauthorized Absence</span>'
         + '</div>';
     }).join("");
 
-    var src = sourceFile
-      ? '<span style="font-size:11px;opacity:.7;display:block;margin-top:4px;">📄 ' + sourceFile + "</span>"
+    var src = mState.sourceFile
+      ? '<span style="font-size:11px;opacity:.7;display:block;margin-top:4px;">📄 ' + mState.sourceFile + "</span>"
       : "";
-    var firstName = empName.split(" ")[0];
+    var firstName = mState.empName.split(" ")[0];
+
+    // التحقق مما إذا كانت النافذة مخفية من قبل المستخدم لضبط علامة الـ Checkbox
+    var isDismissed = (localStorage.getItem("absDismissed_" + mState.empId) === mState.hash);
+    var checkedAttr = isDismissed ? "checked" : "";
 
     ov.innerHTML =
       '<div id="abs-modal">'
@@ -231,18 +255,18 @@
       + '<div id="abs-body">'
         + '<div class="ab-badge">'
           + '<div class="ab-avatar">👤</div>'
-          + '<div><div class="ab-name">' + empName + '</div>'
+          + '<div><div class="ab-name">' + mState.empName + '</div>'
           + '<div class="ab-lbl">Absent Employee</div></div>'
         + '</div>'
         + '<div class="ab-list">' + rows + '</div>'
         + '<div id="abs-notice">📋 Dear <strong>' + firstName + '</strong>, '
-          + 'you have <strong>' + absences.length + ' absence record(s)</strong> '
+          + 'you have <strong>' + mState.absences.length + ' absence record(s)</strong> '
           + 'registered that require explanation.<br><br>'
           + 'Please <strong>visit the administration office</strong> or '
           + '<strong>send an email</strong> explaining your absence(s) as soon as possible.'
           + src + '</div>'
         + '<div class="abs-dont-show-wrap">'
-          + '<label><input type="checkbox" id="abs-chk-dontshow"> Do not show again until new update</label>'
+          + '<label><input type="checkbox" id="abs-chk-dontshow" ' + checkedAttr + '> Do not show again until new update</label>'
         + '</div>'
       + '</div>'
       + '<div id="abs-foot">'
@@ -252,20 +276,11 @@
       + '</div>';
 
     document.body.appendChild(ov);
-
-    function closeModal() {
-      // حفظ اختيار عدم الإظهار عند الإغلاق
-      var chk = document.getElementById("abs-chk-dontshow");
-      if (chk && chk.checked) {
-        localStorage.setItem("absDismissed_" + empId, currentHash);
-      }
-      ov.style.animation = "absIn .15s ease reverse forwards";
-      setTimeout(function () { ov.remove(); openSidebar(); }, 150);
-    }
+    updateSidebarToggleBtn();
 
     document.getElementById("abs-btn-x").onclick = closeModal;
     document.getElementById("abs-btn-mail").onclick = function () {
-      sendMail(empName, absences);
+      sendMail();
     };
     ov.onclick = function (e) {
       if (e.target === ov) closeModal();
@@ -278,16 +293,42 @@
     });
   }
 
+  function closeModal() {
+    if (mState.isAnimating) return;
+    var ov = document.getElementById("abs-overlay");
+    if (!ov) return;
+
+    mState.isAnimating = true;
+
+    // حفظ اختيار عدم الإظهار عند الإغلاق
+    var chk = document.getElementById("abs-chk-dontshow");
+    if (chk) {
+      if (chk.checked) {
+        localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
+      } else {
+        localStorage.removeItem("absDismissed_" + mState.empId);
+      }
+    }
+
+    ov.style.animation = "absIn .15s ease reverse forwards";
+    setTimeout(function () { 
+      ov.remove(); 
+      mState.isAnimating = false;
+      updateSidebarToggleBtn();
+      openSidebar(); 
+    }, 150);
+  }
+
   // ── SIDEBAR ───────────────────────────────────────────────────────────────
 
   var sbEl = null;
 
-  function buildSidebar(empName, absences) {
+  function buildSidebar() {
     var sb = document.createElement("div");
     sb.id = "abs-sb";
     sbEl = sb;
 
-    var rows = absences.map(function (a) {
+    var rows = mState.absences.map(function (a) {
       return '<div class="sb-row">'
         + '<div class="sb-date">📅 ' + a.date + '</div>'
         + '<div class="sb-type">Unauthorized Absence</div>'
@@ -299,34 +340,55 @@
       '<div id="abs-sb-panel"><div id="abs-sb-inner">'
         + '<button id="abs-sb-close">✕</button>'
         + '<h3>⚠️ Absence Notice</h3>'
-        + '<div class="sb-sub">' + absences.length + ' record(s) require your attention</div>'
+        + '<div class="sb-sub">' + mState.absences.length + ' record(s) require your attention</div>'
         + '<div class="sb-list">' + rows + '</div>'
-        + '<button id="abs-sb-mail">📧 Send Explanation Email</button>'
+        + '<button class="abs-sb-btn" id="abs-sb-mail">📧 Send Explanation Email</button>'
+        + '<button class="abs-sb-btn" id="abs-sb-toggle-modal" style="margin-top:5px; background:rgba(0,0,0,0.15);">👁️ Show Popup Window</button>'
       + '</div></div>'
       + '<button id="abs-tab"><span class="ti">⚠️</span><span class="tt">Absence</span></button>';
 
     document.body.appendChild(sb);
+    updateSidebarToggleBtn();
 
     document.getElementById("abs-tab").onclick = function () { sb.classList.toggle("open"); };
     document.getElementById("abs-sb-close").onclick = function () { sb.classList.remove("open"); };
-    document.getElementById("abs-sb-mail").onclick = function () { sendMail(empName, absences); };
+    document.getElementById("abs-sb-mail").onclick = function () { sendMail(); };
+    
+    // زر تشغيل وإغلاق النافذة المنبثقة من الشريط الجانبي
+    document.getElementById("abs-sb-toggle-modal").onclick = function () {
+      if (document.getElementById("abs-overlay")) {
+        closeModal();
+      } else {
+        buildModal();
+      }
+    };
   }
 
   function openSidebar() {
     sbEl && setTimeout(function () { sbEl.classList.add("open"); }, 400);
   }
 
+  function updateSidebarToggleBtn() {
+    var btn = document.getElementById("abs-sb-toggle-modal");
+    if (!btn) return;
+    if (document.getElementById("abs-overlay")) {
+      btn.innerHTML = "🚫 Hide Popup Window";
+    } else {
+      btn.innerHTML = "👁️ Show Popup Window";
+    }
+  }
+
   // ── EMAIL ─────────────────────────────────────────────────────────────────
 
-  function sendMail(empName, absences) {
-    var dates = absences.map(function (a) { return "  - " + a.date; }).join("\n");
+  function sendMail() {
+    var dates = mState.absences.map(function (a) { return "  - " + a.date; }).join("\n");
     window.location.href = "mailto:?subject="
-      + encodeURIComponent("Absence Explanation - " + empName)
+      + encodeURIComponent("Absence Explanation - " + mState.empName)
       + "&body="
       + encodeURIComponent(
           "Dear Management,\n\nI am writing to explain my absence(s) on:\n\n"
           + dates
-          + "\n\nExplanation:\n[Write here]\n\nThank you,\n" + empName
+          + "\n\nExplanation:\n[Write here]\n\nThank you,\n" + mState.empName
         );
   }
 
