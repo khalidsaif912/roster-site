@@ -179,7 +179,7 @@
       "#abs-btn-x:hover{background:#e2e8f0;color:#1e293b}",
       
       /* Sidebar - تم التعديل ليكون أعلى (top: 10vh) وفوق النافذة (z-index: 99999) */
-      "#abs-sb{position:fixed;left:0;top:5vh;z-index:99999;display:flex;align-items:center}",
+      "#abs-sb{position:fixed;left:0;top:3vh;z-index:99999;display:flex;align-items:center}",
       "#abs-sb-panel{background:linear-gradient(160deg,#991b1b,#dc2626);border-radius:0 16px 16px 0;box-shadow:4px 0 28px rgba(185,28,28,.35);overflow:hidden;width:0;opacity:0;transition:width .4s cubic-bezier(.22,1,.36,1),opacity .3s ease;pointer-events:none;flex-shrink:0}",
       "#abs-sb.open #abs-sb-panel{width:260px;opacity:1;pointer-events:all}",
       "#abs-sb-inner{padding:16px;min-width:260px;color:#fff;position:relative}",
