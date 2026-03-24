@@ -1,1119 +1,236 @@
-{
-  "generated_at": "2026-03-24T14:04:43.105719",
-  "total_records": 221,
-  "records": [
-    {
-      "date": "2026-01-04",
-      "names": [
-        "Sultan Saif Mohamed Al Riyami",
-        "Adil Salim Rashid Al Harrasi",
-        "Hafedh Said Humaid Al Salmani"
-      ],
-      "empNos": [
-        "8859",
-        "2817",
-        "990893"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-05",
-      "names": [
-        "Adil Salim Rashid Al Harrasi",
-        "Hafedh Said Humaid Al Salmani",
-        "Sultan Saif Mohamed Al Riyami"
-      ],
-      "empNos": [
-        "2817",
-        "990893",
-        "8859"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-06",
-      "names": [
-        "Mohamed Salim Surur Al Dughaishi"
-      ],
-      "empNos": [
-        "82532"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-07",
-      "names": [
-        "Haiyan Hamed Khalfan Alghannami"
-      ],
-      "empNos": [
-        "81301"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-08",
-      "names": [
-        "Haiyan Hamed Khalfan Alghannami"
-      ],
-      "empNos": [
-        "81301"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-12",
-      "names": [
-        "Hafedh Said Humaid Al Salmani",
-        "Adil Salim Rashid Al Harrasi"
-      ],
-      "empNos": [
-        "990893",
-        "2817"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-13",
-      "names": [
-        "Waleed Salim Abdullah Al Kharusi",
-        "Hafedh Said Humaid Al Salmani",
-        "Adil Salim Rashid Al Harrasi"
-      ],
-      "empNos": [
-        "82466",
-        "990893",
-        "2817"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-14",
-      "names": [
-        "Mohamed Salim Surur Al Dughaishi",
-        "Ahmed Mohammed Issa Al Balushi"
-      ],
-      "empNos": [
-        "82532",
-        "82415"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-16",
-      "names": [
-        "Mohamed Sulaiman Hamed Al-Alawi"
-      ],
-      "empNos": [
-        "82643"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-19",
-      "names": [
-        "Mohamed Sulaiman Hamed Al-Alawi",
-        "Mohammed Anees Mohammed Al Kharusi"
-      ],
-      "empNos": [
-        "82643",
-        "81403"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-20",
-      "names": [
-        "Sultan Saif Mohamed Al Riyami",
-        "Adil Salim Rashid Al Harrasi",
-        "Hafedh Said Humaid Al Salmani",
-        "Mohammed Anees Mohammed Al Kharusi"
-      ],
-      "empNos": [
-        "8859",
-        "2817",
-        "990893",
-        "81403"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-21",
-      "names": [
-        "Mohammed Anees Mohammed Al Kharusi",
-        "Sultan Saif Mohamed Al Riyami",
-        "Adil Salim Rashid Al Harrasi",
-        "Hafedh Said Humaid Al Salmani"
-      ],
-      "empNos": [
-        "81403",
-        "8859",
-        "2817",
-        "990893"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-22",
-      "names": [
-        "Mohamed Salim Surur Al Dughaishi",
-        "Mohammed Anees Mohammed Al Kharusi",
-        "Qais Salmeen Suweilem Al Rashdi"
-      ],
-      "empNos": [
-        "82532",
-        "81403",
-        "82409"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-23",
-      "names": [
-        "Mohamed Sulaiman Hamed Al-Alawi"
-      ],
-      "empNos": [
-        "82643"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-24",
-      "names": [
-        "Hisham Saif Mubarak Al Maharbi"
-      ],
-      "empNos": [
-        "82454"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-25",
-      "names": [
-        "Sami Mohamed Khamis Al Hadabi"
-      ],
-      "empNos": [
-        "80479"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-26",
-      "names": [
-        "Ahmed Mohammed Issa Al Balushi",
-        "Khalid Saif Said Al Ruqadi",
-        "Sami Mohamed Khamis Al Hadabi"
-      ],
-      "empNos": [
-        "82415",
-        "8715",
-        "80479"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-27",
-      "names": [
-        "Ahmed Mohammed Issa Al Balushi"
-      ],
-      "empNos": [
-        "82415"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-28",
-      "names": [
-        "Hafedh Said Humaid Al Salmani"
-      ],
-      "empNos": [
-        "990893"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-29",
-      "names": [
-        "Hafedh Said Humaid Al Salmani"
-      ],
-      "empNos": [
-        "990893"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-30",
-      "names": [
-        "Zainab Hamood Ali Al Hashimi"
-      ],
-      "empNos": [
-        "82475"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-01-31",
-      "names": [
-        "Qais Salmeen Suweilem Al Rashdi"
-      ],
-      "empNos": [
-        "82409"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-01",
-      "names": [
-        "Salim Mohamed Salim Al Harasi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Jaafar Ibrahim Hassan Al Balushi",
-        "Mohammed Khamis Saleem Al Haddabi"
-      ],
-      "empNos": [
-        "8542",
-        "82571",
-        "81409",
-        "81258",
-        "990895"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-02",
-      "names": [
-        "Mohammed Anees Mohammed Al Kharusi",
-        "Mohammed Khamis Saleem Al Haddabi",
-        "Ahmed Mohammed Issa Al Balushi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Habib Mohamed Janjan Al Balushi",
-        "Dhaigham Anees Khalfan Al Sulaimi",
-        "Nayif Darwish Ali Al Balushi",
-        "Nasma Khatar Khamis Al Farsi",
-        "Muzdalifa Hamed Obaid Al Naamani",
-        "Yaarab Khalfan Ruzaiq Al Raqadi"
-      ],
-      "empNos": [
-        "81403",
-        "990895",
-        "82415",
-        "81409",
-        "82600",
-        "82465",
-        "82453",
-        "82469",
-        "82597",
-        "82571"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-03",
-      "names": [
-        "Qasim Salim Qasim Al Maqbali",
-        "Omar Abdul Aziz Salim Al Harthy",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Ahmed Saleh Said Al Uraimi",
-        "Nasma Khatar Khamis Al Farsi",
-        "Mubarak Hassen Obaid Al Nofli"
-      ],
-      "empNos": [
-        "81409",
-        "82662",
-        "82571",
-        "82427",
-        "82469",
-        "82114"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-04",
-      "names": [
-        "Dhaigham Anees Khalfan Al Sulaimi",
-        "Abdullah Juma Hashil Al Shekaili",
-        "Yaarab Khalfan Ruzaiq Al Raqadi"
-      ],
-      "empNos": [
-        "82465",
-        "82645",
-        "82571"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-05",
-      "names": [
-        "Zaina Abdallah Abdul Aziz Al Hajri",
-        "Ahmed Saleh Said Al Uraimi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Yasir Humaid Said Al Gharabi"
-      ],
-      "empNos": [
-        "80719",
-        "82427",
-        "82571",
-        "990786"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-06",
-      "names": [
-        "Ahmed Darwish Abdullah Al Farsi",
-        "Osama Hassan Fadhil Al Balushi",
-        "Ahmed Shafi Humaid Al Hashemi",
-        "Mubarak Hassen Obaid Al Nofli",
-        "Khalid Murad Adam Al Zadjali",
-        "Mohammed Ali Salim Al Siyabi"
-      ],
-      "empNos": [
-        "82456",
-        "80629",
-        "82616",
-        "82114",
-        "82458",
-        "81402"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-07",
-      "names": [
-        "Ahmed Darwish Abdullah Al Farsi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Mohamed Sulaiman Hamed Al-Alawi",
-        "Mubarak Hassen Obaid Al Nofli",
-        "Mohamed Nasser Said Al Mazro'Ei",
-        "Nasma Khatar Khamis Al Farsi"
-      ],
-      "empNos": [
-        "82456",
-        "81409",
-        "82643",
-        "82114",
-        "82658",
-        "82469"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-08",
-      "names": [
-        "Ahmed Darwish Abdullah Al Farsi",
-        "Riyadh Ahmed Said Al Jabri",
-        "Qasim Salim Qasim Al Maqbali",
-        "Mohamed Sulaiman Hamed Al-Alawi",
-        "Jamal Salim Ali Al Hadi"
-      ],
-      "empNos": [
-        "82456",
-        "82555",
-        "81409",
-        "82643",
-        "82565"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-09",
-      "names": [
-        "Manal Mohsin Saleh Al Ismaili",
-        "Mohamde Nasser Saif Al Yaarubi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Adil Ali Murad Al Bulushi",
-        "Said Amur Said Al Luwaihi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Jaafar Ibrahim Hassan Al Balushi"
-      ],
-      "empNos": [
-        "82639",
-        "82444",
-        "82571",
-        "82457",
-        "82446",
-        "81409",
-        "81258"
-      ],
-      "sections": [
-        "",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-10",
-      "names": [
-        "Anwar Mohammed Juma Al Balushi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Mohamde Nasser Saif Al Yaarubi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi"
-      ],
-      "empNos": [
-        "990758",
-        "81409",
-        "82444",
-        "82571"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-11",
-      "names": [
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Jaber Abdul Karim Yaqoob Al Bulushi",
-        "Ibrahim Saleh Hashil Al Qutaiti",
-        "Nasma Khatar Khamis Al Farsi",
-        "Faisal Mohamed Rafiq Al Balushi",
-        "Maqbool Hussain Haji Al Balushi",
-        "Haitham Mubarak Marhoon Al Hadabi"
-      ],
-      "empNos": [
-        "82571",
-        "990754",
-        "81351",
-        "82469",
-        "82544",
-        "990347",
-        "82572"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-12",
-      "names": [
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Omar Mubarak Musallam Al Obaidi",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Jaber Abdul Karim Yaqoob Al Bulushi",
-        "Khamis Juma Khamis Al Hinai",
-        "Mohammed Khamis Ghanim Al Maamari"
-      ],
-      "empNos": [
-        "82571",
-        "82551",
-        "80833",
-        "990754",
-        "82467",
-        "82432"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-13",
-      "names": [
-        "Osama Hassan Fadhil Al Balushi",
-        "Naif Mubarak Marzouq All Saad",
-        "Jaber Abdul Karim Yaqoob Al Bulushi",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Omar Abdul Aziz Salim Al Harthy",
-        "Qais Faisal Khalfan Al-Rawahi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi"
-      ],
-      "empNos": [
-        "80629",
-        "82461",
-        "990754",
-        "80833",
-        "82662",
-        "82669",
-        "82571"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-14",
-      "names": [
-        "Marhoon Humaid Marhoon Al Kiyumi",
-        "Anwar Mohammed Juma Al Balushi",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Jaber Abdul Karim Yaqoob Al Bulushi"
-      ],
-      "empNos": [
-        "82545",
-        "990758",
-        "80833",
-        "990754"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-15",
-      "names": [
-        "Mahmood Murad Ramadhan Al Balushi",
-        "Ahmed Aamir Said Al Harrasi",
-        "Qasim Salim Qasim Al Maqbali"
-      ],
-      "empNos": [
-        "82431",
-        "82451",
-        "81409"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-16",
-      "names": [
-        "Omar Abdul Aziz Salim Al Harthy",
-        "Qasim Salim Qasim Al Maqbali",
-        "Mahmood Murad Ramadhan Al Balushi",
-        "Adil Mohamedd Sbeit Al Araimi",
-        "Ala Sulaiman Hamdan Al Wahaibi"
-      ],
-      "empNos": [
-        "82662",
-        "81409",
-        "82431",
-        "8941",
-        "82473"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-17",
-      "names": [
-        "Miss. Wafa Salim Mohamed Al Rahbi",
-        "Mohammed Anees Mohammed Al Kharusi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Nasma Khatar Khamis Al Farsi",
-        "Qais Faisal Khalfan Al-Rawahi",
-        "Jaafar Ibrahim Hassan Al Balushi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Ala Sulaiman Hamdan Al Wahaibi"
-      ],
-      "empNos": [
-        "81021",
-        "81403",
-        "82571",
-        "82469",
-        "82669",
-        "81258",
-        "81409",
-        "82473"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-18",
-      "names": [
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Said Amur Said Al Luwaihi",
-        "Mohamed Hamed Hilal Al Toobi",
-        "Habib Mohamed Janjan Al Balushi",
-        "Ahmed Darwish Abdullah Al Farsi",
-        "Mohamed Khaif Said Al Ghammari"
-      ],
-      "empNos": [
-        "82571",
-        "80833",
-        "81409",
-        "82446",
-        "82130",
-        "82600",
-        "82456",
-        "82591"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-19",
-      "names": [
-        "Manal Mohsin Saleh Al Ismaili",
-        "Salim Mohamed Salim Al Harasi",
-        "Mohammed Anees Mohammed Al Kharusi",
-        "Mohammed Sulaiman Khamis Al Maskari",
-        "Fahim Salim Hamed Al Hasni",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Ibrahim Saleh Hashil Al Qutaiti",
-        "Nasma Khatar Khamis Al Farsi",
-        "Salim Sulaiman Nasser Al Siyabi",
-        "Muzdalifa Hamed Obaid Al Naamani",
-        "Yaarab Khalfan Ruzaiq Al Raqadi"
-      ],
-      "empNos": [
-        "82639",
-        "8542",
-        "81403",
-        "82666",
-        "8930",
-        "80833",
-        "81351",
-        "82469",
-        "8722",
-        "82597",
-        "82571"
-      ],
-      "sections": [
-        "",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-20",
-      "names": [
-        "Khalid Saif Said Al Ruqadi",
-        "Salim Sulaiman Nasser Al Siyabi",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Fahim Salim Hamed Al Hasni",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Osama Hassan Fadhil Al Balushi"
-      ],
-      "empNos": [
-        "8715",
-        "8722",
-        "80833",
-        "8930",
-        "82571",
-        "80629"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-21",
-      "names": [
-        "Salim Sulaiman Nasser Al Siyabi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Sulaiman Salim Saif Al Maharbi"
-      ],
-      "empNos": [
-        "8722",
-        "82571",
-        "80833"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-22",
-      "names": [
-        "Sami Saleh Abdul Rahman Al Zadjali",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Mahnad Khalid Abdallah Al-Hadi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Muzdalifa Hamed Obaid Al Naamani",
-        "Salim Sulaiman Nasser Al Siyabi"
-      ],
-      "empNos": [
-        "990894",
-        "80833",
-        "82665",
-        "82571",
-        "82597",
-        "8722"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-23",
-      "names": [
-        "Sami Saleh Abdul Rahman Al Zadjali",
-        "Ali Yousuf Yaqoob Al Balushi",
-        "Said Amur Said Al Luwaihi",
-        "Zainab Hamood Ali Al Hashimi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Abdallah Ali Mohammed Al Sawaai",
-        "Nayif Darwish Ali Al Balushi",
-        "Ahmed Rashid Nasser Al Hadi",
-        "Qais Faisal Khalfan Al-Rawahi",
-        "Jamal Salim Ali Al Hadi",
-        "Salim Sulaiman Nasser Al Siyabi",
-        "Muzdalifa Hamed Obaid Al Naamani"
-      ],
-      "empNos": [
-        "990894",
-        "990752",
-        "82446",
-        "82475",
-        "81409",
-        "82113",
-        "82453",
-        "82654",
-        "82669",
-        "82565",
-        "8722",
-        "82597"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-24",
-      "names": [
-        "Said Amur Said Al Luwaihi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Adil Ali Khamis Al Zadjali",
-        "Marhoon Humaid Marhoon Al Kiyumi",
-        "Imad Khamis Salim Al Makhmari",
-        "Riyadh Ahmed Said Al Jabri"
-      ],
-      "empNos": [
-        "82446",
-        "81409",
-        "8584",
-        "82545",
-        "82655",
-        "82555"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-25",
-      "names": [
-        "Badar Saif Nasser Al Fulaiti",
-        "Qasim Salim Qasim Al Maqbali",
-        "Jaafar Ibrahim Hassan Al Balushi",
-        "Majid Said Salim Al Ghafari",
-        "Yaarab Khalfan Ruzaiq Al Raqadi"
-      ],
-      "empNos": [
-        "82468",
-        "81409",
-        "81258",
-        "82049",
-        "82571"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-26",
-      "names": [
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Haitham Mubarak Marhoon Al Hadabi",
-        "Badar Saif Nasser Al Fulaiti",
-        "Qasim Salim Qasim Al Maqbali",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Omar Nasser Khalfan Al Futaisi",
-        "Majid Said Salim Al Ghafari",
-        "Hifaa Yousuf Abdullah Al Balushi",
-        "Nasma Khatar Khamis Al Farsi"
-      ],
-      "empNos": [
-        "82571",
-        "82572",
-        "82468",
-        "81409",
-        "80833",
-        "82107",
-        "82049",
-        "82664",
-        "82469"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-27",
-      "names": [
-        "Badar Saif Nasser Al Fulaiti",
-        "Mohamed Rashid Mabiwa Al Saadi",
-        "Osama Hassan Fadhil Al Balushi",
-        "Qasim Salim Qasim Al Maqbali",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Mubarak Hassen Obaid Al Nofli",
-        "Majid Said Salim Al Ghafari",
-        "Nasma Khatar Khamis Al Farsi",
-        "Haitham Mubarak Marhoon Al Hadabi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi",
-        "Nasser Mohammed Said Al Maamari"
-      ],
-      "empNos": [
-        "82468",
-        "82420",
-        "80629",
-        "81409",
-        "80833",
-        "82114",
-        "82049",
-        "82469",
-        "82572",
-        "82571",
-        "82590"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
-    },
-    {
-      "date": "2026-02-28",
-      "names": [
-        "Mohammed Khamis Ghanim Al Maamari",
-        "Ahmed Nasser Said Al Mawali",
-        "Badar Saif Nasser Al Fulaiti",
-        "Khalid Saif Said Al Ruqadi",
-        "Sulaiman Salim Saif Al Maharbi",
-        "Anwar Mohammed Juma Al Balushi",
-        "Yaarab Khalfan Ruzaiq Al Raqadi"
-      ],
-      "empNos": [
-        "82432",
-        "82283",
-        "82468",
-        "8715",
-        "80833",
-        "990758",
-        "82571"
-      ],
-      "sections": [
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation",
-        "Cargo - Exp/Imp Operation"
-      ]
+(function () {
+  "use strict";
+
+  // ── DATA URL ──────────────────────────────────────────────────────────────
+  var DATA_URL = (function () {
+    var origin = location.origin;
+    var base = location.pathname.includes("/roster-site/") ? origin + "/roster-site" : origin;
+    return base + "/absence-data.json";
+  })();
+
+  var mState = { empName: "", absences: [], empId: "", hash: "" };
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+  function norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, " ").replace(/\s+/g, " ").trim(); }
+  function nameMatch(a, b) {
+    var na = norm(a), nb = norm(b);
+    if (na === nb) return true;
+    var wa = na.split(" ").filter(function (w) { return w.length > 3; });
+    var wb = nb.split(" ").filter(function (w) { return w.length > 3; });
+    return wa.length && wb.length && wa.filter(function (w) { return wb.indexOf(w) !== -1; }).length >= 2;
+  }
+
+  function findAbsences(empId, empName, records) {
+    var results = [];
+    var cleanName = (empName || "").replace(/-\s*\d+\s*$/, "").trim();
+    records.forEach(function (rec) {
+      var m = false;
+      if (empId && rec.empNos && rec.empNos.indexOf(String(empId)) !== -1) {
+        results.push({ date: rec.date, absentName: rec.names[rec.empNos.indexOf(String(empId))], section: rec.sections ? rec.sections[rec.empNos.indexOf(String(empId))] : "" });
+        m = true;
+      }
+      if (!m && cleanName) {
+        rec.names.forEach(function (n, idx) { if (nameMatch(cleanName, n)) results.push({ date: rec.date, absentName: n, section: rec.sections ? rec.sections[idx] : "" }); });
+      }
+    });
+    return results;
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  function init() {
+    var empId = localStorage.getItem("savedEmpId");
+    if (!empId) return;
+
+    var base = location.pathname.includes("/roster-site/") ? location.origin + "/roster-site/" : location.origin + "/";
+
+    Promise.all([
+      fetch(base + "schedules/" + empId + ".json").then(function (r) { return r.ok ? r.json() : null; }),
+      fetch(DATA_URL + "?v=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }),
+    ]).then(function (res) {
+      var emp = res[0], absData = res[1];
+      if (!emp || !emp.name || !absData || !absData.records) return;
+
+      var absences = findAbsences(empId, emp.name, absData.records);
+      if (!absences.length) return;
+
+      mState = { empName: emp.name, absences: absences, empId: empId, hash: absences.map(function(a){return a.date}).join("|") };
+
+      injectStyles();
+      buildUI();
+    }).catch(function () {});
+  }
+
+  // ── PREMIUM STYLES ───────────────────────────────────────────────────────
+  function injectStyles() {
+    if (document.getElementById("abs-premium-styles")) return;
+    var s = document.createElement("style");
+    s.id = "abs-premium-styles";
+    s.textContent = [
+      /* --- الخطوط والاتجاه --- */
+      ".abs-font { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; direction: rtl; }",
+
+      /* --- النقطة الحمراء (Pulse Dot) --- */
+      "#abs-dot { position: fixed; left: 20px; top: 20px; z-index: 999999; width: 14px; height: 14px; background: #ef4444; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); display: none; border: 2px solid #fff; animation: absPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; transition: transform 0.2s ease; }",
+      "#abs-dot:hover { transform: scale(1.2); }",
+      "@keyframes absPulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }",
+
+      /* --- النافذة الرئيسية (Main Modal) --- */
+      "#abs-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; animation: fadeIn 0.3s ease forwards; }",
+      "@keyframes fadeIn { to { opacity: 1; } }",
+      "#abs-modal { background: #ffffff; border-radius: 24px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; transform: scale(0.95); animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }",
+      "@keyframes scaleUp { to { transform: scale(1); } }",
+      
+      /* هيدر النافذة الرئيسية */
+      "#abs-head { background: linear-gradient(135deg, #ef4444, #b91c1c); padding: 32px 24px 24px; text-align: center; color: #fff; position: relative; }",
+      "#abs-head::before { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; }",
+      ".abs-icon-circle { width: 64px; height: 64px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); position: relative; z-index: 1; }",
+      "#abs-head h2 { margin: 0 0 8px; font-size: 22px; font-weight: 800; position: relative; z-index: 1; }",
+      "#abs-head p { margin: 0; font-size: 14px; opacity: 0.9; font-weight: 500; position: relative; z-index: 1; }",
+
+      /* محتوى النافذة الرئيسية */
+      ".abs-body { padding: 24px; }",
+      ".abs-greeting { font-size: 15px; color: #334155; margin-bottom: 16px; font-weight: 600; line-height: 1.5; }",
+      ".abs-list { max-height: 180px; overflow-y: auto; margin-bottom: 24px; padding-left: 4px; }",
+      ".abs-list::-webkit-scrollbar { width: 6px; }",
+      ".abs-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }",
+      
+      /* صفوف الغياب */
+      ".ab-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; margin-bottom: 10px; transition: transform 0.2s ease; }",
+      ".ab-row:hover { transform: translateX(-4px); border-color: #fca5a5; }",
+      ".ab-date { color: #b91c1c; font-size: 13px; font-weight: 800; background: #fecaca; padding: 6px 12px; border-radius: 8px; letter-spacing: 0.5px; }",
+      ".ab-badge { color: #ef4444; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }",
+
+      /* زر الاختيار (Checkbox) */
+      ".abs-checkbox-wrapper { display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8fafc; border-radius: 14px; cursor: pointer; margin-bottom: 24px; border: 1px solid #e2e8f0; transition: all 0.2s ease; }",
+      ".abs-checkbox-wrapper:hover { border-color: #cbd5e1; background: #f1f5f9; }",
+      ".abs-checkbox-wrapper input { width: 20px; height: 20px; accent-color: #ef4444; cursor: pointer; }",
+      ".abs-checkbox-text { font-size: 13px; color: #475569; font-weight: 600; user-select: none; }",
+
+      /* زر الإغلاق الرئيسي */
+      "#abs-main-close { width: 100%; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(to right, #ef4444, #dc2626); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px -6px rgba(239, 68, 68, 0.5); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }",
+      "#abs-main-close:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(239, 68, 68, 0.6); }",
+      "#abs-main-close:active { transform: translateY(0); scale: 0.98; }",
+
+      /* --- النافذة المطوية (Sidebar) --- */
+      "#abs-sb { position: fixed; left: -340px; top: 0; height: 100%; width: 320px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 10px 0 40px rgba(0, 0, 0, 0.1); transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000001; display: flex; flex-direction: column; border-right: 1px solid rgba(255, 255, 255, 0.5); }",
+      "#abs-sb.open { left: 0; }",
+      ".sb-header { padding: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(226, 232, 240, 0.8); }",
+      ".sb-title { font-size: 18px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }",
+      ".sb-close-icon { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 14px; font-weight: bold; transition: all 0.2s ease; }",
+      ".sb-close-icon:hover { background: #e2e8f0; color: #0f172a; transform: rotate(90deg); }",
+      ".sb-content { padding: 24px; flex: 1; overflow-y: auto; }",
+      
+      /* أزرار النافذة المطوية */
+      ".sb-btn { width: 100%; padding: 14px; margin-top: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: 700; transition: all 0.2s ease; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }",
+      ".btn-main { background: #0f172a; color: #fff; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }",
+      ".btn-main:hover { background: #1e293b; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3); }",
+      ".btn-main:active { transform: translateY(0); scale: 0.98; }"
+    ].join("");
+    document.head.appendChild(s);
+  }
+
+  // ── UI BUILDERS ──────────────────────────────────────────────────────────
+  function buildUI() {
+    // 1. إنشاء النقطة (الخفية مبدئياً)
+    var dot = document.createElement("div");
+    dot.id = "abs-dot";
+    document.body.appendChild(dot);
+
+    // 2. إنشاء الشريط الجانبي المطوي
+    var sb = document.createElement("div");
+    sb.id = "abs-sb";
+    sb.className = "abs-font";
+    var rows = mState.absences.map(function(a){ 
+      return '<div class="ab-row"><span class="ab-date">'+a.date+'</span><span class="ab-badge">غياب مسجل</span></div>'; 
+    }).join("");
+    
+    sb.innerHTML = 
+      '<div class="sb-header">' +
+        '<div class="sb-title"><span style="color:#ef4444; font-size: 22px;">⚠️</span> تنبيه الغياب</div>' +
+        '<button class="sb-close-icon" id="sb-close-btn">✕</button>' +
+      '</div>' +
+      '<div class="sb-content">' + 
+        rows + 
+        '<div style="margin-top: 32px;">' +
+          '<button class="sb-btn btn-main" id="sb-restore">🔄 استعادة النافذة الرئيسية</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(sb);
+
+    // 3. التحقق من حالة العرض (هل المستخدم أخفاها سابقاً؟)
+    var isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
+    
+    if (isDismissed) {
+      dot.style.display = "block"; 
+    } else {
+      showMainModal(); 
     }
-  ]
-}
+
+    // 4. ربط الأحداث (Events)
+    dot.onclick = function() { sb.classList.add("open"); };
+    document.getElementById("sb-close-btn").onclick = function() { sb.classList.remove("open"); };
+    document.getElementById("sb-restore").onclick = function() {
+      localStorage.removeItem("absDismissed_" + mState.empId); // إزالة الحظر
+      sb.classList.remove("open"); // إغلاق الجانبية
+      dot.style.display = "none"; // إخفاء النقطة
+      setTimeout(showMainModal, 300); // إظهار الرئيسية بعد أن تُغلق الجانبية بانسيابية
+    };
+  }
+
+  // دالة إظهار النافذة الكبيرة الاحترافية
+  function showMainModal() {
+    if (document.getElementById("abs-overlay")) return;
+    
+    var ov = document.createElement("div");
+    ov.id = "abs-overlay";
+    ov.className = "abs-font";
+    
+    var rows = mState.absences.map(function(a){ 
+      return '<div class="ab-row"><span class="ab-date">📅 '+a.date+'</span><span class="ab-badge">غياب غير مبرر</span></div>'; 
+    }).join("");
+    
+    ov.innerHTML = 
+      '<div id="abs-modal">' +
+        '<div id="abs-head">' +
+          '<div class="abs-icon-circle">⚠️</div>' +
+          '<h2>تنبيه إداري</h2>' +
+          '<p>يرجى مراجعة سجل الحضور الخاص بك</p>' +
+        '</div>' +
+        '<div class="abs-body">' +
+          '<div class="abs-greeting">مرحباً <b>'+mState.empName.split(' ')[0]+'</b>، تم رصد غياب لك في التواريخ التالية:</div>' +
+          '<div class="abs-list">' + rows + '</div>' +
+          '<label class="abs-checkbox-wrapper">' +
+            '<input type="checkbox" id="abs-hide-check">' +
+            '<span class="abs-checkbox-text">عدم إظهار هذه النافذة مجدداً (تحويلها لنقطة تنبيه جانبية)</span>' +
+          '</label>' +
+          '<button id="abs-main-close">حسناً، فهمت</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(ov);
+
+    // حدث الإغلاق
+    document.getElementById("abs-main-close").onclick = function() {
+      var isChecked = document.getElementById("abs-hide-check").checked;
+      
+      // حركة خروج سلسة
+      ov.style.animation = "fadeIn 0.3s ease reverse forwards";
+      document.getElementById("abs-modal").style.animation = "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) reverse forwards";
+      
+      setTimeout(function() {
+        if (isChecked) {
+          localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
+          document.getElementById("abs-dot").style.display = "block"; // إظهار النقطة الدائمة
+        }
+        ov.remove();
+      }, 300);
+    };
+  }
+
+  // ── تشغيل السكربت ────────────────────────────────────────────────────────
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { setTimeout(init, 500); });
+  } else {
+    setTimeout(init, 500);
+  }
+})();
