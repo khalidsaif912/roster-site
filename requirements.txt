@@ -3,3 +3,4 @@ openpyxl
 requests
 jinja2
 python-dateutil
+pyxlsb
