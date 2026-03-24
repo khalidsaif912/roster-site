@@ -20,6 +20,9 @@
     return base + "/absence-data.json";
   })();
 
+  var STORAGE_KEY = "absence_modal_dismissed";
+  var LAST_DATA_KEY = "absence_last_data_hash";
+
   // ── HELPERS ───────────────────────────────────────────────────────────────
 
   function norm(s) {
@@ -46,24 +49,42 @@
     return results;
   }
 
+  // Generate a hash of absence data to detect changes
+  function getAbsenceHash(absences) {
+    if (!absences || !absences.length) return "";
+    var dates = absences.map(function(a) { return a.date; }).sort().join("|");
+    return dates;
+  }
+
+  // Check if modal should be shown (new data or never dismissed)
+  function shouldShowModal(absences) {
+    var dismissed = localStorage.getItem(STORAGE_KEY);
+    var lastHash = localStorage.getItem(LAST_DATA_KEY);
+    var currentHash = getAbsenceHash(absences);
+    
+    // If no dismiss record, show modal
+    if (!dismissed) return true;
+    
+    // If data has changed, show modal again (reset dismiss state)
+    if (currentHash && currentHash !== lastHash) {
+      // Clear the dismiss state since there's new data
+      localStorage.removeItem(STORAGE_KEY);
+      return true;
+    }
+    
+    return false;
+  }
+
+  // Mark modal as dismissed
+  function dismissModal(absences) {
+    var currentHash = getAbsenceHash(absences);
+    if (currentHash) {
+      localStorage.setItem(STORAGE_KEY, "true");
+      localStorage.setItem(LAST_DATA_KEY, currentHash);
+    }
+  }
+
   // ── MAIN ──────────────────────────────────────────────────────────────────
-
-  // ── DISMISS KEY ───────────────────────────────────────────────────────────
-  // يُخزَّن في localStorage: "abs_dismissed_<empId>_<version>"
-  // version = hash بسيط من مجموع التواريخ — يتغير فقط عند تحديث البيانات
-
-  function dismissKey(empId, absences) {
-    var hash = absences.map(function (a) { return a.date; }).sort().join("|");
-    return "abs_dismissed_" + empId + "_" + hash;
-  }
-
-  function isDismissed(empId, absences) {
-    return localStorage.getItem(dismissKey(empId, absences)) === "1";
-  }
-
-  function setDismissed(empId, absences) {
-    localStorage.setItem(dismissKey(empId, absences), "1");
-  }
 
   function init() {
     var empId = localStorage.getItem("savedEmpId");
@@ -81,14 +102,13 @@
       if (!absData || !absData.records || !absData.records.length) return;
       var absences = findAbsences(emp.name, absData.records);
       if (!absences.length) return;
+      
       injectStyles();
-      buildSidebar(emp.name, absences, empId);
-      // عرض النافذة فقط إذا لم يتم إخفاؤها مسبقاً
-      if (!isDismissed(empId, absences)) {
-        buildModal(emp.name, absences, absData.source_file, empId);
-      } else {
-        // مطوية مباشرةً بدون نافذة
-        openSidebar();
+      buildSidebar(emp.name, absences);
+      
+      // Only show modal if not dismissed or data has changed
+      if (shouldShowModal(absences)) {
+        buildModal(emp.name, absences, absData.source_file);
       }
     }).catch(function () {});
   }
@@ -125,17 +145,14 @@
       ".ab-type{font-size:13px;color:#7f1d1d;font-weight:600;flex:1}",
       "#abs-notice{background:#fef3c7;border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:12px 14px;font-size:13px;color:#92400e;line-height:1.65;margin-bottom:18px}",
       "#abs-notice strong{font-weight:800}",
-      "#abs-foot{padding:0 20px 10px;display:flex;gap:10px}",
-      "#abs-foot2{padding:0 20px 18px}",
-      "#abs-btn-dismiss{width:100%;padding:10px;border-radius:12px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:#f8fafc;color:#94a3b8;transition:all .15s;-webkit-tap-highlight-color:transparent}",
-      "#abs-btn-dismiss:hover{background:#fee2e2;color:#dc2626}",
+      "#abs-foot{padding:0 20px 20px;display:flex;gap:10px}",
       "#abs-foot button{flex:1;padding:13px;border-radius:14px;border:none;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}",
       "#abs-btn-mail{background:linear-gradient(135deg,#1e40af,#1976d2);color:#fff;box-shadow:0 4px 14px rgba(30,64,175,.3)}",
       "#abs-btn-mail:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(30,64,175,.4)}",
       "#abs-btn-x{background:#f1f5f9;color:#475569}",
       "#abs-btn-x:hover{background:#e2e8f0;color:#1e293b}",
-      /* Sidebar */
-      "#abs-sb{position:fixed;left:0;top:30%;transform:translateY(-50%);z-index:99997;display:flex;align-items:center}",
+      /* Sidebar - moved higher up */
+      "#abs-sb{position:fixed;left:0;top:20%;transform:translateY(-50%);z-index:99997;display:flex;align-items:center}",
       "#abs-sb-panel{background:linear-gradient(160deg,#991b1b,#dc2626);border-radius:0 16px 16px 0;box-shadow:4px 0 28px rgba(185,28,28,.35);overflow:hidden;width:0;opacity:0;transition:width .4s cubic-bezier(.22,1,.36,1),opacity .3s ease;pointer-events:none;flex-shrink:0}",
       "#abs-sb.open #abs-sb-panel{width:250px;opacity:1;pointer-events:all}",
       "#abs-sb-inner{padding:16px;min-width:250px;color:#fff;position:relative}",
@@ -163,7 +180,7 @@
 
   // ── MODAL ─────────────────────────────────────────────────────────────────
 
-  function buildModal(empName, absences, sourceFile, empId) {
+  function buildModal(empName, absences, sourceFile) {
     var ov = document.createElement("div");
     ov.id = "abs-overlay";
 
@@ -183,21 +200,22 @@
         + '<div id="abs-notice">📋 Dear <strong>' + firstName + '</strong>, you have <strong>' + absences.length + ' absence record(s)</strong> registered that require explanation.<br><br>Please <strong>visit the administration office</strong> or <strong>send an email</strong> explaining your absence(s) as soon as possible.' + src + '</div>'
       + '</div>'
       + '<div id="abs-foot"><button id="abs-btn-mail">📧 Send Email</button><button id="abs-btn-x">✕ Close</button></div>'
-      + '<div id="abs-foot2"><button id="abs-btn-dismiss">🔕 Don\'t show again until next update</button></div>'
       + '</div>';
 
     document.body.appendChild(ov);
 
     document.getElementById("abs-btn-x").onclick = function () {
       ov.style.animation = "absIn .15s ease reverse forwards";
-      setTimeout(function () { ov.remove(); openSidebar(); }, 150);
+      setTimeout(function () { 
+        ov.remove(); 
+        openSidebar();
+        // Mark modal as dismissed when user clicks close
+        dismissModal(absences);
+      }, 150);
     };
-    document.getElementById("abs-btn-dismiss").onclick = function () {
-      setDismissed(empId, absences);
-      ov.style.animation = "absIn .15s ease reverse forwards";
-      setTimeout(function () { ov.remove(); openSidebar(); }, 150);
+    document.getElementById("abs-btn-mail").onclick = function () { 
+      sendMail(empName, absences); 
     };
-    document.getElementById("abs-btn-mail").onclick = function () { sendMail(empName, absences); };
     ov.onclick = function (e) { if (e.target === ov) document.getElementById("abs-btn-x").click(); };
     document.addEventListener("keydown", function h(e) {
       if (e.key === "Escape") { document.getElementById("abs-btn-x") && document.getElementById("abs-btn-x").click(); document.removeEventListener("keydown", h); }
@@ -208,7 +226,7 @@
 
   var sbEl = null;
 
-  function buildSidebar(empName, absences, empId) {
+  function buildSidebar(empName, absences) {
     var sb = document.createElement("div");
     sb.id = "abs-sb";
     sbEl = sb;
