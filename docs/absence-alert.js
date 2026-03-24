@@ -26,11 +26,11 @@
     records.forEach(function (rec) {
       var m = false;
       if (empId && rec.empNos && rec.empNos.indexOf(String(empId)) !== -1) {
-        results.push({ date: rec.date, absentName: rec.names[rec.empNos.indexOf(String(empId))], section: rec.sections ? rec.sections[rec.empNos.indexOf(String(empId))] : "" });
+        results.push({ date: rec.date });
         m = true;
       }
       if (!m && cleanName) {
-        rec.names.forEach(function (n, idx) { if (nameMatch(cleanName, n)) results.push({ date: rec.date, absentName: n, section: rec.sections ? rec.sections[idx] : "" }); });
+        rec.names.forEach(function (n, idx) { if (nameMatch(cleanName, n)) results.push({ date: rec.date }); });
       }
     });
     return results;
@@ -44,8 +44,8 @@
     var base = location.pathname.includes("/roster-site/") ? location.origin + "/roster-site/" : location.origin + "/";
 
     Promise.all([
-      fetch(base + "schedules/" + empId + ".json").then(function (r) { return r.ok ? r.json() : null; }),
-      fetch(DATA_URL + "?v=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }),
+      fetch(base + "schedules/" + empId + ".json").then(r => r.ok ? r.json() : null),
+      fetch(DATA_URL + "?v=" + Date.now()).then(r => r.ok ? r.json() : null),
     ]).then(function (res) {
       var emp = res[0], absData = res[1];
       if (!emp || !emp.name || !absData || !absData.records) return;
@@ -53,11 +53,16 @@
       var absences = findAbsences(empId, emp.name, absData.records);
       if (!absences.length) return;
 
-      mState = { empName: emp.name, absences: absences, empId: empId, hash: absences.map(function(a){return a.date}).join("|") };
+      mState = {
+        empName: emp.name,
+        absences: absences,
+        empId: empId,
+        hash: absences.map(a => a.date).join("|")
+      };
 
       injectStyles();
       buildUI();
-    }).catch(function () {});
+    });
   }
 
   // ── STYLES ────────────────────────────────────────────────────────────────
@@ -66,83 +71,78 @@
     var s = document.createElement("style");
     s.id = "abs-premium-styles";
     s.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+      .abs-font { font-family: 'Tajawal', sans-serif; direction: rtl; }
 
-      .abs-font * { box-sizing: border-box; margin: 0; padding: 0; }
-      .abs-font { font-family: 'Tajawal', system-ui, sans-serif; direction: rtl; }
-
-      /* ── Dot ── */
+      /* 🔺 Triangle Icon */
       #abs-dot {
         position: fixed;
         left: 16px;
         top: 16px;
         z-index: 999999;
-        width: 32px;
-        height: 32px;
-        background: #dc2626;
-        border-radius: 50%;
+        width: 0;
+        height: 0;
+        border-left: 14px solid transparent;
+        border-right: 14px solid transparent;
+        border-bottom: 24px solid #dc2626;
         cursor: pointer;
         display: none;
-        box-shadow: 0 2px 10px rgba(220, 38, 38, 0.4);
-        animation: absPulse 2.5s ease-in-out infinite;
+        animation: pulse 2s infinite;
       }
       #abs-dot::after {
         content: '!';
         position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        top: 6px;
+        left: -4px;
         color: #fff;
-        font-weight: 900;
+        font-weight: bold;
       }
-      @keyframes absPulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.08); }
+      @keyframes pulse {
+        0%,100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
       }
 
-      /* ── Overlay ── */
+      /* Overlay */
       #abs-overlay {
         position: fixed;
         inset: 0;
         background: rgba(0,0,0,0.5);
-        z-index: 1000000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:1000000;
       }
 
-      /* ── Modal ── */
+      /* Modal */
       #abs-modal {
-        background: #fff;
-        border-radius: 20px;
-        width: 90%;
-        max-width: 380px;
-        padding: 20px;
+        background:#fff;
+        border-radius:20px;
+        padding:20px;
+        width:90%;
+        max-width:380px;
       }
 
       .ab-row {
-        padding: 8px;
-        margin-bottom: 6px;
-        background: #f9f9f9;
-        border-radius: 10px;
+        padding:10px;
+        margin-bottom:8px;
+        background:#f5f5f5;
+        border-radius:10px;
       }
 
       #abs-main-close {
-        width: 100%;
-        margin-top: 15px;
-        padding: 10px;
-        background: #dc2626;
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-weight: bold;
+        width:100%;
+        margin-top:15px;
+        padding:12px;
+        background:#dc2626;
+        color:#fff;
+        border:none;
+        border-radius:12px;
+        font-weight:bold;
       }
     `;
     document.head.appendChild(s);
   }
 
-  // ── UI BUILDERS ──────────────────────────────────────────────────────────
+  // ── UI ────────────────────────────────────────────────────────────────────
   function buildUI() {
     var dot = document.createElement("div");
     dot.id = "abs-dot";
@@ -156,8 +156,8 @@
       showMainModal();
     }
 
-    // 🔥 هنا التعديل المهم
-    dot.onclick = function() {
+    // 🔥 التعديل: يفتح النافذة مباشرة
+    dot.onclick = function () {
       showMainModal();
     };
   }
@@ -165,28 +165,30 @@
   function showMainModal() {
     if (document.getElementById("abs-overlay")) return;
 
-    var rows = mState.absences.map(function(a) {
-      return '<div class="ab-row">' + a.date + '</div>';
-    }).join("");
+    var rows = mState.absences.map(a => `<div class="ab-row">📅 ${a.date}</div>`).join("");
 
     var ov = document.createElement("div");
     ov.id = "abs-overlay";
     ov.className = "abs-font";
 
-    ov.innerHTML =
-      '<div id="abs-modal">' +
-        '<h3>لديك غياب</h3>' +
-        rows +
-        '<label><input type="checkbox" id="abs-hide-check"> عدم الإظهار مرة أخرى</label>' +
-        '<button id="abs-main-close">موافق</button>' +
-      '</div>';
+    ov.innerHTML = `
+      <div id="abs-modal">
+        <h3>تنبيه غياب</h3>
+        ${rows}
+        <label>
+          <input type="checkbox" id="abs-hide-check">
+          عدم الإظهار مرة أخرى
+        </label>
+        <button id="abs-main-close">موافق</button>
+      </div>
+    `;
 
     document.body.appendChild(ov);
 
-    document.getElementById("abs-main-close").onclick = function() {
-      var isChecked = document.getElementById("abs-hide-check").checked;
+    document.getElementById("abs-main-close").onclick = function () {
+      var checked = document.getElementById("abs-hide-check").checked;
 
-      if (isChecked) {
+      if (checked) {
         localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
         document.getElementById("abs-dot").style.display = "block";
       }
@@ -200,4 +202,5 @@
   } else {
     setTimeout(init, 500);
   }
+
 })();
