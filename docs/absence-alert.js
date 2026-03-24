@@ -3,7 +3,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * يجلب بيانات الغياب من /absence-data.json (يُولَّد بـ process_absence.py)
  * ويعرض للموظف المُعرَّف (savedEmpId) نافذة منبثقة + شريط جانبي منطوي.
- *
+ * 
  * الإضافة: سطر واحد فقط قبل </body> في page_shell_html:
  *   <script src="/absence-alert.js"></script>
  * ─────────────────────────────────────────────────────────────────────────────
@@ -62,6 +62,8 @@
     var lastHash = localStorage.getItem(LAST_DATA_KEY);
     var currentHash = getAbsenceHash(absences);
     
+    console.log("Modal check - dismissed:", dismissed, "lastHash:", lastHash, "currentHash:", currentHash);
+    
     // If no dismiss record, show modal
     if (!dismissed) return true;
     
@@ -81,36 +83,77 @@
     if (currentHash) {
       localStorage.setItem(STORAGE_KEY, "true");
       localStorage.setItem(LAST_DATA_KEY, currentHash);
+      console.log("Modal dismissed, saved hash:", currentHash);
     }
   }
 
   // ── MAIN ──────────────────────────────────────────────────────────────────
 
   function init() {
+    console.log("absence-alert.js: Initializing...");
+    
     var empId = localStorage.getItem("savedEmpId");
-    if (!empId) return;
+    console.log("Employee ID:", empId);
+    
+    if (!empId) {
+      console.log("No savedEmpId found in localStorage");
+      return;
+    }
 
     var origin = location.origin;
     var base = location.pathname.includes("/roster-site/") ? origin + "/roster-site/" : origin + "/";
+    
+    var scheduleUrl = base + "schedules/" + empId + ".json";
+    var absenceUrl = DATA_URL + "?v=" + Date.now();
+    
+    console.log("Fetching schedule from:", scheduleUrl);
+    console.log("Fetching absence data from:", absenceUrl);
 
     Promise.all([
-      fetch(base + "schedules/" + empId + ".json").then(function (r) { return r.ok ? r.json() : null; }),
-      fetch(DATA_URL + "?v=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }),
+      fetch(scheduleUrl).then(function (r) { 
+        console.log("Schedule fetch status:", r.status);
+        return r.ok ? r.json() : null; 
+      }),
+      fetch(absenceUrl).then(function (r) { 
+        console.log("Absence data fetch status:", r.status);
+        return r.ok ? r.json() : null; 
+      }),
     ]).then(function (res) {
       var emp = res[0], absData = res[1];
-      if (!emp || !emp.name) return;
-      if (!absData || !absData.records || !absData.records.length) return;
-      var absences = findAbsences(emp.name, absData.records);
-      if (!absences.length) return;
+      console.log("Employee data:", emp);
+      console.log("Absence data:", absData);
       
+      if (!emp || !emp.name) {
+        console.log("No employee data or name found");
+        return;
+      }
+      if (!absData || !absData.records || !absData.records.length) {
+        console.log("No absence records found");
+        return;
+      }
+      
+      var absences = findAbsences(emp.name, absData.records);
+      console.log("Found absences:", absences.length, absences);
+      
+      if (!absences.length) {
+        console.log("No matching absences for employee");
+        return;
+      }
+      
+      console.log("Injecting styles and building UI...");
       injectStyles();
       buildSidebar(emp.name, absences);
       
       // Only show modal if not dismissed or data has changed
       if (shouldShowModal(absences)) {
+        console.log("Showing modal...");
         buildModal(emp.name, absences, absData.source_file);
+      } else {
+        console.log("Modal suppressed (already dismissed for this data)");
       }
-    }).catch(function () {});
+    }).catch(function (err) {
+      console.error("Error in absence-alert.js:", err);
+    });
   }
 
   // ── STYLES ────────────────────────────────────────────────────────────────
@@ -152,7 +195,7 @@
       "#abs-btn-x{background:#f1f5f9;color:#475569}",
       "#abs-btn-x:hover{background:#e2e8f0;color:#1e293b}",
       /* Sidebar - moved higher up */
-      "#abs-sb{position:fixed;left:0;top:20%;transform:translateY(-50%);z-index:99997;display:flex;align-items:center}",
+      "#abs-sb{position:fixed;left:0;top:20%;z-index:99997;display:flex;align-items:flex-start}",
       "#abs-sb-panel{background:linear-gradient(160deg,#991b1b,#dc2626);border-radius:0 16px 16px 0;box-shadow:4px 0 28px rgba(185,28,28,.35);overflow:hidden;width:0;opacity:0;transition:width .4s cubic-bezier(.22,1,.36,1),opacity .3s ease;pointer-events:none;flex-shrink:0}",
       "#abs-sb.open #abs-sb-panel{width:250px;opacity:1;pointer-events:all}",
       "#abs-sb-inner{padding:16px;min-width:250px;color:#fff;position:relative}",
@@ -176,11 +219,13 @@
       "@media(max-width:480px){#abs-modal{border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%}#abs-overlay{align-items:flex-end;padding:0}#abs-foot{flex-direction:column}}",
     ].join("");
     document.head.appendChild(s);
+    console.log("Styles injected");
   }
 
   // ── MODAL ─────────────────────────────────────────────────────────────────
 
   function buildModal(empName, absences, sourceFile) {
+    console.log("Building modal...");
     var ov = document.createElement("div");
     ov.id = "abs-overlay";
 
@@ -203,22 +248,36 @@
       + '</div>';
 
     document.body.appendChild(ov);
+    console.log("Modal added to DOM");
 
-    document.getElementById("abs-btn-x").onclick = function () {
-      ov.style.animation = "absIn .15s ease reverse forwards";
-      setTimeout(function () { 
-        ov.remove(); 
-        openSidebar();
-        // Mark modal as dismissed when user clicks close
-        dismissModal(absences);
-      }, 150);
-    };
-    document.getElementById("abs-btn-mail").onclick = function () { 
-      sendMail(empName, absences); 
-    };
-    ov.onclick = function (e) { if (e.target === ov) document.getElementById("abs-btn-x").click(); };
+    var closeBtn = document.getElementById("abs-btn-x");
+    var mailBtn = document.getElementById("abs-btn-mail");
+    
+    if (closeBtn) {
+      closeBtn.onclick = function () {
+        console.log("Closing modal...");
+        ov.style.animation = "absIn .15s ease reverse forwards";
+        setTimeout(function () { 
+          ov.remove(); 
+          openSidebar();
+          // Mark modal as dismissed when user clicks close
+          dismissModal(absences);
+        }, 150);
+      };
+    }
+    
+    if (mailBtn) {
+      mailBtn.onclick = function () { 
+        sendMail(empName, absences); 
+      };
+    }
+    
+    ov.onclick = function (e) { if (e.target === ov && closeBtn) closeBtn.click(); };
     document.addEventListener("keydown", function h(e) {
-      if (e.key === "Escape") { document.getElementById("abs-btn-x") && document.getElementById("abs-btn-x").click(); document.removeEventListener("keydown", h); }
+      if (e.key === "Escape") { 
+        if (closeBtn) closeBtn.click(); 
+        document.removeEventListener("keydown", h); 
+      }
     });
   }
 
@@ -227,6 +286,7 @@
   var sbEl = null;
 
   function buildSidebar(empName, absences) {
+    console.log("Building sidebar...");
     var sb = document.createElement("div");
     sb.id = "abs-sb";
     sbEl = sb;
@@ -246,14 +306,28 @@
       + '<button id="abs-tab"><span class="ti">⚠️</span><span class="tt">Absence</span></button>';
 
     document.body.appendChild(sb);
+    console.log("Sidebar added to DOM");
 
-    document.getElementById("abs-tab").onclick = function () { sb.classList.toggle("open"); };
-    document.getElementById("abs-sb-close").onclick = function () { sb.classList.remove("open"); };
-    document.getElementById("abs-sb-mail").onclick = function () { sendMail(empName, absences); };
+    var tabBtn = document.getElementById("abs-tab");
+    var closeBtn = document.getElementById("abs-sb-close");
+    var mailBtn = document.getElementById("abs-sb-mail");
+    
+    if (tabBtn) {
+      tabBtn.onclick = function () { sb.classList.toggle("open"); };
+    }
+    if (closeBtn) {
+      closeBtn.onclick = function () { sb.classList.remove("open"); };
+    }
+    if (mailBtn) {
+      mailBtn.onclick = function () { sendMail(empName, absences); };
+    }
   }
 
   function openSidebar() {
-    sbEl && setTimeout(function () { sbEl.classList.add("open"); }, 400);
+    sbEl && setTimeout(function () { 
+      console.log("Opening sidebar...");
+      sbEl.classList.add("open"); 
+    }, 400);
   }
 
   // ── EMAIL ─────────────────────────────────────────────────────────────────
