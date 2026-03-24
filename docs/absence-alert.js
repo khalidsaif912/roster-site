@@ -76,91 +76,86 @@
       @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
       .abs-font { font-family: 'Tajawal', sans-serif; direction: rtl; }
 
-      /* مثلث التنبيه الصغير ⚠️ */
-      #abs-triangle {
+      /* أيقونة التنبيه ⚠️ الصغيرة */
+      #abs-trigger-icon {
         position: fixed; left: 15px; bottom: 15px; z-index: 999999;
-        width: 0; height: 0;
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-bottom: 20px solid #e11d48;
-        cursor: pointer; display: none;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-        animation: absPulse 2s infinite;
-      }
-      #abs-triangle::after {
-        content: '!'; position: absolute; top: 3px; left: -3px;
-        color: #fff; font-size: 12px; font-weight: bold;
+        font-size: 24px; cursor: pointer; display: none;
+        user-select: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        animation: absShake 3s infinite;
       }
 
-      @keyframes absPulse {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.1); opacity: 0.8; }
+      @keyframes absShake {
+        0%, 90%, 100% { transform: scale(1); }
+        93% { transform: scale(1.2) rotate(5deg); }
+        95% { transform: scale(1.2) rotate(-5deg); }
+        97% { transform: scale(1.2) rotate(5deg); }
       }
 
       /* النافذة والغطاء */
       #abs-overlay {
-        position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6);
         display: flex; align-items: center; justify-content: center;
-        z-index: 1000000; backdrop-filter: blur(5px);
+        z-index: 1000000; backdrop-filter: blur(4px);
       }
       #abs-modal {
-        background: #fff; border-radius: 20px; padding: 25px;
-        width: 85%; max-width: 360px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-        text-align: center; border: 1px solid #f1f5f9;
-        animation: modalFadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        background: #fff; border-radius: 24px; padding: 25px;
+        width: 85%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        text-align: center; animation: absPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-      @keyframes modalFadeUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+      @keyframes absPop {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
       }
 
-      .abs-title { color: #e11d48; font-weight: 700; font-size: 1.2rem; margin-bottom: 15px; }
+      .abs-title { color: #1e293b; font-weight: 700; font-size: 1.25rem; margin: 10px 0; }
+      .abs-emoji-big { font-size: 40px; margin-bottom: 5px; }
+      
       .ab-row {
-        background: #fff1f2; color: #9f1239; padding: 12px;
-        border-radius: 12px; margin-bottom: 8px; font-weight: 500;
-        display: flex; align-items: center; justify-content: center; gap: 8px;
+        background: #fff1f2; color: #be123c; padding: 12px;
+        border-radius: 12px; margin-bottom: 8px; font-weight: 600;
+        border: 1px solid #fecdd3;
       }
+      
       .abs-footer { margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px; }
       
       .abs-check-label {
         display: flex; align-items: center; justify-content: center; gap: 8px;
-        font-size: 13px; color: #64748b; cursor: pointer; margin-bottom: 15px;
+        font-size: 14px; color: #64748b; cursor: pointer; margin-bottom: 15px;
       }
+      
       #abs-main-close {
-        width: 100%; padding: 12px; background: #e11d48; color: #fff;
-        border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
-        transition: transform 0.2s;
+        width: 100%; padding: 14px; background: #e11d48; color: #fff;
+        border: none; border-radius: 12px; font-weight: 700; font-size: 16px; 
+        cursor: pointer; transition: background 0.2s;
       }
-      #abs-main-close:hover { transform: translateY(-2px); }
+      #abs-main-close:hover { background: #be123c; }
     `;
     document.head.appendChild(s);
   }
 
   // ─── واجهة المستخدم (UI) ──────────────────────────────────────────────────
   function buildUI() {
-    const tri = document.createElement("div");
-    tri.id = "abs-triangle";
-    document.body.appendChild(tri);
+    const icon = document.createElement("div");
+    icon.id = "abs-trigger-icon";
+    icon.innerHTML = "⚠️";
+    document.body.appendChild(icon);
 
     const isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
     
-    // إذا اختار المستخدم عدم الإظهار، نظهر المثلث فقط
     if (isDismissed) {
-      tri.style.display = "block";
+      icon.style.display = "block";
     } else {
       showMainModal();
     }
 
-    tri.onclick = () => showMainModal();
+    icon.onclick = () => showMainModal();
   }
 
   function showMainModal() {
     if (document.getElementById("abs-overlay")) return;
 
     const rows = mState.absences.map(a => `
-      <div class="ab-row">
-        <span>⚠️</span> <span>تاريخ الغياب: ${a.date}</span>
-      </div>
+      <div class="ab-row">📅 غياب يوم: ${a.date}</div>
     `).join("");
 
     const ov = document.createElement("div");
@@ -168,15 +163,16 @@
     ov.className = "abs-font";
     ov.innerHTML = `
       <div id="abs-modal">
-        <div class="abs-title">تنبيه تسجيل غياب</div>
-        <div style="margin-bottom:15px; color:#475569; font-size:14px;">تم العثور على سجلات غياب للأسماء المطابقة:</div>
+        <div class="abs-emoji-big">⚠️</div>
+        <div class="abs-title">تنبيه غياب</div>
+        <p style="color:#64748b; font-size:14px; margin-bottom:15px;">تم رصد أيام غياب مسجلة باسمك في النظام:</p>
         <div class="abs-list">${rows}</div>
         <div class="abs-footer">
           <label class="abs-check-label">
             <input type="checkbox" id="abs-hide-check">
-            عدم إظهار هذه النافذة مرة أخرى
+            عدم إظهار التنبيه تلقائياً مرة أخرى
           </label>
-          <button id="abs-main-close">فهمت، إغلاق</button>
+          <button id="abs-main-close">حسناً، فهمت</button>
         </div>
       </div>
     `;
@@ -188,12 +184,10 @@
       
       if (isChecked) {
         localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
-        document.getElementById("abs-triangle").style.display = "block";
-      } else {
-        // إذا لم يؤشر، المثلث يبقى مخفياً والنافذة ستظهر المرة القادمة
-        document.getElementById("abs-triangle").style.display = "none";
       }
       
+      // بمجرد الإغلاق، تظهر الأيقونة الصغيرة في الزاوية دائماً للرجوع إليها
+      document.getElementById("abs-trigger-icon").style.display = "block";
       ov.remove();
     };
   }
