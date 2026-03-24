@@ -26,11 +26,11 @@
     records.forEach(function (rec) {
       var m = false;
       if (empId && rec.empNos && rec.empNos.indexOf(String(empId)) !== -1) {
-        results.push({ date: rec.date, absentName: rec.names[rec.empNos.indexOf(String(empId))], section: rec.sections ? rec.sections[rec.empNos.indexOf(String(empId))] : "" });
+        results.push({ date: rec.date, absentName: rec.names[rec.empNos.indexOf(String(empId))] });
         m = true;
       }
       if (!m && cleanName) {
-        rec.names.forEach(function (n, idx) { if (nameMatch(cleanName, n)) results.push({ date: rec.date, absentName: n, section: rec.sections ? rec.sections[idx] : "" }); });
+        rec.names.forEach(function (n, idx) { if (nameMatch(cleanName, n)) results.push({ date: rec.date, absentName: n }); });
       }
     });
     return results;
@@ -66,171 +66,101 @@
     var s = document.createElement("style");
     s.id = "abs-premium-styles";
     s.textContent = [
-      /* --- الخطوط والاتجاه --- */
-      ".abs-font { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; direction: rtl; }",
+      ".abs-font { font-family: system-ui, -apple-system, sans-serif; direction: rtl; }",
 
-      /* --- أيقونة التنبيه (المثلث النابض) --- */
-      "#abs-alert-icon { position: fixed; left: 20px; top: 20px; z-index: 999999; font-size: 32px; cursor: pointer; display: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); animation: alertPulse 1.5s ease-in-out infinite; user-select: none; }",
-      "#abs-alert-icon:hover { animation-play-state: paused; transform: scale(1.1); }",
-      "@keyframes alertPulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }",
+      /* أيقونة المثلث - تم تصغيرها جداً */
+      "#abs-alert-icon { position: fixed; left: 12px; top: 12px; z-index: 999999; font-size: 18px; cursor: pointer; display: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); animation: alertPulse 2s ease-in-out infinite; user-select: none; opacity: 0.9; }",
+      "@keyframes alertPulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); } }",
 
-      /* --- النافذة الرئيسية (Main Modal) --- */
-      "#abs-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; animation: fadeIn 0.3s ease forwards; }",
-      "@keyframes fadeIn { to { opacity: 1; } }",
-      /* تم تصغير max-width هنا إلى 340px */
-      "#abs-modal { background: #ffffff; border-radius: 20px; max-width: 340px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; transform: scale(0.95); animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }",
-      "@keyframes scaleUp { to { transform: scale(1); } }",
-      
-      /* هيدر النافذة الرئيسية (تم تصغير المساحات والأحجام) */
-      "#abs-head { background: linear-gradient(135deg, #ef4444, #b91c1c); padding: 24px 20px 20px; text-align: center; color: #fff; position: relative; }",
-      "#abs-head::before { content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; }",
-      ".abs-icon-circle { width: 50px; height: 50px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); position: relative; z-index: 1; }",
-      "#abs-head h2 { margin: 0 0 6px; font-size: 18px; font-weight: 800; position: relative; z-index: 1; }",
-      "#abs-head p { margin: 0; font-size: 13px; opacity: 0.9; font-weight: 500; position: relative; z-index: 1; }",
+      /* النافذة الرئيسية (Main Modal) - حجم مدمج */
+      "#abs-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.3s ease forwards; }",
+      "#abs-modal { background: #fff; border-radius: 20px; max-width: 320px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }",
+      "@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }",
+      "@keyframes scaleUp { from { transform: scale(0.95); } to { transform: scale(1); } }",
 
-      /* محتوى النافذة الرئيسية (تم تقليل الـ padding) */
-      ".abs-body { padding: 20px; }",
-      ".abs-greeting { font-size: 14px; color: #334155; margin-bottom: 14px; font-weight: 600; line-height: 1.5; }",
-      ".abs-list { max-height: 160px; overflow-y: auto; margin-bottom: 20px; padding-left: 4px; }",
-      ".abs-list::-webkit-scrollbar { width: 5px; }",
-      ".abs-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }",
-      
-      /* صفوف الغياب */
-      ".ab-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 10px; margin-bottom: 8px; transition: transform 0.2s ease; }",
-      ".ab-row:hover { transform: translateX(-4px); border-color: #fca5a5; }",
-      ".ab-date { color: #b91c1c; font-size: 12px; font-weight: 800; background: #fecaca; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; }",
-      ".ab-badge { color: #ef4444; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; }",
+      "#abs-head { background: linear-gradient(135deg, #ef4444, #b91c1c); padding: 20px; text-align: center; color: #fff; }",
+      ".abs-icon-circle { width: 44px; height: 44px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 10px; }",
+      "#abs-head h2 { margin: 0; font-size: 17px; font-weight: 800; }",
 
-      /* زر الاختيار (Checkbox) */
-      ".abs-checkbox-wrapper { display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8fafc; border-radius: 12px; cursor: pointer; margin-bottom: 20px; border: 1px solid #e2e8f0; transition: all 0.2s ease; }",
-      ".abs-checkbox-wrapper:hover { border-color: #cbd5e1; background: #f1f5f9; }",
-      ".abs-checkbox-wrapper input { width: 18px; height: 18px; accent-color: #ef4444; cursor: pointer; flex-shrink: 0; }",
-      ".abs-checkbox-text { font-size: 12px; color: #475569; font-weight: 600; user-select: none; line-height: 1.4; }",
+      ".abs-body { padding: 18px; }",
+      ".ab-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 10px; margin-bottom: 6px; }",
+      ".ab-date { color: #b91c1c; font-size: 11px; font-weight: 800; background: #fecaca; padding: 3px 8px; border-radius: 5px; }",
 
-      /* زر الإغلاق الرئيسي */
-      "#abs-main-close { width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(to right, #ef4444, #dc2626); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px -4px rgba(239, 68, 68, 0.5); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }",
-      "#abs-main-close:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -6px rgba(239, 68, 68, 0.6); }",
-      "#abs-main-close:active { transform: translateY(0); scale: 0.98; }",
+      ".abs-checkbox-wrapper { display: flex; align-items: center; gap: 8px; padding: 10px; background: #f8fafc; border-radius: 10px; cursor: pointer; margin-bottom: 18px; border: 1px solid #e2e8f0; }",
+      ".abs-checkbox-text { font-size: 11px; color: #475569; font-weight: 600; }",
 
-      /* --- النافذة المطوية (Sidebar) --- */
-      "#abs-sb { position: fixed; left: -340px; top: 0; height: 100%; width: 320px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 10px 0 40px rgba(0, 0, 0, 0.1); transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000001; display: flex; flex-direction: column; border-right: 1px solid rgba(255, 255, 255, 0.5); }",
+      "#abs-main-close { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #dc2626; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }",
+
+      /* الشريط الجانبي المطوي */
+      "#abs-sb { position: fixed; left: -320px; top: 0; height: 100%; width: 280px; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); box-shadow: 10px 0 30px rgba(0,0,0,0.1); transition: left 0.4s ease; z-index: 1000001; direction: rtl; }",
       "#abs-sb.open { left: 0; }",
-      ".sb-header { padding: 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(226, 232, 240, 0.8); }",
-      ".sb-title { font-size: 18px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }",
-      ".sb-close-icon { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 14px; font-weight: bold; transition: all 0.2s ease; }",
-      ".sb-close-icon:hover { background: #e2e8f0; color: #0f172a; transform: rotate(90deg); }",
-      ".sb-content { padding: 24px; flex: 1; overflow-y: auto; }",
-      
-      /* أزرار النافذة المطوية */
-      ".sb-btn { width: 100%; padding: 14px; margin-top: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: 700; transition: all 0.2s ease; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }",
-      ".btn-main { background: #0f172a; color: #fff; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }",
-      ".btn-main:hover { background: #1e293b; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3); }",
-      ".btn-main:active { transform: translateY(0); scale: 0.98; }"
+      ".sb-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }",
+      ".sb-content { padding: 20px; }",
+      ".sb-btn { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-size: 13px; }"
     ].join("");
     document.head.appendChild(s);
   }
 
   // ── UI BUILDERS ──────────────────────────────────────────────────────────
   function buildUI() {
-    // 1. إنشاء الأيقونة (المثلث) - الخفية مبدئياً
     var alertIcon = document.createElement("div");
     alertIcon.id = "abs-alert-icon";
     alertIcon.innerHTML = "⚠️";
-    alertIcon.title = "يوجد تنبيه غياب";
     document.body.appendChild(alertIcon);
 
-    // 2. إنشاء الشريط الجانبي المطوي
     var sb = document.createElement("div");
     sb.id = "abs-sb";
     sb.className = "abs-font";
     var rows = mState.absences.map(function(a){ 
-      return '<div class="ab-row"><span class="ab-date">'+a.date+'</span><span class="ab-badge">غياب مسجل</span></div>'; 
+      return '<div class="ab-row"><span class="ab-date">'+a.date+'</span><span style="font-size:11px; color:#ef4444">تنبيه غياب</span></div>'; 
     }).join("");
     
-    sb.innerHTML = 
-      '<div class="sb-header">' +
-        '<div class="sb-title"><span style="color:#ef4444; font-size: 22px;">⚠️</span> تنبيه الغياب</div>' +
-        '<button class="sb-close-icon" id="sb-close-btn">✕</button>' +
-      '</div>' +
-      '<div class="sb-content">' + 
-        rows + 
-        '<div style="margin-top: 32px;">' +
-          '<button class="sb-btn btn-main" id="sb-restore">🔄 استعادة النافذة الرئيسية</button>' +
-        '</div>' +
-      '</div>';
+    sb.innerHTML = '<div class="sb-header"><b>تنبيهات الغياب</b><button id="sb-close-btn" style="background:none; border:none; cursor:pointer">✕</button></div>' +
+      '<div class="sb-content">' + rows + 
+      '<button class="sb-btn" id="sb-restore" style="background:#0f172a; color:#fff">🔄 استعادة النافذة</button></div>';
     document.body.appendChild(sb);
 
-    // 3. التحقق من حالة العرض (هل المستخدم أخفاها سابقاً؟)
     var isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
-    
-    if (isDismissed) {
-      alertIcon.style.display = "block"; // إظهار المثلث
-    } else {
-      showMainModal(); // إظهار النافذة الكبيرة
-    }
+    if (isDismissed) { alertIcon.style.display = "block"; } else { showMainModal(); }
 
-    // 4. ربط الأحداث (Events)
     alertIcon.onclick = function() { sb.classList.add("open"); };
     document.getElementById("sb-close-btn").onclick = function() { sb.classList.remove("open"); };
     document.getElementById("sb-restore").onclick = function() {
-      localStorage.removeItem("absDismissed_" + mState.empId); // إزالة الحظر
-      sb.classList.remove("open"); // إغلاق الجانبية
-      alertIcon.style.display = "none"; // إخفاء المثلث
-      setTimeout(showMainModal, 300); // إظهار الرئيسية بعد أن تُغلق الجانبية
+      localStorage.removeItem("absDismissed_" + mState.empId);
+      sb.classList.remove("open");
+      alertIcon.style.display = "none";
+      setTimeout(showMainModal, 300);
     };
   }
 
-  // دالة إظهار النافذة الكبيرة
   function showMainModal() {
     if (document.getElementById("abs-overlay")) return;
-    
     var ov = document.createElement("div");
     ov.id = "abs-overlay";
     ov.className = "abs-font";
-    
     var rows = mState.absences.map(function(a){ 
-      return '<div class="ab-row"><span class="ab-date">📅 '+a.date+'</span><span class="ab-badge">غياب غير مبرر</span></div>'; 
+      return '<div class="ab-row"><span class="ab-date">📅 '+a.date+'</span><span style="font-size:11px; color:#ef4444">غياب غير مبرر</span></div>'; 
     }).join("");
     
-    ov.innerHTML = 
-      '<div id="abs-modal">' +
-        '<div id="abs-head">' +
-          '<div class="abs-icon-circle">⚠️</div>' +
-          '<h2>تنبيه إداري</h2>' +
-          '<p>يرجى مراجعة سجل الحضور الخاص بك</p>' +
-        '</div>' +
-        '<div class="abs-body">' +
-          '<div class="abs-greeting">مرحباً <b>'+mState.empName.split(' ')[0]+'</b>، تم رصد غياب لك في التواريخ التالية:</div>' +
-          '<div class="abs-list">' + rows + '</div>' +
-          '<label class="abs-checkbox-wrapper">' +
-            '<input type="checkbox" id="abs-hide-check">' +
-            '<span class="abs-checkbox-text">عدم الإظهار مجدداً (تصغير إلى مثلث تنبيه)</span>' +
-          '</label>' +
-          '<button id="abs-main-close">حسناً، فهمت</button>' +
-        '</div>' +
-      '</div>';
+    ov.innerHTML = '<div id="abs-modal">' +
+      '<div id="abs-head"><div class="abs-icon-circle">⚠️</div><h2>تنبيه غياب</h2></div>' +
+      '<div class="abs-body">' +
+        '<div class="abs-greeting">مرحباً <b>'+mState.empName.split(' ')[0]+'</b>، تم رصد غياب:</div>' +
+        '<div style="max-height:120px; overflow-y:auto; margin-bottom:15px">' + rows + '</div>' +
+        '<label class="abs-checkbox-wrapper"><input type="checkbox" id="abs-hide-check"><span class="abs-checkbox-text">إخفاء (تحويل لمثلث صغير)</span></label>' +
+        '<button id="abs-main-close">فهمت</button>' +
+      '</div></div>';
 
     document.body.appendChild(ov);
-
-    // حدث الإغلاق
     document.getElementById("abs-main-close").onclick = function() {
-      var isChecked = document.getElementById("abs-hide-check").checked;
-      
-      // حركة خروج سلسة
-      ov.style.animation = "fadeIn 0.3s ease reverse forwards";
-      document.getElementById("abs-modal").style.animation = "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) reverse forwards";
-      
-      setTimeout(function() {
-        if (isChecked) {
-          localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
-          document.getElementById("abs-alert-icon").style.display = "block"; // إظهار المثلث النابض
-        }
-        ov.remove();
-      }, 300);
+      if (document.getElementById("abs-hide-check").checked) {
+        localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
+        document.getElementById("abs-alert-icon").style.display = "block";
+      }
+      ov.remove();
     };
   }
 
-  // ── تشغيل السكربت ────────────────────────────────────────────────────────
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () { setTimeout(init, 500); });
   } else {
