@@ -76,118 +76,139 @@
       @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
       .abs-font { font-family: 'Tajawal', sans-serif; direction: rtl; }
 
-      /* أيقونة التنبيه ⚠️ الصغيرة */
-      #abs-trigger-icon {
-        position: fixed; left: 15px; bottom: 15px; z-index: 999999;
-        font-size: 24px; cursor: pointer; display: none;
-        user-select: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-        animation: absShake 3s infinite;
+      /* الحاوية الكبيرة للأيقونة المتحركة */
+      #abs-trigger-container {
+        position: fixed; left: 30px; bottom: 30px; z-index: 999999;
+        width: 60px; height: 60px; cursor: pointer; display: none;
       }
 
-      @keyframes absShake {
-        0%, 90%, 100% { transform: scale(1); }
-        93% { transform: scale(1.2) rotate(5deg); }
-        95% { transform: scale(1.2) rotate(-5deg); }
-        97% { transform: scale(1.2) rotate(5deg); }
+      /* النقاط التي تدور حول المركز */
+      .abs-orbit-dots {
+        position: absolute; width: 100%; height: 100%;
+        animation: absRotate 4s linear infinite;
+      }
+      .abs-dot {
+        position: absolute; width: 6px; height: 6px;
+        background: #dc2626; border-radius: 50%;
+      }
+      .abs-dot:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
+      .abs-dot:nth-child(2) { bottom: 0; left: 50%; transform: translateX(-50%); }
+      .abs-dot:nth-child(3) { left: 0; top: 50%; transform: translateY(-50%); }
+      .abs-dot:nth-child(4) { right: 0; top: 50%; transform: translateY(-50%); }
+
+      /* الدائرة المركزية */
+      .abs-center-circle {
+        position: absolute; inset: 12px;
+        background: #dc2626; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+        z-index: 10; animation: absPulse 2s ease-in-out infinite;
+      }
+
+      /* تبديل الرموز ! و ? */
+      .abs-center-circle::after {
+        content: '!'; color: white; font-weight: bold; font-size: 20px;
+        animation: absSymbolChange 3s step-end infinite;
+      }
+
+      @keyframes absRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      
+      @keyframes absPulse { 
+        0%, 100% { transform: scale(1); } 
+        50% { transform: scale(1.1); } 
+      }
+
+      @keyframes absSymbolChange {
+        0%, 45% { content: '!'; }
+        50%, 95% { content: '?'; }
       }
 
       /* النافذة والغطاء */
       #abs-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+        position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
         display: flex; align-items: center; justify-content: center;
-        z-index: 1000000; backdrop-filter: blur(4px);
+        z-index: 1000000; backdrop-filter: blur(8px);
       }
       #abs-modal {
         background: #fff; border-radius: 24px; padding: 25px;
-        width: 85%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
-        text-align: center; animation: absPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        width: 90%; max-width: 380px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+        text-align: center; animation: absPopUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
-      @keyframes absPop {
-        from { opacity: 0; transform: scale(0.8); }
-        to { opacity: 1; transform: scale(1); }
-      }
+      @keyframes absPopUp { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
 
-      .abs-title { color: #1e293b; font-weight: 700; font-size: 1.25rem; margin: 10px 0; }
-      .abs-emoji-big { font-size: 40px; margin-bottom: 5px; }
-      
+      .abs-title { color: #1e293b; font-weight: 700; font-size: 1.3rem; margin-bottom: 15px; }
       .ab-row {
-        background: #fff1f2; color: #be123c; padding: 12px;
+        background: #fef2f2; color: #9f1239; padding: 12px;
         border-radius: 12px; margin-bottom: 8px; font-weight: 600;
         border: 1px solid #fecdd3;
       }
       
       .abs-footer { margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px; }
-      
       .abs-check-label {
         display: flex; align-items: center; justify-content: center; gap: 8px;
         font-size: 14px; color: #64748b; cursor: pointer; margin-bottom: 15px;
       }
-      
       #abs-main-close {
-        width: 100%; padding: 14px; background: #e11d48; color: #fff;
-        border: none; border-radius: 12px; font-weight: 700; font-size: 16px; 
-        cursor: pointer; transition: background 0.2s;
+        width: 100%; padding: 14px; background: #dc2626; color: #fff;
+        border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
       }
-      #abs-main-close:hover { background: #be123c; }
     `;
     document.head.appendChild(s);
   }
 
   // ─── واجهة المستخدم (UI) ──────────────────────────────────────────────────
   function buildUI() {
-    const icon = document.createElement("div");
-    icon.id = "abs-trigger-icon";
-    icon.innerHTML = "⚠️";
-    document.body.appendChild(icon);
+    const container = document.createElement("div");
+    container.id = "abs-trigger-container";
+    container.innerHTML = `
+      <div class="abs-orbit-dots">
+        <div class="abs-dot"></div>
+        <div class="abs-dot"></div>
+        <div class="abs-dot"></div>
+        <div class="abs-dot"></div>
+      </div>
+      <div class="abs-center-circle"></div>
+    `;
+    document.body.appendChild(container);
 
     const isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
     
     if (isDismissed) {
-      icon.style.display = "block";
+      container.style.display = "block";
     } else {
       showMainModal();
     }
 
-    icon.onclick = () => showMainModal();
+    container.onclick = () => showMainModal();
   }
 
   function showMainModal() {
     if (document.getElementById("abs-overlay")) return;
 
-    const rows = mState.absences.map(a => `
-      <div class="ab-row">📅 غياب يوم: ${a.date}</div>
-    `).join("");
+    const rows = mState.absences.map(a => `<div class="ab-row">🗓️ غياب يوم: ${a.date}</div>`).join("");
 
     const ov = document.createElement("div");
     ov.id = "abs-overlay";
     ov.className = "abs-font";
     ov.innerHTML = `
       <div id="abs-modal">
-        <div class="abs-emoji-big">⚠️</div>
-        <div class="abs-title">تنبيه غياب</div>
-        <p style="color:#64748b; font-size:14px; margin-bottom:15px;">تم رصد أيام غياب مسجلة باسمك في النظام:</p>
+        <div class="abs-title">تنبيه الغياب</div>
         <div class="abs-list">${rows}</div>
         <div class="abs-footer">
           <label class="abs-check-label">
-            <input type="checkbox" id="abs-hide-check">
-            عدم إظهار التنبيه تلقائياً مرة أخرى
+            <input type="checkbox" id="abs-hide-check"> عدم الإظهار تلقائياً مرة أخرى
           </label>
-          <button id="abs-main-close">حسناً، فهمت</button>
+          <button id="abs-main-close">موافق</button>
         </div>
       </div>
     `;
-
     document.body.appendChild(ov);
 
     document.getElementById("abs-main-close").onclick = function () {
-      const isChecked = document.getElementById("abs-hide-check").checked;
-      
-      if (isChecked) {
+      if (document.getElementById("abs-hide-check").checked) {
         localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
       }
-      
-      // بمجرد الإغلاق، تظهر الأيقونة الصغيرة في الزاوية دائماً للرجوع إليها
-      document.getElementById("abs-trigger-icon").style.display = "block";
+      document.getElementById("abs-trigger-container").style.display = "block";
       ov.remove();
     };
   }
