@@ -76,13 +76,11 @@
       @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
       .abs-font { font-family: 'Tajawal', sans-serif; direction: rtl; }
 
-      /* الحاوية الكبيرة للأيقونة المتحركة */
+      /* الأيقونة المتحركة (الدائرة والنقاط) */
       #abs-trigger-container {
-        position: fixed; left: 30px; bottom: 30px; z-index: 999999;
+        position: fixed; left: 25px; bottom: 25px; z-index: 999999;
         width: 60px; height: 60px; cursor: pointer; display: none;
       }
-
-      /* النقاط التي تدور حول المركز */
       .abs-orbit-dots {
         position: absolute; width: 100%; height: 100%;
         animation: absRotate 4s linear infinite;
@@ -96,7 +94,6 @@
       .abs-dot:nth-child(3) { left: 0; top: 50%; transform: translateY(-50%); }
       .abs-dot:nth-child(4) { right: 0; top: 50%; transform: translateY(-50%); }
 
-      /* الدائرة المركزية */
       .abs-center-circle {
         position: absolute; inset: 12px;
         background: #dc2626; border-radius: 50%;
@@ -104,26 +101,16 @@
         box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
         z-index: 10; animation: absPulse 2s ease-in-out infinite;
       }
-
-      /* تبديل الرموز ! و ? */
       .abs-center-circle::after {
         content: '!'; color: white; font-weight: bold; font-size: 20px;
         animation: absSymbolChange 3s step-end infinite;
       }
 
       @keyframes absRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      
-      @keyframes absPulse { 
-        0%, 100% { transform: scale(1); } 
-        50% { transform: scale(1.1); } 
-      }
+      @keyframes absPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+      @keyframes absSymbolChange { 0%, 45% { content: '!'; } 50%, 95% { content: '?'; } }
 
-      @keyframes absSymbolChange {
-        0%, 45% { content: '!'; }
-        50%, 95% { content: '?'; }
-      }
-
-      /* النافذة والغطاء */
+      /* النافذة */
       #abs-overlay {
         position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
         display: flex; align-items: center; justify-content: center;
@@ -139,15 +126,17 @@
       .abs-title { color: #1e293b; font-weight: 700; font-size: 1.3rem; margin-bottom: 15px; }
       .ab-row {
         background: #fef2f2; color: #9f1239; padding: 12px;
-        border-radius: 12px; margin-bottom: 8px; font-weight: 600;
-        border: 1px solid #fecdd3;
+        border-radius: 12px; margin-bottom: 8px; font-weight: 600; border: 1px solid #fecdd3;
       }
       
       .abs-footer { margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px; }
+      
+      .abs-check-group { text-align: right; margin-bottom: 20px; }
       .abs-check-label {
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        font-size: 14px; color: #64748b; cursor: pointer; margin-bottom: 15px;
+        display: flex; align-items: center; gap: 10px;
+        font-size: 14px; color: #64748b; cursor: pointer; margin-bottom: 10px;
       }
+      
       #abs-main-close {
         width: 100%; padding: 14px; background: #dc2626; color: #fff;
         border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
@@ -160,20 +149,17 @@
   function buildUI() {
     const container = document.createElement("div");
     container.id = "abs-trigger-container";
-    container.innerHTML = `
-      <div class="abs-orbit-dots">
-        <div class="abs-dot"></div>
-        <div class="abs-dot"></div>
-        <div class="abs-dot"></div>
-        <div class="abs-dot"></div>
-      </div>
-      <div class="abs-center-circle"></div>
-    `;
+    container.innerHTML = `<div class="abs-orbit-dots"><div class="abs-dot"></div><div class="abs-dot"></div><div class="abs-dot"></div><div class="abs-dot"></div></div><div class="abs-center-circle"></div>`;
     document.body.appendChild(container);
 
-    const isDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
+    const isModalDismissed = localStorage.getItem("absDismissed_" + mState.empId) === mState.hash;
+    const isDotHidden = localStorage.getItem("absHideDot_" + mState.empId) === mState.hash;
     
-    if (isDismissed) {
+    // إذا تم إخفاء كل شيء لهذا التحديث، لا تفعل شيئاً
+    if (isDotHidden) return;
+
+    // إذا تم إخفاء النافذة فقط، أظهر الدائرة
+    if (isModalDismissed) {
       container.style.display = "block";
     } else {
       showMainModal();
@@ -195,9 +181,16 @@
         <div class="abs-title">تنبيه الغياب</div>
         <div class="abs-list">${rows}</div>
         <div class="abs-footer">
-          <label class="abs-check-label">
-            <input type="checkbox" id="abs-hide-check"> عدم الإظهار تلقائياً مرة أخرى
-          </label>
+          <div class="abs-check-group">
+            <label class="abs-check-label">
+              <input type="checkbox" id="abs-hide-check"> 
+              <span>عدم إظهار النافذة تلقائياً</span>
+            </label>
+            <label class="abs-check-label">
+              <input type="checkbox" id="abs-hide-dot-check"> 
+              <span style="color: #ef4444; font-weight: bold;">إخفاء الدائرة أيضاً حتى التحديث القادم</span>
+            </label>
+          </div>
           <button id="abs-main-close">موافق</button>
         </div>
       </div>
@@ -205,10 +198,22 @@
     document.body.appendChild(ov);
 
     document.getElementById("abs-main-close").onclick = function () {
-      if (document.getElementById("abs-hide-check").checked) {
+      const hideModal = document.getElementById("abs-hide-check").checked;
+      const hideDot = document.getElementById("abs-hide-dot-check").checked;
+
+      if (hideDot) {
+        // إخفاء كلي (نافذة + دائرة)
+        localStorage.setItem("absHideDot_" + mState.empId, mState.hash);
+        document.getElementById("abs-trigger-container").style.display = "none";
+      } else if (hideModal) {
+        // إخفاء النافذة فقط وإظهار الدائرة
         localStorage.setItem("absDismissed_" + mState.empId, mState.hash);
+        document.getElementById("abs-trigger-container").style.display = "block";
+      } else {
+        // لم يختر أي شيء، الدائرة ستظهر مؤقتاً
+        document.getElementById("abs-trigger-container").style.display = "block";
       }
-      document.getElementById("abs-trigger-container").style.display = "block";
+      
       ov.remove();
     };
   }
