@@ -208,6 +208,19 @@ jobs:
           sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/now/index.html || true
           echo "✅ Eid overlay injected!"
 
+      - name: Generate absence data
+        if: steps.check_changes.outputs.should_process == 'true'
+        env:
+          ABSENCE_EXCEL_URL: ${{ secrets.ABSENCE_EXCEL_URL }}
+        run: |
+          if [ -f "process_absence.py" ]; then
+            echo "Generating absence-data.json..."
+            python process_absence.py
+            echo "Done!"
+          else
+            echo "process_absence.py not found, skipping..."
+          fi
+
       - name: Send Email Notification
         if: steps.check_changes.outputs.should_send_email == 'true'
         env:
