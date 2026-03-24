@@ -1706,6 +1706,7 @@ applyLang(LANG);
 }})();
 </script>
 <script src="/roster-site/eid-overlay.js"></script>
+<script src="/roster-site/absence-alert.js"></script>
 </body>
 </html>"""
 
