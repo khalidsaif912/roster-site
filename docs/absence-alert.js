@@ -151,26 +151,6 @@
         text-align: left;
       }
 
-      #abs-lang-toggle {
-        position: fixed;
-        top: 14px;
-        right: 14px;
-        z-index: 1000000;
-        height: 34px;
-        min-width: 42px;
-        padding: 0 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(153,27,27,0.18);
-        background: #991b1b;
-        color: #fff;
-        font-size: 12px;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 8px 20px rgba(153,27,27,0.22);
-        -webkit-tap-highlight-color: transparent;
-      }
-      #abs-lang-toggle:hover { opacity: .92; }
-      #abs-lang-toggle:active { transform: scale(.97); }
 
       #abs-dot {
         position: fixed;
@@ -556,27 +536,15 @@
   }
 
   function clearUI() {
-    ["abs-dot", "abs-card", "abs-overlay", "abs-lang-toggle"].forEach((id) => {
+    ["abs-dot", "abs-card", "abs-overlay"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.remove();
     });
   }
 
-  function createLangToggleButton() {
-    const btn = applyLangMeta(document.createElement("button"));
-    btn.id = "abs-lang-toggle";
-    btn.className = "abs-r";
-    btn.type = "button";
-    btn.textContent = t().langButton;
-    btn.onclick = toggleLang;
-    document.body.appendChild(btn);
-  }
-
   function buildUI() {
     const dict = t();
     const count = mState.absences.length;
-
-    createLangToggleButton();
 
     const dot = applyLangMeta(document.createElement("div"));
     dot.id = "abs-dot";
@@ -662,7 +630,10 @@
       <div id="abs-modal">
         <div id="abs-mhead">
           <div class="abs-mhead-row">
-            <div class="abs-mtitle">${dict.hello(firstName)}</div>
+            <button class="abs-mxbtn" id="abs-lang-btn" type="button" aria-label="Change language" style="width:auto;height:28px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:800;">
+              ${dict.langButton}
+            </button>
+            <div class="abs-mtitle" style="flex:1;text-align:center;">${dict.hello(firstName)}</div>
             <button class="abs-mxbtn" id="abs-xbtn" aria-label="${dict.closeLabel}">✕</button>
           </div>
           <div class="abs-msub">${dict.systemHas(count)}</div>
@@ -704,6 +675,10 @@
       </div>`;
     document.body.appendChild(ov);
 
+    document.getElementById("abs-lang-btn").onclick = (e) => {
+      e.stopPropagation();
+      toggleLang();
+    };
     document.getElementById("abs-xbtn").onclick = () => closeModal(ov, false, false);
     document.getElementById("abs-ok").onclick = () => closeModal(
       ov,
