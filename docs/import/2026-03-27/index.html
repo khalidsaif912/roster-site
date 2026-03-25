@@ -709,7 +709,7 @@ body:not(.light) .emp-code{filter:brightness(1.4)}
   </div>
   
   <div class="page-footer">
-    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">25 MAR 2026 / 11:49</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">25 MAR 2026 / 12:33</strong>
     &nbsp;&middot;&nbsp; 78 employees &nbsp;&middot;&nbsp; MARCH ROSTER MID.xlsx
   </div>
 
@@ -718,7 +718,7 @@ body:not(.light) .emp-code{filter:brightness(1.4)}
 function _importBase(){var o=location.origin,r=location.pathname.includes('/roster-site/')?o+'/roster-site':o;return r+'/import';}
 var _avail=["2026-03"];
 function openDatePicker(){var p=document.getElementById('datePicker');if(!p)return;try{p.showPicker()}catch(e){p.click()}p.onchange=function(){if(!p.value)return;sessionStorage.setItem('manualNav','1');location.href=_importBase()+'/'+p.value+'/';}; }
-function goToMySchedule(e){if(e)e.preventDefault();var id=localStorage.getItem('savedEmpId');location.href=_importBase()+'/my-schedules/index.html'+(id?'?emp='+encodeURIComponent(id):'');}
+function goToMySchedule(e){if(e)e.preventDefault();var id=localStorage.getItem('importSavedEmpId');location.href=_importBase()+'/my-schedules/index.html'+(id?'?emp='+encodeURIComponent(id):'');}
 function toggleTheme(){var isLight=document.body.classList.toggle('light');localStorage.setItem('importTheme',isLight?'light':'dark');var btn=document.getElementById('themeBtn');if(btn)btn.textContent=isLight?'☀️':'🌙';}
 // Toggle btn alternates between 👋 and 📅
 (function(){
