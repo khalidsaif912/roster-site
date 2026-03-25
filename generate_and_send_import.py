@@ -842,7 +842,7 @@ body:not(.light) .emp-code{{filter:brightness(1.4)}}
 function _importBase(){{var o=location.origin,r=location.pathname.includes('/roster-site/')?o+'/roster-site':o;return r+'{safe_repo_base}';}}
 var _avail={safe_available_months_js};
 function openDatePicker(){{var p=document.getElementById('datePicker');if(!p)return;try{{p.showPicker()}}catch(e){{p.click()}}p.onchange=function(){{if(!p.value)return;sessionStorage.setItem('manualNav','1');location.href=_importBase()+'/'+p.value+'/';}}; }}
-function goToMySchedule(e){{if(e)e.preventDefault();var id=localStorage.getItem('savedEmpId')||localStorage.getItem('importSavedEmpId');location.href=_importBase()+'/my-schedules/index.html'+(id?'?emp='+encodeURIComponent(id):'');}}
+function goToMySchedule(e){{if(e)e.preventDefault();var id=localStorage.getItem('savedEmpId');location.href=_importBase()+'/my-schedules/index.html'+(id?'?emp='+encodeURIComponent(id):'');}}
 function toggleTheme(){{var isLight=document.body.classList.toggle('light');localStorage.setItem('importTheme',isLight?'light':'dark');var btn=document.getElementById('themeBtn');if(btn)btn.textContent=isLight?'☀️':'🌙';}}
 // Toggle btn alternates between 👋 and 📅
 (function(){{
@@ -868,7 +868,7 @@ function _wave(){{var h=document.getElementById('waveHand');if(!h)return;h.class
   var isLight=localStorage.getItem('importTheme')==='light';
   if(isLight){{document.body.classList.add('light');var tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}}
   document.querySelectorAll('a[href^="{{BASE}}"]').forEach(function(a){{a.href=a.getAttribute('href').replace('{{BASE}}',_importBase());}});
-  var empId=localStorage.getItem('savedEmpId')||localStorage.getItem('importSavedEmpId');
+  var empId=localStorage.getItem('savedEmpId');
   var hdrWave=document.getElementById('hdrWave'),hdrGreet=document.getElementById('hdrGreet');
   if(empId&&hdrGreet){{
     fetch(_importBase()+'/schedules/'+encodeURIComponent(empId)+'.json').then(function(r){{return r.ok?r.json():null;}}).then(function(d){{
