@@ -868,7 +868,7 @@ function _wave(){{var h=document.getElementById('waveHand');if(!h)return;h.class
   var isLight=localStorage.getItem('importTheme')==='light';
   if(isLight){{document.body.classList.add('light');var tb=document.getElementById('themeBtn');if(tb)tb.textContent='☀️';}}
   document.querySelectorAll('a[href^="{{BASE}}"]').forEach(function(a){{a.href=a.getAttribute('href').replace('{{BASE}}',_importBase());}});
-  var empId=localStorage.getItem('savedEmpId');
+  var empId=localStorage.getItem('importSavedEmpId');
   var hdrWave=document.getElementById('hdrWave'),hdrGreet=document.getElementById('hdrGreet');
   if(empId&&hdrGreet){{
     fetch(_importBase()+'/schedules/'+encodeURIComponent(empId)+'.json').then(function(r){{return r.ok?r.json():null;}}).then(function(d){{
