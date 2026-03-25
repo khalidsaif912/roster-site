@@ -718,7 +718,7 @@ body:not(.light) .emp-code{filter:brightness(1.4)}
   </div>
   
   <div class="page-footer">
-    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">25 MAR 2026 / 18:11</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">25 MAR 2026 / 18:31</strong>
     &nbsp;&middot;&nbsp; 78 employees &nbsp;&middot;&nbsp; MARCH ROSTER MID.xlsx
   </div>
 
@@ -745,7 +745,7 @@ function toggleTheme(){var isLight=document.body.classList.toggle('light');local
   setInterval(flip,4000);
 })();
 var _T={ar:{title:'Import Duty Roster',emp:'موظف',dept:'قسم',my:'جدولي',cta:'عرض جدول المناوبات',Morning:'صباح',Afternoon:'ظهر',Night:'ليل','Off Day':'إجازة','Annual Leave':'سنوية','Sick Leave':'مرضية',Training:'تدريب',Standby:'استعداد',Other:'أخرى'},en:{title:'Import Duty Roster',emp:'Emp',dept:'Dept',my:'جدولي',cta:'View Full Roster',Morning:'Morning',Afternoon:'Afternoon',Night:'Night','Off Day':'Off Day','Annual Leave':'Annual Leave','Sick Leave':'Sick Leave',Training:'Training',Standby:'Standby',Other:'Other'}};
-function _applyLang(isAr){var L=_T[isAr?'ar':'en'];var b=document.getElementById('langToggle');if(b)b.textContent=isAr?'EN':'ع';var pt=document.getElementById('pageTitle');if(pt)pt.textContent=L.title;var cta=document.getElementById('ctaBtn');if(cta)cta.textContent=L.cta;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=L[el.getAttribute('data-i18n')]||el.textContent;});document.querySelectorAll('.shift-label[data-shift]').forEach(function(el){el.textContent=L[el.getAttribute('data-shift')]||el.getAttribute('data-shift');});}
+function _applyLang(isAr){var L=_T[isAr?'ar':'en'];document.body.classList.toggle('ar',isAr);document.documentElement.lang=isAr?'ar':'en';document.documentElement.dir=isAr?'rtl':'ltr';var b=document.getElementById('langToggle');if(b)b.textContent=isAr?'EN':'ع';var pt=document.getElementById('pageTitle');if(pt)pt.textContent=L.title;var cta=document.getElementById('ctaBtn');if(cta)cta.textContent=L.cta;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=L[el.getAttribute('data-i18n')]||el.textContent;});document.querySelectorAll('.shift-label[data-shift]').forEach(function(el){el.textContent=L[el.getAttribute('data-shift')]||el.getAttribute('data-shift');});}
 function toggleLang(){var isAr=!document.body.classList.contains('ar');localStorage.setItem('importLang',isAr?'ar':'en');_applyLang(isAr);}
 function _wave(){var h=document.getElementById('waveHand');if(!h)return;h.classList.remove('waving');void h.offsetWidth;h.classList.add('waving');}
 (function(){
