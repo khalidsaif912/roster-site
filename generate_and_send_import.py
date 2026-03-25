@@ -882,7 +882,8 @@ function _applyLang(isAr){
   document.querySelectorAll('.shift-label[data-shift]').forEach(function(el){
     el.textContent = L[el.getAttribute('data-shift')] || el.getAttribute('data-shift');
   });
-}
+}function toggleLang(){{var isAr=!document.body.classList.contains('ar');localStorage.setItem('importLang',isAr?'ar':'en');_applyLang(isAr);}}
+function _wave(){{var h=document.getElementById('waveHand');if(!h)return;h.classList.remove('waving');void h.offsetWidth;h.classList.add('waving');}}
 (function(){{
   var isAr=localStorage.getItem('importLang')==='ar';_applyLang(isAr);
   var isLight=localStorage.getItem('importTheme')==='light';
