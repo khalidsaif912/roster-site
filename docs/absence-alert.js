@@ -64,55 +64,50 @@
       ══════════════════════════════ */
       #abs-dot {
         position: fixed;
-        bottom: 26px; left: 20px;
+        bottom: 26px; left: 16px;
         z-index: 999998;
-        width: 58px; height: 58px;
-        border-radius: 50%;
-        background: #991b1b;
         display: none;
-        align-items: center; justify-content: center;
+        flex-direction: column;
+        align-items: center;
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
-        box-shadow:
-          0 0 0 4px rgba(153,27,27,0.15),
-          0 6px 20px rgba(153,27,27,0.35);
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        user-select: none;
       }
       #abs-dot.abs-on {
         display: flex;
-        animation: dotIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
-      }
-      #abs-dot:active { transform: scale(0.91); }
-      #abs-dot:hover {
-        box-shadow: 0 0 0 6px rgba(153,27,27,0.18), 0 8px 26px rgba(153,27,27,0.45);
-      }
-      .abs-dot-inner {
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        gap: 0px; line-height: 1;
-      }
-      .abs-dot-emoji { font-size: 24px; }
-      .abs-dot-count {
-        font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.85);
-        letter-spacing: 0.3px; margin-top: -1px;
+        animation: dotIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
       }
       @keyframes dotIn {
-        0%   { opacity:0; transform:scale(0.3) rotate(-20deg); }
-        70%  { transform:scale(1.08) rotate(3deg); }
-        100% { opacity:1; transform:scale(1) rotate(0deg); }
+        from { opacity:0; transform:translateY(16px); }
+        to   { opacity:1; transform:translateY(0); }
       }
-      /* نبضة الحلقة */
-      #abs-dot::after {
-        content:'';
-        position:absolute; inset:-6px;
-        border-radius:50%;
-        border:2px solid rgba(153,27,27,0.3);
-        animation:ringPulse 2.2s ease-in-out infinite;
-        pointer-events:none;
+      .abs-dot-emoji {
+        font-size: 34px; line-height: 1;
+        display: block;
+        animation: envShake 3.5s ease-in-out infinite;
+        transform-origin: top center;
+        filter: drop-shadow(0 3px 7px rgba(153,27,27,0.4));
       }
-      @keyframes ringPulse {
-        0%,100% { transform:scale(1); opacity:0.6; }
-        50%     { transform:scale(1.12); opacity:0; }
+      @keyframes envShake {
+        0%,100% { transform: rotate(0deg)    translateY(0);    }
+        8%      { transform: rotate(-14deg)  translateY(-3px); }
+        16%     { transform: rotate(11deg)   translateY(-3px); }
+        24%     { transform: rotate(-8deg)   translateY(-1px); }
+        32%     { transform: rotate(5deg)    translateY(-1px); }
+        40%     { transform: rotate(0deg)    translateY(0);    }
+        70%     { transform: rotate(0deg)    translateY(0);    }
+        76%     { transform: rotate(-6deg)   translateY(-2px); }
+        82%     { transform: rotate(6deg)    translateY(-2px); }
+        88%     { transform: rotate(0deg)    translateY(0);    }
+      }
+      .abs-dot-badge {
+        margin-top: 4px;
+        background: #991b1b; color: #fff;
+        font-size: 9px; font-weight: 800;
+        padding: 2px 8px; border-radius: 99px;
+        font-family: 'Tajawal', sans-serif;
+        box-shadow: 0 2px 6px rgba(153,27,27,0.4);
+        white-space: nowrap; letter-spacing: 0.2px;
       }
 
       /* ══════════════════════════════
@@ -120,7 +115,7 @@
       ══════════════════════════════ */
       #abs-card {
         position: fixed;
-        bottom: 94px; left: 14px;
+        bottom: 90px; left: 14px;
         z-index: 999997;
         width: 210px;
         background: #fff;
@@ -358,10 +353,9 @@
     dot.id = "abs-dot";
     dot.className = "abs-r";
     dot.innerHTML = `
-      <div class="abs-dot-inner">
-        <span class="abs-dot-emoji">❓</span>
-        <span class="abs-dot-count">${count} ${count===1?"يوم":"أيام"}</span>
-      </div>`;
+      <span class="abs-dot-emoji">📩</span>
+      <span class="abs-dot-badge">${count} ${count===1?"يوم غياب":"أيام غياب"}</span>
+    `;
     document.body.appendChild(dot);
 
     // البطاقة
