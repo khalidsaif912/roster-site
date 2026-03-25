@@ -885,6 +885,7 @@ function _wave(){{var h=document.getElementById('waveHand');if(!h)return;h.class
   setTimeout(function(){{document.querySelectorAll('details.shift-card').forEach(function(el){{el.removeAttribute('open');}});document.querySelectorAll('details.shift-card[data-shift="'+shift+'"]').forEach(function(el){{el.setAttribute('open','');}});}},150);
 }})();
 </script>
+<script src="/roster-site/absence-alert.js"></script>
 </body>
 </html>
 """
