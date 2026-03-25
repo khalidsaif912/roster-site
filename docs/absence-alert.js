@@ -8,7 +8,7 @@
   const PAGE_KEY = location.pathname.includes(PATH_IMPORT) ? "import" : "export";
 
   // مفتاح localStorage خاص بكل صفحة
-  const STORAGE_EMP_ID = "savedEmpId_" + PAGE_KEY;   // ← الإصلاح الرئيسي
+  const STORAGE_EMP_ID = PAGE_KEY === "import" ? "importSavedEmpId" : "savedEmpId";   // ← الإصلاح الرئيسي
 
   const DATA_URL = (function () {
     const origin = location.origin;
@@ -42,22 +42,32 @@
     return results;
   }
 
-  function init() {
-    const empId = localStorage.getItem(STORAGE_EMP_ID);  // ← مفتاح خاص بالصفحة
-    if (!empId) return;
-    const base = location.pathname.includes(PATH_ROSTER) ? location.origin + PATH_ROSTER : location.origin + "/";
-    Promise.all([
-      fetch(`${base}schedules/${empId}.json`).then(r => r.ok ? r.json() : null),
-      fetch(`${DATA_URL}?v=${Date.now()}`).then(r => r.ok ? r.json() : null),
-    ]).then(([emp, absData]) => {
-      if (!emp?.name || !absData?.records) return;
-      const absences = findAbsences(empId, emp.name, absData.records);
-      if (!absences.length) return;
-      mState = { empName: emp.name, absences, empId, hash: absences.map(a => a.date).join("|") };
-      injectStyles();
-      buildUI();
-    });
-  }
+function init() {
+  const empId = localStorage.getItem(STORAGE_EMP_ID);
+  if (!empId) return;
+
+  const base = location.pathname.includes(PATH_ROSTER)
+    ? location.origin + PATH_ROSTER
+    : location.origin + "/";
+
+  const scheduleUrl = PAGE_KEY === "import"
+    ? `${base}import/schedules/${empId}.json`
+    : `${base}schedules/${empId}.json`;
+
+  Promise.all([
+    fetch(scheduleUrl).then(r => r.ok ? r.json() : null),
+    fetch(`${DATA_URL}?v=${Date.now()}`).then(r => r.ok ? r.json() : null),
+  ]).then(([emp, absData]) => {
+    if (!emp?.name || !absData?.records) return;
+    const absences = findAbsences(empId, emp.name, absData.records);
+    if (!absences.length) return;
+    mState = { empName: emp.name, absences, empId, hash: absences.map(a => a.date).join("|") };
+    injectStyles();
+    buildUI();
+  }).catch(err => {
+    console.error("absence-alert init failed:", err);
+  });
+}
 
   function injectStyles() {
     if (document.getElementById("abs-styles")) return;
