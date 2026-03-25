@@ -5,6 +5,7 @@
   const PATH_IMPORT = "/roster-site/import";
   const PAGE_KEY = location.pathname.includes(PATH_IMPORT) ? "import" : "export";
   const STORAGE_EMP_ID = PAGE_KEY === "import" ? "importSavedEmpId" : "savedEmpId";
+  const STORAGE_LANG = "appLang";
 
   const DATA_URL = (function () {
     const origin = location.origin;
@@ -18,6 +19,7 @@
 
   const I18N = {
     ar: {
+      langButton: "EN",
       daysAbsence: (n) => `${n} ${n === 1 ? "يوم غياب" : "أيام غياب"}`,
       daysOnly: (n) => `${n} ${n === 1 ? "يوم" : "أيام"}`,
       recordedAbsence: "🔔 غياب مسجّل",
@@ -25,24 +27,25 @@
       hello: (name) => `مرحباً ${name} 👋`,
       systemHas: (n) => `لديك ${n} ${n === 1 ? "يوم غياب" : "أيام غياب"} مسجّلة في النظام`,
       reason:
-        "رصد نظام الحضور غياباً باسمك في التواريخ أدناه. إن اعتقدت بوجود خطأ راسل الإدارة مباشرةً.",
+        "رصد نظام الحضور غياباً باسمك في التواريخ أدناه. إن اعتقدت بوجود خطأ، راسل الإدارة مباشرةً.",
       absenceTag: "غياب",
       email: "بريد",
       whatsapp: "واتساب",
       hideModal: "عدم إظهار النافذة تلقائياً",
-      hideModalSub: "ستبقى أيقونة التنبيه",
+      hideModalSub: "ستبقى أيقونة التنبيه ظاهرة",
       hideDot: "إخفاء كل شيء حتى التحديث القادم",
-      hideDotSub: "لن يظهر تنبيه إلا عند غياب جديد",
+      hideDotSub: "لن يظهر التنبيه إلا عند وجود غياب جديد",
       ok: "حسناً، فهمت ✓",
       subject: (name) => `تنبيه غياب — ${name}`,
       adminMailBody: (name, empId, dates) =>
         `السلام عليكم،\n\nأفيدكم بأن الموظف ${name} (رقم: ${empId}) لديه غياب مسجّل في التواريخ التالية:\n${dates}\n\nأرجو مراجعة الأمر.\n\nشكراً`,
       waBody: (name, empId, dates) =>
         `السلام عليكم، أنا ${name} (رقم: ${empId})\nلديّ غياب مسجّل في التواريخ التالية:\n${dates}\nأرجو المراجعة. شكراً`,
-      dir: "rtl",
-      closeLabel: "إغلاق"
+      closeLabel: "إغلاق",
+      dir: "rtl"
     },
     en: {
+      langButton: "ع",
       daysAbsence: (n) => `${n} ${n === 1 ? "absence day" : "absence days"}`,
       daysOnly: (n) => `${n} ${n === 1 ? "day" : "days"}`,
       recordedAbsence: "🔔 Recorded absence",
@@ -64,29 +67,39 @@
         `Hello,\n\nThis is to inform you that employee ${name} (ID: ${empId}) has recorded absences on the following dates:\n${dates}\n\nPlease review the matter.\n\nThank you.`,
       waBody: (name, empId, dates) =>
         `Hello, I am ${name} (ID: ${empId}).\nI have recorded absences on the following dates:\n${dates}\nPlease review. Thank you.`,
-      dir: "ltr",
-      closeLabel: "Close"
+      closeLabel: "Close",
+      dir: "ltr"
     }
   };
 
-  function getCurrentLang() {
-    const htmlLang = (document.documentElement.lang || "").toLowerCase();
-    const htmlDir = (document.documentElement.dir || "").toLowerCase();
-    const bodyHasAr = document.body && document.body.classList && document.body.classList.contains("ar");
-    const stored = [
-      localStorage.getItem("importLang"),
-      localStorage.getItem("lang"),
-      localStorage.getItem("importPrefLang"),
-      localStorage.getItem("prefLang")
-    ].find(Boolean);
-
+  function getLang() {
+    const stored = localStorage.getItem(STORAGE_LANG);
     if (stored === "ar" || stored === "en") return stored;
-    if (htmlLang.startsWith("ar") || htmlDir === "rtl" || bodyHasAr) return "ar";
-    return "en";
+    localStorage.setItem(STORAGE_LANG, "ar");
+    return "ar";
+  }
+
+  function setLang(lang) {
+    localStorage.setItem(STORAGE_LANG, lang === "en" ? "en" : "ar");
+    applyLang();
+  }
+
+  function toggleLang() {
+    setLang(getLang() === "ar" ? "en" : "ar");
+    rerenderUI();
   }
 
   function t() {
-    return I18N[getCurrentLang()] || I18N.en;
+    return I18N[getLang()] || I18N.ar;
+  }
+
+  function applyLang() {
+    const lang = getLang();
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    if (document.body) {
+      document.body.classList.toggle("ar", lang === "ar");
+    }
   }
 
   function nameMatch(a, b) {
@@ -115,33 +128,6 @@
     return results;
   }
 
-  function init() {
-    const empId = localStorage.getItem(STORAGE_EMP_ID);
-    if (!empId) return;
-
-    const base = location.pathname.includes(PATH_ROSTER)
-      ? location.origin + PATH_ROSTER
-      : location.origin + "/";
-
-    const scheduleUrl = PAGE_KEY === "import"
-      ? `${base}import/schedules/${empId}.json`
-      : `${base}schedules/${empId}.json`;
-
-    Promise.all([
-      fetch(scheduleUrl).then(r => r.ok ? r.json() : null),
-      fetch(`${DATA_URL}?v=${Date.now()}`).then(r => r.ok ? r.json() : null),
-    ]).then(([emp, absData]) => {
-      if (!emp || !emp.name || !absData || !absData.records) return;
-      const absences = findAbsences(empId, emp.name, absData.records);
-      if (!absences.length) return;
-      mState = { empName: emp.name, absences, empId, hash: absences.map(a => a.date).join("|") };
-      injectStyles();
-      buildUI();
-    }).catch(err => {
-      console.error("absence-alert init failed:", err);
-    });
-  }
-
   function injectStyles() {
     if (document.getElementById("abs-styles")) return;
     const s = document.createElement("style");
@@ -164,6 +150,27 @@
         direction: ltr;
         text-align: left;
       }
+
+      #abs-lang-toggle {
+        position: fixed;
+        top: 14px;
+        right: 14px;
+        z-index: 1000000;
+        height: 34px;
+        min-width: 42px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(153,27,27,0.18);
+        background: #991b1b;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(153,27,27,0.22);
+        -webkit-tap-highlight-color: transparent;
+      }
+      #abs-lang-toggle:hover { opacity: .92; }
+      #abs-lang-toggle:active { transform: scale(.97); }
 
       #abs-dot {
         position: fixed;
@@ -396,7 +403,7 @@
       .abs-mxbtn:hover { background: rgba(255,255,255,0.3); }
       .abs-msub {
         font-size: 11px;
-        color: rgba(255,255,255,0.8);
+        color: rgba(255,255,255,0.82);
         font-weight: 500;
         position: relative;
         z-index: 1;
@@ -542,16 +549,34 @@
   }
 
   function applyLangMeta(el) {
-    const lang = getCurrentLang();
-    if (!el) return el;
+    const lang = getLang();
     el.setAttribute("data-lang", lang);
     el.setAttribute("dir", t().dir);
     return el;
   }
 
+  function clearUI() {
+    ["abs-dot", "abs-card", "abs-overlay", "abs-lang-toggle"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    });
+  }
+
+  function createLangToggleButton() {
+    const btn = applyLangMeta(document.createElement("button"));
+    btn.id = "abs-lang-toggle";
+    btn.className = "abs-r";
+    btn.type = "button";
+    btn.textContent = t().langButton;
+    btn.onclick = toggleLang;
+    document.body.appendChild(btn);
+  }
+
   function buildUI() {
     const dict = t();
     const count = mState.absences.length;
+
+    createLangToggleButton();
 
     const dot = applyLangMeta(document.createElement("div"));
     dot.id = "abs-dot";
@@ -704,6 +729,42 @@
         dot.classList.add("abs-on");
       }
     }, 220);
+  }
+
+  function rerenderUI() {
+    applyLang();
+    clearUI();
+    if (mState.absences && mState.absences.length) {
+      buildUI();
+    }
+  }
+
+  function init() {
+    applyLang();
+    const empId = localStorage.getItem(STORAGE_EMP_ID);
+    if (!empId) return;
+
+    const base = location.pathname.includes(PATH_ROSTER)
+      ? location.origin + PATH_ROSTER
+      : location.origin + "/";
+
+    const scheduleUrl = PAGE_KEY === "import"
+      ? `${base}import/schedules/${empId}.json`
+      : `${base}schedules/${empId}.json`;
+
+    Promise.all([
+      fetch(scheduleUrl).then(r => r.ok ? r.json() : null),
+      fetch(`${DATA_URL}?v=${Date.now()}`).then(r => r.ok ? r.json() : null),
+    ]).then(([emp, absData]) => {
+      if (!emp || !emp.name || !absData || !absData.records) return;
+      const absences = findAbsences(empId, emp.name, absData.records);
+      if (!absences.length) return;
+      mState = { empName: emp.name, absences, empId, hash: absences.map(a => a.date).join("|") };
+      injectStyles();
+      buildUI();
+    }).catch(err => {
+      console.error("absence-alert init failed:", err);
+    });
   }
 
   if (document.readyState === "loading") {
