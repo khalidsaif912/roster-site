@@ -860,9 +860,29 @@ function toggleTheme(){{var isLight=document.body.classList.toggle('light');loca
   setInterval(flip,4000);
 }})();
 var _T={{ar:{{title:'Import Duty Roster',emp:'\u0645\u0648\u0638\u0641',dept:'\u0642\u0633\u0645',my:'\u062c\u062f\u0648\u0644\u064a',cta:'\u0639\u0631\u0636 \u062c\u062f\u0648\u0644 \u0627\u0644\u0645\u0646\u0627\u0648\u0628\u0627\u062a',Morning:'\u0635\u0628\u0627\u062d',Afternoon:'\u0638\u0647\u0631',Night:'\u0644\u064a\u0644','Off Day':'\u0625\u062c\u0627\u0632\u0629','Annual Leave':'\u0633\u0646\u0648\u064a\u0629','Sick Leave':'\u0645\u0631\u0636\u064a\u0629',Training:'\u062a\u062f\u0631\u064a\u0628',Standby:'\u0627\u0633\u062a\u0639\u062f\u0627\u062f',Other:'\u0623\u062e\u0631\u0649'}},en:{{title:'Import Duty Roster',emp:'Emp',dept:'Dept',my:'\u062c\u062f\u0648\u0644\u064a',cta:'View Full Roster',Morning:'Morning',Afternoon:'Afternoon',Night:'Night','Off Day':'Off Day','Annual Leave':'Annual Leave','Sick Leave':'Sick Leave',Training:'Training',Standby:'Standby',Other:'Other'}}}};
-function _applyLang(isAr){{var L=_T[isAr?'ar':'en'];var b=document.getElementById('langToggle');if(b)b.textContent=isAr?'EN':'\u0639';var pt=document.getElementById('pageTitle');if(pt)pt.textContent=L.title;var cta=document.getElementById('ctaBtn');if(cta)cta.textContent=L.cta;document.querySelectorAll('[data-i18n]').forEach(function(el){{el.textContent=L[el.getAttribute('data-i18n')]||el.textContent;}});document.querySelectorAll('.shift-label[data-shift]').forEach(function(el){{el.textContent=L[el.getAttribute('data-shift')]||el.getAttribute('data-shift');}});}}
-function toggleLang(){{var isAr=!document.body.classList.contains('ar');localStorage.setItem('importLang',isAr?'ar':'en');_applyLang(isAr);}}
-function _wave(){{var h=document.getElementById('waveHand');if(!h)return;h.classList.remove('waving');void h.offsetWidth;h.classList.add('waving');}}
+function _applyLang(isAr){
+  var L = _T[isAr ? 'ar' : 'en'];
+
+  // 🔥 الحل: إدارة الكلاس
+  document.body.classList.toggle('ar', isAr);
+
+  var b = document.getElementById('langToggle');
+  if(b) b.textContent = isAr ? 'EN' : 'ع';
+
+  var pt = document.getElementById('pageTitle');
+  if(pt) pt.textContent = L.title;
+
+  var cta = document.getElementById('ctaBtn');
+  if(cta) cta.textContent = L.cta;
+
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    el.textContent = L[el.getAttribute('data-i18n')] || el.textContent;
+  });
+
+  document.querySelectorAll('.shift-label[data-shift]').forEach(function(el){
+    el.textContent = L[el.getAttribute('data-shift')] || el.getAttribute('data-shift');
+  });
+}
 (function(){{
   var isAr=localStorage.getItem('importLang')==='ar';_applyLang(isAr);
   var isLight=localStorage.getItem('importTheme')==='light';
