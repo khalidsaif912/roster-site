@@ -1,9 +1,9 @@
 {
-  "generated_for": "2026-03-27",
+  "generated_for": "2026-03-28",
   "months_generated": [
     "2026-03"
   ],
   "employees_total_unique": 78,
-  "source_file": "MARCH ROSTER MID.xlsx",
-  "incoming_month": "2026-03"
+  "source_file": "{\"error\":{\"code\":\"generalException\",\"message\":\"User migrated.\",\"innererror\":{\"code\":\"userContentMigrated\"}}}",
+  "incoming_month": null
 }
