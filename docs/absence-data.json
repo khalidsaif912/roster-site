@@ -1,7 +1,19 @@
 {
-  "generated_at": "2026-03-28T20:45:09.445029",
-  "total_records": 221,
+  "generated_at": "2026-03-29T06:25:29.579184",
+  "total_records": 220,
   "records": [
+    {
+      "date": "2026-01-01",
+      "names": [
+        "Khalid Saif Said Al Ruqadi"
+      ],
+      "empNos": [
+        "8715"
+      ],
+      "sections": [
+        "Cargo - Exp/Imp Operation"
+      ]
+    },
     {
       "date": "2026-01-04",
       "names": [
@@ -249,16 +261,13 @@
       "date": "2026-01-26",
       "names": [
         "Ahmed Mohammed Issa Al Balushi",
-        "Khalid Saif Said Al Ruqadi",
         "Sami Mohamed Khamis Al Hadabi"
       ],
       "empNos": [
         "82415",
-        "8715",
         "80479"
       ],
       "sections": [
-        "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation"
       ]
@@ -330,16 +339,19 @@
         "Yaarab Khalfan Ruzaiq Al Raqadi",
         "Qasim Salim Qasim Al Maqbali",
         "Jaafar Ibrahim Hassan Al Balushi",
-        "Mohammed Khamis Saleem Al Haddabi"
+        "Mohammed Khamis Saleem Al Haddabi",
+        "Khalid Saif Said Al Ruqadi"
       ],
       "empNos": [
         "8542",
         "82571",
         "81409",
         "81258",
-        "990895"
+        "990895",
+        "8715"
       ],
       "sections": [
+        "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
@@ -842,7 +854,6 @@
     {
       "date": "2026-02-20",
       "names": [
-        "Khalid Saif Said Al Ruqadi",
         "Salim Sulaiman Nasser Al Siyabi",
         "Sulaiman Salim Saif Al Maharbi",
         "Fahim Salim Hamed Al Hasni",
@@ -850,7 +861,6 @@
         "Osama Hassan Fadhil Al Balushi"
       ],
       "empNos": [
-        "8715",
         "8722",
         "80833",
         "8930",
@@ -858,7 +868,6 @@
         "80629"
       ],
       "sections": [
-        "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
@@ -1091,7 +1100,6 @@
         "Mohammed Khamis Ghanim Al Maamari",
         "Ahmed Nasser Said Al Mawali",
         "Badar Saif Nasser Al Fulaiti",
-        "Khalid Saif Said Al Ruqadi",
         "Sulaiman Salim Saif Al Maharbi",
         "Anwar Mohammed Juma Al Balushi",
         "Yaarab Khalfan Ruzaiq Al Raqadi"
@@ -1100,13 +1108,11 @@
         "82432",
         "82283",
         "82468",
-        "8715",
         "80833",
         "990758",
         "82571"
       ],
       "sections": [
-        "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
