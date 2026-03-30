@@ -9,9 +9,10 @@ process_absence.py
 ──────────────────────────────────────────────────────────────────────────────
 """
 
-import os, re, json, sys
+import os, re, json, sys, hashlib
 from datetime import datetime
 from io import BytesIO
+from pathlib import Path
 import requests
 
 try:
@@ -22,6 +23,7 @@ except ImportError:
 
 ABSENCE_URL = os.environ.get("ABSENCE_EXCEL_URL", "").strip()
 OUTPUT_PATH = "docs/absence-data.json"
+HASH_FILE   = "last_absence_hash.txt"
 COL_EMP_NO  = 1
 COL_NAME    = 2
 COL_SECTION = 3
@@ -75,6 +77,25 @@ def main():
     except Exception as e:
         print(f"  Failed to download: {e}")
         sys.exit(1)
+
+    # ✅ تحقق من التغيير عبر hash
+    current_hash = hashlib.md5(data).hexdigest()
+    print(f"  Current hash: {current_hash}")
+
+    if Path(HASH_FILE).exists():
+        with open(HASH_FILE, "r") as f:
+            old_hash = f.read().strip()
+        if old_hash == current_hash:
+            print("  No changes detected in absence file — skipping")
+            return
+        else:
+            print(f"  Change detected! Old: {old_hash} → New: {current_hash}")
+    else:
+        print("  First run — generating...")
+
+    # احفظ الـ hash الجديد
+    with open(HASH_FILE, "w") as f:
+        f.write(current_hash)
 
     records_by_date = {}
     processed = 0
