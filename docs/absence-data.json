@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-03-30T01:05:25.148455",
-  "total_records": 220,
+  "generated_at": "2026-03-30T08:19:04.737081",
+  "total_records": 221,
   "records": [
     {
       "date": "2026-01-01",
@@ -896,6 +896,7 @@
     {
       "date": "2026-02-22",
       "names": [
+        "Khalid Saif Said Al Ruqadi",
         "Sami Saleh Abdul Rahman Al Zadjali",
         "Sulaiman Salim Saif Al Maharbi",
         "Mahnad Khalid Abdallah Al-Hadi",
@@ -904,6 +905,7 @@
         "Salim Sulaiman Nasser Al Siyabi"
       ],
       "empNos": [
+        "8715",
         "990894",
         "80833",
         "82665",
@@ -912,6 +914,7 @@
         "8722"
       ],
       "sections": [
+        "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
         "Cargo - Exp/Imp Operation",
