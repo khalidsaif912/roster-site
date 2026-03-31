@@ -843,9 +843,9 @@
         "day": 3,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-04-04",
