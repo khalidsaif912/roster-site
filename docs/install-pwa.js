@@ -1,6 +1,14 @@
 (function () {
   let deferredPrompt = null;
 
+  function isiOS() {
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  }
+
+  function isInStandaloneMode() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
   function ensureButton() {
     if (document.getElementById('installWrap')) return;
 
@@ -28,15 +36,21 @@
 
     wrap.addEventListener('click', async function (e) {
       const btn = e.target.closest('#installBtn');
-      if (!btn || !deferredPrompt) return;
+      if (!btn) return;
 
-      deferredPrompt.prompt();
-      try {
-        await deferredPrompt.userChoice;
-      } catch (err) {}
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        try {
+          await deferredPrompt.userChoice;
+        } catch (err) {}
+        deferredPrompt = null;
+        wrap.style.display = 'none';
+        return;
+      }
 
-      deferredPrompt = null;
-      wrap.style.display = 'none';
+      if (isiOS() && !isInStandaloneMode()) {
+        alert('على iPhone/iPad: افتح زر المشاركة ثم اختر Add to Home Screen');
+      }
     });
   }
 
@@ -54,7 +68,18 @@
     deferredPrompt = null;
   });
 
+  window.addEventListener('load', function () {
+    ensureButton();
+
+    const wrap = document.getElementById('installWrap');
+    if (!wrap) return;
+
+    if (isiOS() && !isInStandaloneMode()) {
+      wrap.style.display = 'block';
+    }
+  });
+
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/roster-site/docs/sw.js');
+    navigator.serviceWorker.register('/roster-site/sw.js');
   }
 })();

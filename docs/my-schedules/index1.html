@@ -226,6 +226,12 @@
       .wrap{max-width:100%}
     }
   </style>
+
+<link rel="manifest" href="/roster-site/manifest.json">
+<meta name="theme-color" content="#1a1208">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
 </head>
 <body>
 <div class="wrap">
@@ -960,5 +966,8 @@ else{
   if(saved){document.getElementById('empId').value=saved;loadSchedule(saved);}
 }
 </script>
+
+<script src="/roster-site/install-pwa.js"></script>
+
 </body>
 </html>
