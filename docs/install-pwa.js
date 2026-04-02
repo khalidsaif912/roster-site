@@ -50,6 +50,8 @@
 
       if (isiOS() && !isInStandaloneMode()) {
         alert('على iPhone/iPad: افتح زر المشاركة ثم اختر Add to Home Screen');
+      } else {
+        alert('إذا لم تظهر نافذة التثبيت، افتح قائمة المتصفح ثم اختر Install App أو Add to Home Screen');
       }
     });
   }
@@ -70,7 +72,6 @@
 
   window.addEventListener('load', function () {
     ensureButton();
-
     const wrap = document.getElementById('installWrap');
     if (!wrap) return;
 
@@ -80,6 +81,8 @@
   });
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/roster-site/sw.js');
+    navigator.serviceWorker.register('/roster-site/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.error('SW registration failed:', err));
   }
 })();
