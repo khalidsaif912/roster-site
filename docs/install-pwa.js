@@ -1,4 +1,5 @@
 (function () {
+
   let deferredPrompt = null;
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -29,27 +30,56 @@
     `;
 
     banner.innerHTML = `
-      <span style="color:#e8c97a;font-size:14px">ثبّت التطبيق</span>
-      <button id="installBtn">تثبيت</button>
+      <span style="color:#e8c97a;font-size:14px">إضافة للتطبيق</span>
+      <button id="installBtn">فتح الطريقة</button>
       <button id="closeBtn">✕</button>
     `;
 
     document.body.appendChild(banner);
 
     document.getElementById('installBtn').onclick = async () => {
+
       if (deferredPrompt) {
         deferredPrompt.prompt();
         await deferredPrompt.userChoice;
-      } else if (isIOS) {
-        alert("اضغط مشاركة ثم Add to Home Screen");
-      } else {
-        alert("من قائمة المتصفح اختر Install App");
+        return;
       }
+
+      showHelp();
     };
 
     document.getElementById('closeBtn').onclick = () => {
       banner.remove();
     };
+  }
+
+  function showHelp() {
+    if (document.getElementById('pwa-help')) return;
+
+    const box = document.createElement('div');
+    box.id = 'pwa-help';
+
+    box.style.cssText = `
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      background:#1e1508;
+      color:#e8c97a;
+      padding:20px;
+      z-index:99999;
+      direction:rtl;
+      border-radius:20px 20px 0 0;
+    `;
+
+    box.innerHTML = `
+      <h3>طريقة إضافة التطبيق</h3>
+      <p>افتح قائمة المتصفح ثم اختر:</p>
+      <p style="font-weight:bold">Add to Home Screen</p>
+      <button onclick="this.parentElement.remove()">إغلاق</button>
+    `;
+
+    document.body.appendChild(box);
   }
 
   window.addEventListener('beforeinstallprompt', e => {
@@ -59,11 +89,12 @@
 
   window.addEventListener('load', () => {
     if (!isStandalone) {
-      setTimeout(createBanner, 1000);
+      setTimeout(createBanner, 1200);
     }
   });
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/roster-site/sw.js?v=5');
+    navigator.serviceWorker.register('/roster-site/sw.js?v=7');
   }
+
 })();
