@@ -1,22 +1,16 @@
 (function () {
   let deferredPrompt = null;
 
-  function isiOS() {
-    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-  }
-
-  function isInStandaloneMode() {
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  }
-
-  function ensureButton() {
+  function addInstallButton() {
     if (document.getElementById('installWrap')) return;
 
     const wrap = document.createElement('div');
     wrap.id = 'installWrap';
-    wrap.style.display = 'none';
-    wrap.style.textAlign = 'center';
-    wrap.style.margin = '18px 0 8px';
+    wrap.style.position = 'fixed';
+    wrap.style.left = '50%';
+    wrap.style.bottom = '20px';
+    wrap.style.transform = 'translateX(-50%)';
+    wrap.style.zIndex = '99999';
 
     wrap.innerHTML = `
       <button id="installBtn" style="
@@ -28,61 +22,29 @@
         cursor:pointer;
         color:#fff;
         background:linear-gradient(135deg,#16a34a,#22c55e);
-        box-shadow:0 6px 20px rgba(34,197,94,.25);
       ">📲 تثبيت التطبيق</button>
     `;
 
     document.body.appendChild(wrap);
 
-    wrap.addEventListener('click', async function (e) {
-      const btn = e.target.closest('#installBtn');
-      if (!btn) return;
-
+    document.getElementById('installBtn').onclick = async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        try {
-          await deferredPrompt.userChoice;
-        } catch (err) {}
-        deferredPrompt = null;
-        wrap.style.display = 'none';
-        return;
-      }
-
-      if (isiOS() && !isInStandaloneMode()) {
-        alert('على iPhone/iPad: افتح زر المشاركة ثم اختر Add to Home Screen');
+        await deferredPrompt.userChoice;
       } else {
-        alert('إذا لم تظهر نافذة التثبيت، افتح قائمة المتصفح ثم اختر Install App أو Add to Home Screen');
+        alert("استخدم Add to Home Screen من المتصفح");
       }
-    });
+    };
   }
 
-  window.addEventListener('beforeinstallprompt', function (e) {
+  window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
-    ensureButton();
-    const wrap = document.getElementById('installWrap');
-    if (wrap) wrap.style.display = 'block';
   });
 
-  window.addEventListener('appinstalled', function () {
-    const wrap = document.getElementById('installWrap');
-    if (wrap) wrap.style.display = 'none';
-    deferredPrompt = null;
-  });
-
-  window.addEventListener('load', function () {
-    ensureButton();
-    const wrap = document.getElementById('installWrap');
-    if (!wrap) return;
-
-    if (isiOS() && !isInStandaloneMode()) {
-      wrap.style.display = 'block';
-    }
-  });
+  window.addEventListener('load', addInstallButton);
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/roster-site/sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
-      .catch(err => console.error('SW registration failed:', err));
+    navigator.serviceWorker.register('/roster-site/sw.js');
   }
 })();
