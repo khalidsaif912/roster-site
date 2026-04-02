@@ -54,7 +54,6 @@ jobs:
           
           def main():
               try:
-                  # ✅ إجبار التوليد إذا طلبه المستخدم يدوياً
                   force_generate = os.getenv('FORCE_GENERATE', 'false').lower() == 'true'
                   if force_generate:
                       print("⚡ Force generate enabled by user")
@@ -95,7 +94,6 @@ jobs:
                   with open(cache_file, 'w', encoding='utf-8') as f:
                       f.write(current_filename)
                   
-                  # Muscat time (UTC+4)
                   muscat_tz = timezone(timedelta(hours=4))
                   now = datetime.now(muscat_tz)
                   current_hour = now.hour
@@ -107,8 +105,7 @@ jobs:
                   is_morning_email = (current_hour in [7, 8])
                   is_manual = os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch'
 
-                  # ✅ force_generate يُجبر التوليد بغض النظر عن أي شرط آخر
-                  should_process    = changed or is_mandatory_update or is_manual or force_generate
+                  should_process = changed or is_mandatory_update or is_manual or force_generate
                   should_send_email = changed or is_morning_email or is_manual
                   
                   print(f"File changed:      {changed}")
@@ -194,16 +191,176 @@ jobs:
           python generate_and_send.py
           echo "Done!"
 
+      - name: Add optional PWA install support
+        if: steps.check_changes.outputs.should_process == 'true'
+        run: |
+          cat > docs/manifest.json <<'EOF'
+          {
+            "name": "الأذكار",
+            "short_name": "الأذكار",
+            "start_url": "/roster-site/",
+            "display": "standalone",
+            "orientation": "any",
+            "background_color": "#1a1208",
+            "theme_color": "#1a1208",
+            "lang": "ar",
+            "dir": "rtl",
+            "icons": [
+              {
+                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%231a1208'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23c9a84c'%E2%98%AD%3C/text%3E%3C/svg%3E",
+                "sizes": "192x192",
+                "type": "image/svg+xml"
+              },
+              {
+                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231a1208'/%3E%3Ctext x='256' y='340' font-size='260' text-anchor='middle' fill='%23c9a84c'%E2%98%AD%3C/text%3E%3C/svg%3E",
+                "sizes": "512x512",
+                "type": "image/svg+xml"
+              }
+            ]
+          }
+          EOF
+
+          cat > docs/sw.js <<'EOF'
+          self.addEventListener('install', event => {
+            self.skipWaiting();
+          });
+
+          self.addEventListener('activate', event => {
+            event.waitUntil(self.clients.claim());
+          });
+
+          self.addEventListener('fetch', event => {
+            event.respondWith(
+              fetch(event.request).catch(() => caches.match(event.request))
+            );
+          });
+          EOF
+
+          cat > docs/install-pwa.js <<'EOF'
+          (function () {
+            let deferredPrompt = null;
+
+            function isiOS() {
+              return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+            }
+
+            function isInStandaloneMode() {
+              return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            }
+
+            function ensureButton() {
+              if (document.getElementById('installWrap')) return;
+
+              const wrap = document.createElement('div');
+              wrap.id = 'installWrap';
+              wrap.style.display = 'none';
+              wrap.style.textAlign = 'center';
+              wrap.style.margin = '18px 0 8px';
+
+              wrap.innerHTML = `
+                <button id="installBtn" style="
+                  border:none;
+                  border-radius:16px;
+                  padding:14px 28px;
+                  font-size:15px;
+                  font-weight:800;
+                  cursor:pointer;
+                  color:#fff;
+                  background:linear-gradient(135deg,#16a34a,#22c55e);
+                  box-shadow:0 6px 20px rgba(34,197,94,.25);
+                ">📲 تثبيت التطبيق</button>
+              `;
+
+              document.body.appendChild(wrap);
+
+              wrap.addEventListener('click', async function (e) {
+                const btn = e.target.closest('#installBtn');
+                if (!btn) return;
+
+                if (deferredPrompt) {
+                  deferredPrompt.prompt();
+                  try {
+                    await deferredPrompt.userChoice;
+                  } catch (err) {}
+                  deferredPrompt = null;
+                  wrap.style.display = 'none';
+                  return;
+                }
+
+                if (isiOS() && !isInStandaloneMode()) {
+                  alert('على iPhone/iPad: افتح زر المشاركة ثم اختر Add to Home Screen');
+                }
+              });
+            }
+
+            window.addEventListener('beforeinstallprompt', function (e) {
+              e.preventDefault();
+              deferredPrompt = e;
+              ensureButton();
+              const wrap = document.getElementById('installWrap');
+              if (wrap) wrap.style.display = 'block';
+            });
+
+            window.addEventListener('appinstalled', function () {
+              const wrap = document.getElementById('installWrap');
+              if (wrap) wrap.style.display = 'none';
+              deferredPrompt = null;
+            });
+
+            window.addEventListener('load', function () {
+              ensureButton();
+
+              const wrap = document.getElementById('installWrap');
+              if (!wrap) return;
+
+              if (isiOS() && !isInStandaloneMode()) {
+                wrap.style.display = 'block';
+              }
+            });
+
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('/roster-site/sw.js');
+            }
+          })();
+          EOF
+
+          python <<'EOF'
+          from pathlib import Path
+
+          head_inject = """
+          <link rel="manifest" href="/roster-site/manifest.json">
+          <meta name="theme-color" content="#1a1208">
+          <meta name="apple-mobile-web-app-capable" content="yes">
+          <meta name="apple-mobile-web-app-status-bar-style" content="default">
+          """
+
+          body_inject = """
+          <script src="/roster-site/install-pwa.js"></script>
+          """
+
+          for path in Path("docs").rglob("*.html"):
+              html = path.read_text(encoding="utf-8")
+
+              if 'rel="manifest"' not in html and "</head>" in html:
+                  html = html.replace("</head>", head_inject + "\n</head>")
+
+              if 'install-pwa.js' not in html and "</body>" in html:
+                  html = html.replace("</body>", body_inject + "\n</body>")
+
+              path.write_text(html, encoding="utf-8")
+              print(f"Patched: {path}")
+          EOF
+
+          echo "✅ Optional PWA support added!"
+
       - name: Inject Eid overlay into HTML pages
         if: steps.check_changes.outputs.should_process == 'true'
         run: |
-          # حذف أي سكريبت قديم للـ eid-overlay أولاً
           sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/index.html || true
           sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/now/index.html || true
           sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/index.html || true
           sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/now/index.html || true
 
-          # حقن السكريبت الصحيح
           sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/index.html || true
           sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/now/index.html || true
           echo "✅ Eid overlay injected!"
