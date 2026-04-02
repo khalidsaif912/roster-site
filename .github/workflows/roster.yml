@@ -57,20 +57,35 @@ jobs:
         run: python generate_and_send.py
 
       # ======================
-      # 🔥 PWA (الجزء المهم)
+      # 🔥 PWA (نسخة ذكية للروستر)
       # ======================
       - name: Add PWA support
         run: |
 
-          # ===== manifest =====
+          # ===== manifest (خاص بالروستر) =====
           cat > docs/manifest.json <<'EOF'
           {
-            "name": "الأذكار",
-            "short_name": "الأذكار",
+            "name": "Roster Schedule",
+            "short_name": "Roster",
             "start_url": "/roster-site/",
             "display": "standalone",
+            "orientation": "any",
             "background_color": "#1a1208",
-            "theme_color": "#1a1208"
+            "theme_color": "#1a1208",
+            "lang": "ar",
+            "dir": "rtl",
+            "icons": [
+              {
+                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%231a1208'/%3E%3Ctext x='96' y='130' font-size='90' text-anchor='middle' fill='%23c9a84c'%3ER%3C/text%3E%3C/svg%3E",
+                "sizes": "192x192",
+                "type": "image/svg+xml"
+              },
+              {
+                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231a1208'/%3E%3Ctext x='256' y='340' font-size='240' text-anchor='middle' fill='%23c9a84c'%3ER%3C/text%3E%3C/svg%3E",
+                "sizes": "512x512",
+                "type": "image/svg+xml"
+              }
+            ]
           }
           EOF
 
@@ -81,9 +96,10 @@ jobs:
           self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
           EOF
 
-          # ===== install script (مصحح) =====
+          # ===== سكربت التثبيت (بدون alert) =====
           cat > docs/install-pwa.js <<'EOF'
           (function () {
+
             let deferredPrompt = null;
 
             const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -114,27 +130,56 @@ jobs:
               `;
 
               banner.innerHTML = `
-                <span style="color:#e8c97a;font-size:14px">ثبّت التطبيق</span>
-                <button id="installBtn">تثبيت</button>
+                <span style="color:#e8c97a;font-size:14px">إضافة للتطبيق</span>
+                <button id="installBtn">فتح الطريقة</button>
                 <button id="closeBtn">✕</button>
               `;
 
               document.body.appendChild(banner);
 
               document.getElementById('installBtn').onclick = async () => {
+
                 if (deferredPrompt) {
                   deferredPrompt.prompt();
                   await deferredPrompt.userChoice;
-                } else if (isIOS) {
-                  alert("اضغط مشاركة ثم Add to Home Screen");
-                } else {
-                  alert("من قائمة المتصفح اختر Install App");
+                  return;
                 }
+
+                showHelp();
               };
 
               document.getElementById('closeBtn').onclick = () => {
                 banner.remove();
               };
+            }
+
+            function showHelp() {
+              if (document.getElementById('pwa-help')) return;
+
+              const box = document.createElement('div');
+              box.id = 'pwa-help';
+
+              box.style.cssText = `
+                position:fixed;
+                bottom:0;
+                left:0;
+                right:0;
+                background:#1e1508;
+                color:#e8c97a;
+                padding:20px;
+                z-index:99999;
+                direction:rtl;
+                border-radius:20px 20px 0 0;
+              `;
+
+              box.innerHTML = `
+                <h3>طريقة إضافة التطبيق</h3>
+                <p>افتح قائمة المتصفح ثم اختر:</p>
+                <p style="font-weight:bold">Add to Home Screen</p>
+                <button onclick="this.parentElement.remove()">إغلاق</button>
+              `;
+
+              document.body.appendChild(box);
             }
 
             window.addEventListener('beforeinstallprompt', e => {
@@ -144,13 +189,14 @@ jobs:
 
             window.addEventListener('load', () => {
               if (!isStandalone) {
-                setTimeout(createBanner, 1000);
+                setTimeout(createBanner, 1200);
               }
             });
 
             if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register('/roster-site/sw.js?v=5');
+              navigator.serviceWorker.register('/roster-site/sw.js?v=7');
             }
+
           })();
           EOF
 
@@ -163,22 +209,22 @@ jobs:
 
               if "manifest.json" not in html:
                   html = html.replace("</head>",
-                  '<link rel="manifest" href="/roster-site/manifest.json?v=5"></head>')
+                  '<link rel="manifest" href="/roster-site/manifest.json?v=7"></head>')
 
-              if "install-pwa.js?v=5" not in html:
+              if "install-pwa.js?v=7" not in html:
                   html = html.replace("</body>",
-                  '<script src="/roster-site/install-pwa.js?v=5"></script></body>')
+                  '<script src="/roster-site/install-pwa.js?v=7"></script></body>')
 
               f.write_text(html)
           EOF
 
       # ======================
-      # 💾 commit
+      # 💾 Commit
       # ======================
       - name: Commit
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add docs
-          git commit -m "Update site + PWA" || echo "No changes"
+          git commit -m "Update roster site + PWA UX" || echo "No changes"
           git push
