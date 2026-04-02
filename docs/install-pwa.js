@@ -1,17 +1,22 @@
 (function () {
   let deferredPrompt = null;
 
-  function addInstallButton() {
+  function isiOS() {
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  }
+
+  function isInStandaloneMode() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  function ensureButton() {
     if (document.getElementById('installWrap')) return;
 
     const wrap = document.createElement('div');
     wrap.id = 'installWrap';
-    wrap.style.position = 'fixed';
-    wrap.style.left = '50%';
-    wrap.style.bottom = '20px';
-    wrap.style.transform = 'translateX(-50%)';
-    wrap.style.zIndex = '99999';
+    wrap.style.display = 'none';
     wrap.style.textAlign = 'center';
+    wrap.style.margin = '18px 0 8px';
 
     wrap.innerHTML = `
       <button id="installBtn" style="
@@ -29,17 +34,21 @@
 
     document.body.appendChild(wrap);
 
-    document.getElementById('installBtn').addEventListener('click', async function () {
+    wrap.addEventListener('click', async function (e) {
+      const btn = e.target.closest('#installBtn');
+      if (!btn) return;
+
       if (deferredPrompt) {
         deferredPrompt.prompt();
         try {
           await deferredPrompt.userChoice;
-        } catch (e) {}
+        } catch (err) {}
+        deferredPrompt = null;
+        wrap.style.display = 'none';
         return;
       }
 
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      if (isIOS) {
+      if (isiOS() && !isInStandaloneMode()) {
         alert('على iPhone/iPad: افتح زر المشاركة ثم اختر Add to Home Screen');
       } else {
         alert('إذا لم تظهر نافذة التثبيت، افتح قائمة المتصفح ثم اختر Install App أو Add to Home Screen');
@@ -50,16 +59,25 @@
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredPrompt = e;
+    ensureButton();
+    const wrap = document.getElementById('installWrap');
+    if (wrap) wrap.style.display = 'block';
   });
 
   window.addEventListener('appinstalled', function () {
     const wrap = document.getElementById('installWrap');
-    if (wrap) wrap.remove();
+    if (wrap) wrap.style.display = 'none';
     deferredPrompt = null;
   });
 
   window.addEventListener('load', function () {
-    addInstallButton();
+    ensureButton();
+    const wrap = document.getElementById('installWrap');
+    if (!wrap) return;
+
+    if (isiOS() && !isInStandaloneMode()) {
+      wrap.style.display = 'block';
+    }
   });
 
   if ('serviceWorker' in navigator) {
