@@ -21,9 +21,9 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # ==============================
+      # ======================
       # 🔹 توليد الموقع
-      # ==============================
+      # ======================
       - name: Generate page
         env:
           EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
@@ -56,9 +56,9 @@ jobs:
           SEND_EMAIL: "true"
         run: python generate_and_send.py
 
-      # ==============================
-      # 🔥 PWA (آخر خطوة)
-      # ==============================
+      # ======================
+      # 🔥 PWA (الجزء المهم)
+      # ======================
       - name: Add PWA support
         run: |
 
@@ -77,10 +77,11 @@ jobs:
           # ===== service worker =====
           cat > docs/sw.js <<'EOF'
           self.addEventListener('install', e => self.skipWaiting());
+          self.addEventListener('activate', e => self.clients.claim());
           self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
           EOF
 
-          # ===== install script (بانر احترافي + iOS) =====
+          # ===== install script (مصحح) =====
           cat > docs/install-pwa.js <<'EOF'
           (function () {
             let deferredPrompt = null;
@@ -90,76 +91,70 @@ jobs:
               window.matchMedia('(display-mode: standalone)').matches ||
               window.navigator.standalone === true;
 
-            function createUI() {
-              if (!document.getElementById('install-banner')) {
-                const banner = document.createElement('div');
-                banner.id = 'install-banner';
-                banner.style.cssText = `
-                  position:fixed;
-                  bottom:20px;
-                  left:50%;
-                  transform:translateX(-50%) translateY(160px);
-                  background:rgba(22,15,5,0.97);
-                  border:1px solid rgba(201,168,76,0.3);
-                  border-radius:16px;
-                  padding:14px;
-                  z-index:9999;
-                  display:flex;
-                  gap:10px;
-                  direction:rtl;
-                  transition:0.4s;
-                `;
+            function createBanner() {
+              if (document.getElementById('install-banner')) return;
 
-                banner.innerHTML = `
-                  <span style="color:#e8c97a;font-size:14px">ثبّت التطبيق</span>
-                  <button id="installBtn">تثبيت</button>
-                  <button id="closeBtn">✕</button>
-                `;
+              const banner = document.createElement('div');
+              banner.id = 'install-banner';
 
-                document.body.appendChild(banner);
+              banner.style.cssText = `
+                position:fixed;
+                bottom:20px;
+                left:50%;
+                transform:translateX(-50%);
+                background:#1a1208;
+                border:1px solid #c9a84c;
+                border-radius:14px;
+                padding:12px 16px;
+                z-index:9999;
+                display:flex;
+                gap:10px;
+                align-items:center;
+                direction:rtl;
+              `;
 
-                document.getElementById('installBtn').onclick = async () => {
-                  banner.style.transform='translateX(-50%) translateY(160px)';
+              banner.innerHTML = `
+                <span style="color:#e8c97a;font-size:14px">ثبّت التطبيق</span>
+                <button id="installBtn">تثبيت</button>
+                <button id="closeBtn">✕</button>
+              `;
 
-                  if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    await deferredPrompt.userChoice;
-                  } else if (isIOS) {
-                    alert("اضغط مشاركة ثم Add to Home Screen");
-                  }
-                };
+              document.body.appendChild(banner);
 
-                document.getElementById('closeBtn').onclick = () => {
-                  banner.style.transform='translateX(-50%) translateY(160px)';
-                };
-              }
-            }
+              document.getElementById('installBtn').onclick = async () => {
+                if (deferredPrompt) {
+                  deferredPrompt.prompt();
+                  await deferredPrompt.userChoice;
+                } else if (isIOS) {
+                  alert("اضغط مشاركة ثم Add to Home Screen");
+                } else {
+                  alert("من قائمة المتصفح اختر Install App");
+                }
+              };
 
-            function showBanner(){
-              const b=document.getElementById('install-banner');
-              if(b) b.style.transform='translateX(-50%) translateY(0)';
+              document.getElementById('closeBtn').onclick = () => {
+                banner.remove();
+              };
             }
 
             window.addEventListener('beforeinstallprompt', e => {
               e.preventDefault();
               deferredPrompt = e;
-              setTimeout(showBanner, 2500);
             });
 
             window.addEventListener('load', () => {
-              createUI();
-              if (isIOS && !isStandalone) {
-                setTimeout(showBanner, 2500);
+              if (!isStandalone) {
+                setTimeout(createBanner, 1000);
               }
             });
 
             if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register('/roster-site/sw.js');
+              navigator.serviceWorker.register('/roster-site/sw.js?v=5');
             }
           })();
           EOF
 
-          # ===== inject into HTML =====
+          # ===== inject =====
           python <<'EOF'
           from pathlib import Path
 
@@ -168,18 +163,18 @@ jobs:
 
               if "manifest.json" not in html:
                   html = html.replace("</head>",
-                  '<link rel="manifest" href="/roster-site/manifest.json"></head>')
+                  '<link rel="manifest" href="/roster-site/manifest.json?v=5"></head>')
 
-              if "install-pwa.js" not in html:
+              if "install-pwa.js?v=5" not in html:
                   html = html.replace("</body>",
-                  '<script src="/roster-site/install-pwa.js"></script></body>')
+                  '<script src="/roster-site/install-pwa.js?v=5"></script></body>')
 
               f.write_text(html)
           EOF
 
-      # ==============================
-      # 💾 Commit
-      # ==============================
+      # ======================
+      # 💾 commit
+      # ======================
       - name: Commit
         run: |
           git config user.name "github-actions"
