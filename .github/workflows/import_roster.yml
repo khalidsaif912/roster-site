@@ -1,9 +1,9 @@
-name: Roster Site + Email
+name: Import Roster Site (WO/Export)
 on:
   workflow_dispatch:
     inputs:
-      force_generate:
-        description: "إجبار توليد الصفحة (حتى لو لم يتغير الملف)"
+      force_run:
+        description: "Force regenerate pages (even if Excel unchanged)"
         required: false
         default: "false"
         type: choice
@@ -17,136 +17,152 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build_import:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      
+
       - name: Cache pip packages
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
-      - name: Check if Excel file changed
-        id: check_changes
+
+      - name: Check if Import Excel file changed
+        id: check_import_changes
         env:
-          SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
-          FORCE_GENERATE: ${{ github.event.inputs.force_generate || 'false' }}
+          IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          FORCE_RUN: ${{ github.event.inputs.force_run || 'false' }}
         run: |
           python << 'EOF'
           import os
+          import base64
+          import hashlib
           import requests
           from pathlib import Path
           import sys
           from datetime import datetime, timezone, timedelta
-          
+          from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
+
+          def candidate_urls(url):
+              candidates = []
+              u = urlparse(url)
+              host = (u.netloc or "").lower()
+              if not ("sharepoint.com" in host or "onedrive.live.com" in host or "1drv.ms" in host):
+                  return [url]
+              encoded = base64.b64encode(url.encode("utf-8")).decode("utf-8")
+              encoded = encoded.rstrip("=").replace("/", "_").replace("+", "-")
+              candidates.append(f"https://api.onedrive.com/v1.0/shares/u!{encoded}/root/content")
+              qs = dict(parse_qsl(u.query, keep_blank_values=True))
+              qs["download"] = "1"
+              candidates.append(urlunparse(u._replace(query=urlencode(qs, doseq=True))))
+              candidates.append(url)
+              return candidates
+
+          def download_excel(url):
+              headers = {
+                  "User-Agent": "Mozilla/5.0 (GitHub Actions) roster-site",
+                  "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*",
+              }
+              for i, dl_url in enumerate(candidate_urls(url), 1):
+                  try:
+                      print(f"  [Strategy {i}] {dl_url[:80]}...")
+                      r = requests.get(dl_url, headers=headers, timeout=60, allow_redirects=True)
+                      r.raise_for_status()
+                      data = r.content or b""
+                      if data.startswith(b"PK"):
+                          print(f"  ✅ Strategy {i} succeeded!")
+                          return data
+                      print(f"  ⚠️  Strategy {i}: not xlsx, trying next...")
+                  except Exception as e:
+                      print(f"  ⚠️  Strategy {i} failed: {e}")
+              return None
+
           def main():
               try:
-                  force_generate = os.getenv('FORCE_GENERATE', 'false').lower() == 'true'
-                  if force_generate:
-                      print("⚡ Force generate enabled by user")
+                  is_manual = os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch'
+                  force_run = os.getenv('FORCE_RUN', 'false').lower() == 'true'
+                  excel_url = os.getenv('IMPORT_EXCEL_URL')
+                  if not excel_url:
+                      print("IMPORT_EXCEL_URL not found")
+                      sys.exit(1)
 
-                  source_url = os.getenv('SOURCE_NAME_URL')
-                  if not source_url:
-                      print("SOURCE_NAME_URL not found")
+                  print(f"Checking: {excel_url[:60]}...")
+                  data = download_excel(excel_url)
+
+                  if not data:
+                      print("❌ Could not download Excel file")
                       sys.exit(1)
-                  
-                  print(f"Checking: {source_url}")
-                  response = requests.get(source_url, timeout=15)
-                  response.raise_for_status()
-                  current_filename = response.text.strip()
-                  
-                  if not current_filename:
-                      print("source_name.txt is empty")
-                      sys.exit(1)
-                  
-                  print(f"Current file: {current_filename}")
-                  
-                  cache_file = "last_filename.txt"
+
+                  current_hash = hashlib.md5(data).hexdigest()
+                  print(f"Excel MD5: {current_hash}")
+
+                  cache_file = "import_last_filename.txt"
                   changed = True
-                  old_filename = "none"
-                  
+                  old_hash = "none"
+
                   if Path(cache_file).exists():
-                      with open(cache_file, 'r', encoding='utf-8') as f:
-                          old_filename = f.read().strip()
-                      if old_filename:
-                          print(f"Previous file: {old_filename}")
-                          if old_filename == current_filename:
-                              print("No changes detected")
-                              changed = False
-                          else:
-                              print(f"Change detected: {old_filename} -> {current_filename}")
+                      old_hash = Path(cache_file).read_text(encoding='utf-8').strip()
+                      if old_hash == current_hash:
+                          print("No changes detected")
+                          changed = False
+                      else:
+                          print(f"Change detected! (hash changed)")
                   else:
                       print("First run")
-                  
-                  with open(cache_file, 'w', encoding='utf-8') as f:
-                      f.write(current_filename)
-                  
+
+                  Path(cache_file).write_text(current_hash, encoding='utf-8')
+
                   muscat_tz = timezone(timedelta(hours=4))
                   now = datetime.now(muscat_tz)
-                  current_hour = now.hour
                   print(f"Muscat time: {now.strftime('%H:%M')}")
 
-                  mandatory_update_hours = [0, 5, 6, 13, 14, 20, 21]
-                  is_mandatory_update = (current_hour in mandatory_update_hours)
+                  is_morning_update = (now.hour == 7)
+                  should_process = changed or is_morning_update or is_manual or force_run
+                  should_send_email = changed or is_morning_update or is_manual or force_run
 
-                  is_morning_email = (current_hour in [7, 8])
-                  is_manual = os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch'
-
-                  should_process = changed or is_mandatory_update or is_manual or force_generate
-                  should_send_email = changed or is_morning_email or is_manual
-                  
                   print(f"File changed:      {changed}")
-                  print(f"Force generate:    {force_generate}")
-                  print(f"Mandatory update:  {is_mandatory_update}")
-                  print(f"Morning email:     {is_morning_email}")
+                  print(f"Morning update:    {is_morning_update}")
+                  print(f"Force run:         {force_run}")
                   print(f"Manual trigger:    {is_manual}")
                   print(f"Should process:    {should_process}")
                   print(f"Should send email: {should_send_email}")
-                  
+
                   with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                       f.write(f"changed={str(changed).lower()}\n")
-                      f.write(f"force_generate={str(force_generate).lower()}\n")
                       f.write(f"should_process={str(should_process).lower()}\n")
                       f.write(f"should_send_email={str(should_send_email).lower()}\n")
-                      f.write(f"is_morning_email={str(is_morning_email).lower()}\n")
-                      f.write(f"filename={current_filename}\n")
-                      f.write(f"old_filename={old_filename}\n")
-                      f.write(f"muscat_hour={current_hour}\n")
-                  
+                      f.write(f"filename={current_hash}\n")
+                      f.write(f"old_filename={old_hash}\n")
+                      f.write(f"muscat_time={now.strftime('%H:%M')}\n")
+                      f.write(f"muscat_date={now.strftime('%Y-%m-%d')}\n")
+
                   print("=" * 60)
                   print(f"  File changed:      {changed}")
-                  print(f"  Force generate:    {force_generate}")
-                  print(f"  Mandatory update:  {is_mandatory_update}")
-                  print(f"  Morning email:     {is_morning_email}")
+                  print(f"  Morning update:    {is_morning_update}")
+                  print(f"  Manual trigger:    {is_manual}")
                   print(f"  Should process:    {should_process}")
                   print(f"  Should send email: {should_send_email}")
                   print("=" * 60)
-                  
-              except requests.exceptions.Timeout:
-                  print("Connection timeout")
-                  sys.exit(1)
-              except requests.exceptions.RequestException as e:
-                  print(f"Request error: {e}")
-                  sys.exit(1)
+
               except Exception as e:
                   print(f"Unexpected error: {e}")
                   import traceback
                   traceback.print_exc()
                   sys.exit(1)
-          
+
           if __name__ == "__main__":
               main()
           EOF
@@ -154,289 +170,190 @@ jobs:
       - name: Display change info
         run: |
           echo "========================================"
-          echo "Check Report:"
+          echo "Import Check Report:"
           echo "========================================"
-          echo "File changed:      ${{ steps.check_changes.outputs.changed }}"
-          echo "Force generate:    ${{ steps.check_changes.outputs.force_generate }}"
-          echo "Morning email:     ${{ steps.check_changes.outputs.is_morning_email }}"
-          echo "Should process:    ${{ steps.check_changes.outputs.should_process }}"
-          echo "Should send email: ${{ steps.check_changes.outputs.should_send_email }}"
-          echo "Current file:      ${{ steps.check_changes.outputs.filename }}"
-          echo "Previous file:     ${{ steps.check_changes.outputs.old_filename }}"
+          echo "File changed:      ${{ steps.check_import_changes.outputs.changed }}"
+          echo "Should process:    ${{ steps.check_import_changes.outputs.should_process }}"
+          echo "Should send email: ${{ steps.check_import_changes.outputs.should_send_email }}"
+          echo "Current file:      ${{ steps.check_import_changes.outputs.filename }}"
+          echo "Previous file:     ${{ steps.check_import_changes.outputs.old_filename }}"
+          echo "Muscat time:       ${{ steps.check_import_changes.outputs.muscat_time }}"
           echo "========================================"
-      
-      - name: Generate page
-        if: steps.check_changes.outputs.should_process == 'true'
+
+      - name: Generate Import pages
+        if: steps.check_import_changes.outputs.should_process == 'true'
         env:
-          EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
-          SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
+          IMPORT_EXCEL_URL: ${{ secrets.IMPORT_EXCEL_URL }}
+          IMPORT_SOURCE_NAME_URL: ${{ secrets.IMPORT_SOURCE_NAME_URL }}
           PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          MAIL_FROM: ${{ secrets.MAIL_FROM }}
-          MAIL_TO: ${{ secrets.MAIL_TO }}
-          SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }}
-          SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
-          SEND_EMAIL: "false"
         run: |
-          if [ "${{ steps.check_changes.outputs.force_generate }}" == "true" ]; then
-            echo "⚡ Force generating: ${{ steps.check_changes.outputs.filename }}"
-          elif [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
-            echo "Processing (change detected): ${{ steps.check_changes.outputs.filename }}"
-          else
-            echo "Processing (scheduled update): ${{ steps.check_changes.outputs.filename }}"
-          fi
-          python generate_and_send.py
+          pip install pandas openpyxl requests --quiet
+          echo "Generating /docs/import ..."
+          python generate_and_send_import.py
           echo "Done!"
 
-      - name: Add optional PWA install support
-        if: steps.check_changes.outputs.should_process == 'true'
+      - name: Inject Eid overlay into Import HTML pages
+        if: steps.check_import_changes.outputs.should_process == 'true'
         run: |
-          cat > docs/manifest.json <<'EOF'
-          {
-            "name": "الأذكار",
-            "short_name": "الأذكار",
-            "start_url": "/roster-site/",
-            "display": "standalone",
-            "orientation": "any",
-            "background_color": "#1a1208",
-            "theme_color": "#1a1208",
-            "lang": "ar",
-            "dir": "rtl",
-            "icons": [
-              {
-                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%231a1208'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23c9a84c'%E2%98%AD%3C/text%3E%3C/svg%3E",
-                "sizes": "192x192",
-                "type": "image/svg+xml"
-              },
-              {
-                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231a1208'/%3E%3Ctext x='256' y='340' font-size='260' text-anchor='middle' fill='%23c9a84c'%E2%98%AD%3C/text%3E%3C/svg%3E",
-                "sizes": "512x512",
-                "type": "image/svg+xml"
-              }
-            ]
-          }
-          EOF
-
-          cat > docs/sw.js <<'EOF'
-          self.addEventListener('install', event => {
-            self.skipWaiting();
-          });
-
-          self.addEventListener('activate', event => {
-            event.waitUntil(self.clients.claim());
-          });
-
-          self.addEventListener('fetch', event => {
-            event.respondWith(
-              fetch(event.request).catch(() => caches.match(event.request))
-            );
-          });
-          EOF
-
-          cat > docs/install-pwa.js <<'EOF'
-          (function () {
-            let deferredPrompt = null;
-
-            function isiOS() {
-              return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-            }
-
-            function isInStandaloneMode() {
-              return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-            }
-
-            function ensureButton() {
-              if (document.getElementById('installWrap')) return;
-
-              const wrap = document.createElement('div');
-              wrap.id = 'installWrap';
-              wrap.style.display = 'none';
-              wrap.style.textAlign = 'center';
-              wrap.style.margin = '18px 0 8px';
-
-              wrap.innerHTML = `
-                <button id="installBtn" style="
-                  border:none;
-                  border-radius:16px;
-                  padding:14px 28px;
-                  font-size:15px;
-                  font-weight:800;
-                  cursor:pointer;
-                  color:#fff;
-                  background:linear-gradient(135deg,#16a34a,#22c55e);
-                  box-shadow:0 6px 20px rgba(34,197,94,.25);
-                ">📲 تثبيت التطبيق</button>
-              `;
-
-              document.body.appendChild(wrap);
-
-              wrap.addEventListener('click', async function (e) {
-                const btn = e.target.closest('#installBtn');
-                if (!btn) return;
-
-                if (deferredPrompt) {
-                  deferredPrompt.prompt();
-                  try {
-                    await deferredPrompt.userChoice;
-                  } catch (err) {}
-                  deferredPrompt = null;
-                  wrap.style.display = 'none';
-                  return;
-                }
-
-                if (isiOS() && !isInStandaloneMode()) {
-                  alert('على iPhone/iPad: افتح زر المشاركة ثم اختر Add to Home Screen');
-                }
-              });
-            }
-
-            window.addEventListener('beforeinstallprompt', function (e) {
-              e.preventDefault();
-              deferredPrompt = e;
-              ensureButton();
-              const wrap = document.getElementById('installWrap');
-              if (wrap) wrap.style.display = 'block';
-            });
-
-            window.addEventListener('appinstalled', function () {
-              const wrap = document.getElementById('installWrap');
-              if (wrap) wrap.style.display = 'none';
-              deferredPrompt = null;
-            });
-
-            window.addEventListener('load', function () {
-              ensureButton();
-
-              const wrap = document.getElementById('installWrap');
-              if (!wrap) return;
-
-              if (isiOS() && !isInStandaloneMode()) {
-                wrap.style.display = 'block';
-              }
-            });
-
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register('/roster-site/sw.js');
-            }
-          })();
-          EOF
-
-          python <<'EOF'
-          from pathlib import Path
-
-          head_inject = """
-          <link rel="manifest" href="/roster-site/manifest.json">
-          <meta name="theme-color" content="#1a1208">
-          <meta name="apple-mobile-web-app-capable" content="yes">
-          <meta name="apple-mobile-web-app-status-bar-style" content="default">
-          """
-
-          body_inject = """
-          <script src="/roster-site/install-pwa.js"></script>
-          """
-
-          for path in Path("docs").rglob("*.html"):
-              html = path.read_text(encoding="utf-8")
-
-              if 'rel="manifest"' not in html and "</head>" in html:
-                  html = html.replace("</head>", head_inject + "\n</head>")
-
-              if 'install-pwa.js' not in html and "</body>" in html:
-                  html = html.replace("</body>", body_inject + "\n</body>")
-
-              path.write_text(html, encoding="utf-8")
-              print(f"Patched: {path}")
-          EOF
-
-          echo "✅ Optional PWA support added!"
-
-      - name: Inject Eid overlay into HTML pages
-        if: steps.check_changes.outputs.should_process == 'true'
-        run: |
-          sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/index.html || true
-          sed -i 's|<script src="/eid-overlay.js"></script>||g' docs/now/index.html || true
-          sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/index.html || true
-          sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' docs/now/index.html || true
-
-          sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/index.html || true
-          sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' docs/now/index.html || true
-          echo "✅ Eid overlay injected!"
-
-      - name: Generate absence data
-        if: steps.check_changes.outputs.should_process == 'true'
-        env:
-          ABSENCE_EXCEL_URL: ${{ secrets.ABSENCE_EXCEL_URL }}
-        run: |
-          if [ -f "process_absence.py" ]; then
-            echo "Generating absence-data.json..."
-            python process_absence.py
-            echo "Done!"
-          else
-            echo "process_absence.py not found, skipping..."
-          fi
+          find docs/import -name "index.html" | while read f; do
+            sed -i 's|<script src="/eid-overlay.js"></script>||g' "$f" || true
+            sed -i 's|<script src="/roster-site/eid-overlay.js"></script>||g' "$f" || true
+            sed -i 's|</body>|<script src="/roster-site/eid-overlay.js"></script></body>|g' "$f" || true
+          done
+          echo "✅ Eid overlay injected into all Import pages!"
 
       - name: Send Email Notification
-        if: steps.check_changes.outputs.should_send_email == 'true'
+        if: steps.check_import_changes.outputs.should_send_email == 'true'
         env:
-          EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
-          SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
-          PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          MAIL_FROM: ${{ secrets.MAIL_FROM }}
-          MAIL_TO: ${{ secrets.MAIL_TO }}
-          SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }}
-          SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
-          SEND_EMAIL: "true"
-          CHANGED: ${{ steps.check_changes.outputs.changed }}
-          IS_MORNING_EMAIL: ${{ steps.check_changes.outputs.is_morning_email }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
         run: |
-          python generate_and_send.py
-          echo "Email sent!"
+          python << 'EOF'
+          import os
+          import smtplib
+          from email.mime.multipart import MIMEMultipart
+          from email.mime.text import MIMEText
 
-      - name: Generate employee schedules
-        if: steps.check_changes.outputs.should_process == 'true'
-        env:
-          EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
-          ROSTER_FILENAME: ${{ steps.check_changes.outputs.filename }}
-        run: |
-          if [ -f "generate_employee_schedules.py" ]; then
-            echo "Generating employee schedules..."
-            python generate_employee_schedules.py --filename "$ROSTER_FILENAME"
-            echo "Done!"
-          else
-            echo "generate_employee_schedules.py not found, skipping..."
-          fi
+          smtp_server   = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+          smtp_port     = int(os.getenv("SMTP_PORT", "587"))
+          smtp_user     = os.getenv("SMTP_USER", "")
+          smtp_password = os.getenv("SMTP_PASSWORD", "")
+          email_from    = os.getenv("EMAIL_FROM", smtp_user)
+          email_to_raw  = os.getenv("EMAIL_TO", "")
+          pages_url     = os.getenv("PAGES_BASE_URL", "").rstrip("/")
 
-      - name: Commit updated docs
-        if: steps.check_changes.outputs.should_process == 'true'
+          roster_url   = f"{pages_url}/import/" if pages_url else "#"
+          changed      = "${{ steps.check_import_changes.outputs.changed }}" == "true"
+          muscat_date  = "${{ steps.check_import_changes.outputs.muscat_date }}"
+          muscat_time  = "${{ steps.check_import_changes.outputs.muscat_time }}"
+          is_manual    = "${{ github.event_name }}" == "workflow_dispatch"
+
+          if changed:
+              subject = f"📋 Import Roster Updated — {muscat_date}"
+              reason  = "تم تحديث جدول الإيمبورت"
+              badge   = "#e53e3e"
+              badge_text = "تحديث جديد"
+          elif is_manual:
+              subject = f"📋 Import Roster (Manual) — {muscat_date}"
+              reason  = "تشغيل يدوي"
+              badge   = "#805ad5"
+              badge_text = "يدوي"
+          else:
+              subject = f"📋 Import Roster — صباح الخير {muscat_date}"
+              reason  = "التحديث الصباحي اليومي — الساعة 7:00 صباحاً"
+              badge   = "#2b6cb0"
+              badge_text = "تحديث صباحي"
+
+          html_body = f"""
+          <!DOCTYPE html>
+          <html dir="rtl" lang="ar">
+          <head><meta charset="UTF-8"></head>
+          <body style="margin:0;padding:0;background:#f7fafc;font-family:Arial,sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7fafc;padding:30px 0;">
+              <tr><td align="center">
+                <table width="600" cellpadding="0" cellspacing="0"
+                       style="background:#ffffff;border-radius:12px;overflow:hidden;
+                              box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+                  <tr>
+                    <td style="background:#1a365d;padding:28px 32px;text-align:center;">
+                      <h1 style="color:#ffffff;margin:0;font-size:22px;">📋 Import Duty Roster</h1>
+                      <p style="color:#90cdf4;margin:6px 0 0;font-size:14px;">{muscat_date} &nbsp;|&nbsp; {muscat_time}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:20px 32px 0;text-align:center;">
+                      <span style="display:inline-block;background:{badge};color:#fff;
+                                   border-radius:20px;padding:6px 18px;font-size:13px;font-weight:bold;">
+                        {badge_text}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:24px 32px;text-align:right;">
+                      <p style="font-size:16px;color:#2d3748;margin:0 0 16px;">{reason}</p>
+                      <p style="font-size:14px;color:#718096;margin:0 0 24px;">
+                        اضغط على الزر أدناه للاطلاع على جدول العمل لليوم.
+                      </p>
+                      <div style="text-align:center;">
+                        <a href="{roster_url}"
+                           style="display:inline-block;background:#2b6cb0;color:#ffffff;
+                                  text-decoration:none;padding:14px 36px;border-radius:8px;
+                                  font-size:15px;font-weight:bold;">
+                          عرض جدول اليوم ←
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background:#f7fafc;padding:16px 32px;text-align:center;
+                               border-top:1px solid #e2e8f0;">
+                      <p style="color:#a0aec0;font-size:12px;margin:0;">
+                        هذا البريد تلقائي — يُرسل عند تحديث الروستر أو الساعة 7:00 صباحاً يومياً
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td></tr>
+            </table>
+          </body>
+          </html>
+          """
+
+          recipients = [e.strip() for e in email_to_raw.split(",") if e.strip()]
+          if not recipients:
+              print("⚠️  EMAIL_TO is empty — skipping email send")
+              exit(0)
+
+          if not smtp_user or not smtp_password:
+              print("⚠️  SMTP credentials missing — skipping email send")
+              exit(0)
+
+          msg = MIMEMultipart("alternative")
+          msg["Subject"] = subject
+          msg["From"]    = email_from
+          msg["To"]      = ", ".join(recipients)
+          msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+          try:
+              with smtplib.SMTP(smtp_server, smtp_port) as server:
+                  server.ehlo()
+                  server.starttls()
+                  server.login(smtp_user, smtp_password)
+                  server.sendmail(email_from, recipients, msg.as_string())
+              print(f"✅ Email sent to: {', '.join(recipients)}")
+          except Exception as e:
+              print(f"❌ Failed to send email: {e}")
+              exit(1)
+          EOF
+
+      - name: Commit updated Import docs
+        if: steps.check_import_changes.outputs.should_process == 'true'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs rosters last_filename.txt last_absence_hash.txt
+          git add docs/import import-rosters import_last_filename.txt
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            if [ "${{ steps.check_changes.outputs.force_generate }}" == "true" ]; then
-              git commit -m "⚡ Force generated: ${{ steps.check_changes.outputs.filename }}"
-            elif [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
-              git commit -m "Update roster: ${{ steps.check_changes.outputs.filename }}"
+            if [ "${{ steps.check_import_changes.outputs.changed }}" == "true" ]; then
+              git commit -m "Update IMPORT roster: ${{ steps.check_import_changes.outputs.filename }}"
             else
-              git commit -m "Scheduled update"
+              git commit -m "Scheduled IMPORT update"
             fi
+            git pull --rebase
             git push
             echo "Pushed!"
           fi
-      
+
       - name: Skip - No action needed
-        if: steps.check_changes.outputs.should_process == 'false'
+        if: steps.check_import_changes.outputs.should_process == 'false'
         run: |
           echo "========================================"
           echo "No action needed"
-          echo "Current file: ${{ steps.check_changes.outputs.filename }}"
+          echo "Current file: ${{ steps.check_import_changes.outputs.filename }}"
           echo "========================================"
