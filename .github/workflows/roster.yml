@@ -21,6 +21,43 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Check if roster changed
+        id: check_changes
+        env:
+          SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
+        run: |
+          python << 'EOF'
+          import os
+          import requests
+          from pathlib import Path
+
+          source_url = os.getenv("SOURCE_NAME_URL", "").strip()
+          if not source_url:
+              raise SystemExit("SOURCE_NAME_URL not found")
+
+          response = requests.get(source_url, timeout=20)
+          response.raise_for_status()
+          current_filename = response.text.strip()
+
+          if not current_filename:
+              raise SystemExit("source_name.txt is empty")
+
+          cache_file = Path("last_filename.txt")
+          previous_filename = cache_file.read_text(encoding="utf-8").strip() if cache_file.exists() else ""
+          changed = str(previous_filename != current_filename).lower()
+
+          cache_file.write_text(current_filename, encoding="utf-8")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"changed={changed}\n")
+              f.write(f"current_filename={current_filename}\n")
+              f.write(f"previous_filename={previous_filename}\n")
+
+          print(f"Previous: {previous_filename or '(none)'}")
+          print(f"Current : {current_filename}")
+          print(f"Changed : {changed}")
+          EOF
+
       - name: Generate page
         env:
           EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
@@ -37,7 +74,8 @@ jobs:
           SEND_EMAIL: "false"
         run: python generate_and_send.py
 
-      - name: Send Email
+      - name: Send Email only if roster changed
+        if: steps.check_changes.outputs.changed == 'true'
         env:
           EXCEL_URL: ${{ secrets.EXPORT_EXCEL_URL }}
           SOURCE_NAME_URL: ${{ secrets.EXPORT_SOURCE_NAME_URL }}
@@ -51,6 +89,8 @@ jobs:
           SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }}
           SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
           SEND_EMAIL: "true"
+          CHANGED: "true"
+          IS_MORNING_EMAIL: "false"
         run: python generate_and_send.py
 
       - name: Add PWA support
@@ -378,6 +418,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs
+          git add docs last_filename.txt
           git commit -m "Update roster site + PWA UX" || echo "No changes"
           git push
