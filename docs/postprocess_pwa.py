@@ -9,17 +9,15 @@ HEAD_INJECT = """
 
 BODY_INJECT = """
 <script src="/roster-site/docs/install-pwa.js"></script>
+<script src="/roster-site/docs/banner-changer.js"></script>
 """
 
 def patch_html_file(path: Path):
     html = path.read_text(encoding="utf-8")
-
     if 'rel="manifest"' not in html and "</head>" in html:
         html = html.replace("</head>", HEAD_INJECT + "\n</head>")
-
     if 'install-pwa.js' not in html and "</body>" in html:
         html = html.replace("</body>", BODY_INJECT + "\n</body>")
-
     path.write_text(html, encoding="utf-8")
     print(f"Patched: {path}")
 
