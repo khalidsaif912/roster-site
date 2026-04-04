@@ -399,7 +399,24 @@ jobs:
             const availableBanners = [
               'banner1.jpg',
               'banner2.jpg',
-              'banner3.jpg'
+              'banner3.jpg',
+              'banner4.jpg',
+              'banner5.jpg',
+              'banner6.jpg',
+              'banner7.jpg',
+              'banner8.jpg',
+              'banner9.jpg',
+              'banner10.jpg',
+              'banner11.jpg',
+              'banner12.jpg',
+              'banner13.jpg',
+              'banner14.jpg',
+              'banner15.jpg',
+              'banner16.jpg',
+              'banner17.jpg',
+              'banner18.jpg',
+              'banner19.jpg',
+              'banner20.jpg'
             ];
 
             function getSavedBanner() {
