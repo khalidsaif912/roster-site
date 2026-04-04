@@ -50,16 +50,42 @@
       box-shadow:0 10px 30px rgba(0,0,0,0.28);
       backdrop-filter:blur(12px);
       transition:opacity .25s ease, transform .25s ease;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     `;
 
     banner.innerHTML = `
-      <div style="width:32px;height:32px;border-radius:10px;background:rgba(201,168,76,0.10);display:flex;align-items:center;justify-content:center;">📱</div>
-      <div style="flex:1;">
-        <div style="color:#fff;font-size:13px;font-weight:700;">إضافة الروستر</div>
-        <div style="color:#b8a57a;font-size:11px;">افتحه مثل التطبيق</div>
+      <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;background:rgba(201,168,76,0.10);color:#e8c97a;flex-shrink:0;font-size:15px;">📱</div>
+
+      <div style="flex:1;min-width:0;line-height:1.35">
+        <div id="installBannerTitle" style="color:#f5ead8;font-size:13px;font-weight:700;">إضافة الروستر</div>
+        <div id="installBannerSub" style="color:#b8a57a;font-size:11px;margin-top:2px;">افتحه بسرعة مثل التطبيق</div>
       </div>
-      <button id="installBtn">طريقة التثبيت</button>
-      <button id="closeBtn">✕</button>
+
+      <button id="installBtn" style="
+        border:none;
+        border-radius:10px;
+        padding:8px 12px;
+        font-size:12px;
+        font-weight:700;
+        cursor:pointer;
+        color:#1a1208;
+        background:linear-gradient(135deg,#b8922f,#e0bd63);
+        box-shadow:0 4px 12px rgba(201,168,76,0.22);
+        white-space:nowrap;
+        flex-shrink:0;
+      ">طريقة التثبيت</button>
+
+      <button id="closeBtn" style="
+        border:none;
+        background:transparent;
+        color:#8f825f;
+        font-size:16px;
+        cursor:pointer;
+        width:26px;
+        height:26px;
+        border-radius:8px;
+        flex-shrink:0;
+      ">✕</button>
     `;
 
     document.body.appendChild(banner);
@@ -69,97 +95,166 @@
       banner.style.transform = 'translateX(-50%) translateY(0)';
     });
 
-    document.getElementById('closeBtn').onclick = () => banner.remove();
+    updateBannerText();
+
+    document.getElementById('installBtn').onclick = async () => {
+      if (deferredPrompt) {
+        try {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+        } catch (e) {}
+        return;
+      }
+
+      showHelp();
+    };
+
+    document.getElementById('closeBtn').onclick = () => {
+      hideBanner(true);
+    };
   }
 
+  function hideBanner(remember = false) {
+    const banner = document.getElementById('install-banner');
+    if (!banner) return;
+
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateX(-50%) translateY(20px)';
+
+    setTimeout(() => {
+      banner.remove();
+    }, 250);
+
+    if (remember) setBannerDismissed();
+  }
+
+  function updateBannerText() {
+    const btn = document.getElementById('installBtn');
+    const title = document.getElementById('installBannerTitle');
+    const sub = document.getElementById('installBannerSub');
+    if (!btn || !title || !sub) return;
+
+    if (deferredPrompt) {
+      title.textContent = 'تثبيت الروستر';
+      sub.textContent = 'جاهز للإضافة على جهازك';
+      btn.textContent = 'تثبيت الآن';
+    } else {
+      title.textContent = 'إضافة الروستر';
+      sub.textContent = 'خطوات بسيطة لفتحه مثل التطبيق';
+      btn.textContent = 'طريقة التثبيت';
+    }
+  }
+
+  function showHelp() {
+    if (document.getElementById('pwa-help')) return;
+
+    const box = document.createElement('div');
+    box.id = 'pwa-help';
+
+    box.style.cssText = `
+      position:fixed;
+      inset:auto 0 0 0;
+      background:#17181d;
+      color:#f3e6c1;
+      padding:22px 18px 24px;
+      z-index:10000;
+      direction:rtl;
+      border-top-left-radius:22px;
+      border-top-right-radius:22px;
+      box-shadow:0 -10px 30px rgba(0,0,0,0.30);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    `;
+
+    const helpText = isIOS
+      ? `
+        <div style="color:#c7b384;font-size:13px;line-height:1.9">
+          1) افتح زر المشاركة في المتصفح<br>
+          2) اختر <b style="color:#f3e6c1">Add to Home Screen</b><br>
+          3) اضغط <b style="color:#f3e6c1">Add</b>
+        </div>
+      `
+      : `
+        <div style="color:#c7b384;font-size:13px;line-height:1.9">
+          إذا لم تظهر نافذة التثبيت تلقائيًا، أضف الصفحة إلى الشاشة الرئيسية من خيارات المتصفح.<br>
+          بعض المتصفحات لا تعرض نافذة التثبيت المباشرة دائمًا.
+        </div>
+      `;
+
+    box.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+        <div style="font-size:16px;font-weight:800;color:#f5ead8;">طريقة إضافة الروستر</div>
+        <button id="closeHelpBtn" style="
+          border:none;
+          background:rgba(255,255,255,0.05);
+          color:#b8a57a;
+          width:30px;
+          height:30px;
+          border-radius:10px;
+          font-size:15px;
+          cursor:pointer;
+        ">✕</button>
+      </div>
+
+      ${helpText}
+
+      <button id="closeHelpMainBtn" style="
+        margin-top:16px;
+        width:100%;
+        border:none;
+        border-radius:12px;
+        padding:12px;
+        font-size:13px;
+        font-weight:700;
+        cursor:pointer;
+        color:#1a1208;
+        background:linear-gradient(135deg,#b8922f,#e0bd63);
+      ">حسنًا</button>
+    `;
+
+    document.body.appendChild(box);
+
+    document.getElementById('closeHelpBtn').onclick = () => box.remove();
+    document.getElementById('closeHelpMainBtn').onclick = () => box.remove();
+  }
+
+  function tryShowBanner() {
+    if (isStandalone) return;
+    if (bannerDismissed()) return;
+    createBanner();
+  }
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    resetDismissIfInstallAvailable();
+    updateBannerText();
+    tryShowBanner();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    hideBanner(false);
+  });
+
   window.addEventListener('load', () => {
-    setTimeout(createBanner, 3000);
+    if (isStandalone) return;
+
+    setTimeout(() => {
+      tryShowBanner();
+    }, 5000);
+
+    window.addEventListener('scroll', function onFirstScroll() {
+      tryShowBanner();
+      window.removeEventListener('scroll', onFirstScroll);
+    }, { passive: true });
+
+    window.addEventListener('touchstart', function onFirstTouch() {
+      tryShowBanner();
+      window.removeEventListener('touchstart', onFirstTouch);
+    }, { passive: true, once: true });
   });
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/roster-site/sw.js?v=8');
   }
-
 })();
-
-
-// 🔥🔥🔥 BANNER FEATURE (لا تلمس هذا الجزء)
-window.addEventListener('load', function () {
-
-  const KEY = 'selectedBanner';
-  const PATH = '/roster-site/assets/banners/';
-
-  const header = document.querySelector('.header');
-  if (!header) {
-    console.log('❌ header not found');
-    return;
-  }
-
-  console.log('✅ Banner system active');
-
-  function setBanner(file) {
-    header.style.backgroundImage =
-      "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('" + PATH + file + "')";
-    header.style.backgroundSize = 'cover';
-    header.style.backgroundPosition = 'center';
-  }
-
-  const saved = localStorage.getItem(KEY) || 'banner1.jpg';
-  setBanner(saved);
-
-  const btn = document.createElement('button');
-  btn.innerText = '🎨';
-
-  btn.style.position = 'absolute';
-  btn.style.left = '16px';
-  btn.style.top = '14px';
-  btn.style.zIndex = '99999';
-  btn.style.background = '#000';
-  btn.style.color = '#fff';
-  btn.style.border = '2px solid #fff';
-  btn.style.borderRadius = '10px';
-  btn.style.padding = '8px';
-  btn.style.cursor = 'pointer';
-
-  header.appendChild(btn);
-
-  const panel = document.createElement('div');
-  panel.style.position = 'absolute';
-  panel.style.top = '60px';
-  panel.style.left = '10px';
-  panel.style.background = '#fff';
-  panel.style.borderRadius = '12px';
-  panel.style.padding = '10px';
-  panel.style.display = 'none';
-  panel.style.zIndex = '99999';
-  panel.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
-
-  const banners = ['banner1.jpg','banner2.jpg','banner3.jpg'];
-
-  banners.forEach(file => {
-    const img = document.createElement('div');
-
-    img.style.width = '100px';
-    img.style.height = '50px';
-    img.style.marginBottom = '6px';
-    img.style.cursor = 'pointer';
-    img.style.borderRadius = '8px';
-    img.style.backgroundImage = `url(${PATH}${file})`;
-    img.style.backgroundSize = 'cover';
-
-    img.onclick = () => {
-      localStorage.setItem(KEY, file);
-      setBanner(file);
-      panel.style.display = 'none';
-    };
-
-    panel.appendChild(img);
-  });
-
-  header.appendChild(panel);
-
-  btn.onclick = () => {
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-  };
-
-});
