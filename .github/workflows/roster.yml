@@ -95,36 +95,10 @@ jobs:
 
       - name: Add PWA support
         run: |
-          EXPORT_ICONS='"icons": [
-            {
-              "src": "/roster-site/icon-192.png",
-              "sizes": "192x192",
-              "type": "image/png"
-            },
-            {
-              "src": "/roster-site/icon-512.png",
-              "sizes": "512x512",
-              "type": "image/png"
-            }
-          ]'
-
-          IMPORT_ICONS='"icons": [
-            {
-              "src": "/roster-site/icon-192.png",
-              "sizes": "192x192",
-              "type": "image/png"
-            },
-            {
-              "src": "/roster-site/icon-512.png",
-              "sizes": "512x512",
-              "type": "image/png"
-            }
-          ]'
-
-          # ── manifest للصادر (الصفحة الرئيسية) ──
-          cat > docs/manifest.json << EOF
+          # ── manifest للصادر ──
+          cat > docs/manifest.json << 'EOF'
           {
-            "name": "الصادر - EXPORT",
+            "name": "الصادر",
             "short_name": "الصادر",
             "start_url": "/roster-site/",
             "scope": "/roster-site/",
@@ -134,15 +108,26 @@ jobs:
             "theme_color": "#1a1208",
             "lang": "ar",
             "dir": "rtl",
-            $EXPORT_ICONS
+            "icons": [
+              {
+                "src": "/roster-site/icon-192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+              },
+              {
+                "src": "/roster-site/icon-192.png",
+                "sizes": "512x512",
+                "type": "image/png"
+              }
+            ]
           }
           EOF
 
           # ── manifest للوارد ──
           mkdir -p docs/import
-          cat > docs/import/manifest.json << EOF
+          cat > docs/import/manifest.json << 'EOF'
           {
-            "name": "الوارد - IMPORT",
+            "name": "الوارد",
             "short_name": "الوارد",
             "start_url": "/roster-site/import/",
             "scope": "/roster-site/import/",
@@ -152,17 +137,28 @@ jobs:
             "theme_color": "#1a1208",
             "lang": "ar",
             "dir": "rtl",
-            $IMPORT_ICONS
+            "icons": [
+              {
+                "src": "/roster-site/icon-512.png",
+                "sizes": "192x192",
+                "type": "image/png"
+              },
+              {
+                "src": "/roster-site/icon-512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+              }
+            ]
           }
           EOF
 
-          cat > docs/sw.js <<'EOF'
+          cat > docs/sw.js << 'EOF'
           self.addEventListener('install', e => self.skipWaiting());
           self.addEventListener('activate', e => self.clients.claim());
           self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
           EOF
 
-          cat > docs/install-pwa.js <<'EOF'
+          cat > docs/install-pwa.js << 'EOF'
           (function () {
             let deferredPrompt = null;
 
@@ -270,7 +266,6 @@ jobs:
                   } catch (e) {}
                   return;
                 }
-
                 showHelp();
               };
 
@@ -425,18 +420,20 @@ jobs:
           })();
           EOF
 
-          python <<'EOF'
+          python << 'EOF'
           import re
           from pathlib import Path
 
           for f in Path("docs").rglob("*.html"):
-              html = f.read_text(encoding="utf-8")
+              html = f.read_text()
 
+              # تحديث الإصدارات القديمة
               html = html.replace('/roster-site/manifest.json?v=7', '/roster-site/manifest.json?v=9')
               html = html.replace('/roster-site/manifest.json?v=8', '/roster-site/manifest.json?v=9')
               html = html.replace('/roster-site/install-pwa.js?v=7', '/roster-site/install-pwa.js?v=9')
               html = html.replace('/roster-site/install-pwa.js?v=8', '/roster-site/install-pwa.js?v=9')
 
+              # تحديد المسار الصحيح للـ manifest
               is_import = "import" in f.parts
               manifest_href = (
                   '/roster-site/import/manifest.json?v=9'
@@ -444,6 +441,7 @@ jobs:
                   else '/roster-site/manifest.json?v=9'
               )
 
+              # إضافة أو تحديث رابط الـ manifest
               if 'rel="manifest"' in html:
                   html = re.sub(
                       r'<link rel="manifest" href="[^"]*">',
@@ -456,6 +454,7 @@ jobs:
                       f'<link rel="manifest" href="{manifest_href}"></head>'
                   )
 
+              # إضافة سكريبت الـ PWA
               if "install-pwa.js?v=9" not in html:
                   html = html.replace(
                       "</body>",
@@ -467,7 +466,7 @@ jobs:
                       '<script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>'
                   )
 
-              f.write_text(html, encoding="utf-8")
+              f.write_text(html)
               print(f"{'[import]' if is_import else '[export]'} {f} → {manifest_href}")
 
           print("Done: manifests updated per section")
