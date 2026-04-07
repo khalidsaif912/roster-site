@@ -1,8 +1,8 @@
 {
-  "name": "Roster - صادر",
-  "short_name": "صادر",
-  "start_url": "/roster-site/",
-  "scope": "/roster-site/",
+  "name": "Roster - وارد",
+  "short_name": "وارد",
+  "start_url": "/roster-site/import/",
+  "scope": "/roster-site/import/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#1a1208",

@@ -255,6 +255,6 @@
   });
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/roster-site/sw.js?v=8');
+    navigator.serviceWorker.register('/roster-site/sw.js?v=9');
   }
 })();
