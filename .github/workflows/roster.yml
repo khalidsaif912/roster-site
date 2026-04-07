@@ -95,29 +95,51 @@ jobs:
 
       - name: Add PWA support
         run: |
-          cat > docs/manifest.json <<'EOF'
+          ICONS='"icons": [
+            {
+              "src": "data:image/svg+xml,%3Csvg xmlns='"'"'http://www.w3.org/2000/svg'"'"' viewBox='"'"'0 0 192 192'"'"'%3E%3Crect width='"'"'192'"'"' height='"'"'192'"'"' fill='"'"'%231a1208'"'"'/%3E%3Ctext x='"'"'96'"'"' y='"'"'130'"'"' font-size='"'"'90'"'"' text-anchor='"'"'middle'"'"' fill='"'"'%23c9a84c'"'"'%3ER%3C/text%3E%3C/svg%3E",
+              "sizes": "192x192",
+              "type": "image/svg+xml"
+            },
+            {
+              "src": "data:image/svg+xml,%3Csvg xmlns='"'"'http://www.w3.org/2000/svg'"'"' viewBox='"'"'0 0 512 512'"'"'%3E%3Crect width='"'"'512'"'"' height='"'"'512'"'"' fill='"'"'%231a1208'"'"'/%3E%3Ctext x='"'"'256'"'"' y='"'"'340'"'"' font-size='"'"'240'"'"' text-anchor='"'"'middle'"'"' fill='"'"'%23c9a84c'"'"'%3ER%3C/text%3E%3C/svg%3E",
+              "sizes": "512x512",
+              "type": "image/svg+xml"
+            }
+          ]'
+
+          # ── manifest للصادر (الصفحة الرئيسية) ──
+          cat > docs/manifest.json << EOF
           {
-            "name": "Roster Schedule",
-            "short_name": "Roster",
+            "name": "Roster - صادر",
+            "short_name": "صادر",
             "start_url": "/roster-site/",
+            "scope": "/roster-site/",
             "display": "standalone",
             "orientation": "any",
             "background_color": "#1a1208",
             "theme_color": "#1a1208",
             "lang": "ar",
             "dir": "rtl",
-            "icons": [
-              {
-                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%231a1208'/%3E%3Ctext x='96' y='130' font-size='90' text-anchor='middle' fill='%23c9a84c'%3ER%3C/text%3E%3C/svg%3E",
-                "sizes": "192x192",
-                "type": "image/svg+xml"
-              },
-              {
-                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231a1208'/%3E%3Ctext x='256' y='340' font-size='240' text-anchor='middle' fill='%23c9a84c'%3ER%3C/text%3E%3C/svg%3E",
-                "sizes": "512x512",
-                "type": "image/svg+xml"
-              }
-            ]
+            $ICONS
+          }
+          EOF
+
+          # ── manifest للوارد ──
+          mkdir -p docs/import
+          cat > docs/import/manifest.json << EOF
+          {
+            "name": "Roster - وارد",
+            "short_name": "وارد",
+            "start_url": "/roster-site/import/",
+            "scope": "/roster-site/import/",
+            "display": "standalone",
+            "orientation": "any",
+            "background_color": "#1a1208",
+            "theme_color": "#1a1208",
+            "lang": "ar",
+            "dir": "rtl",
+            $ICONS
           }
           EOF
 
@@ -385,194 +407,7 @@ jobs:
             });
 
             if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register('/roster-site/sw.js?v=8');
-            }
-          })();
-          EOF
-
-          cat > docs/banner-changer.js <<'EOF'
-          (function () {
-            const BANNER_KEY = 'roster_banner_choice';
-            const BANNERS_PATH = 'https://khalidsaif912.github.io/roster-site/assets/banners/';
-
-            // عدّل هذه القائمة بأسماء الصور الفعلية في مجلد assets/banners/
-            const availableBanners = [
-              'banner1.jpg',
-              'banner2.jpg',
-              'banner3.jpg',
-              'banner4.jpg',
-              'banner5.jpg',
-              'banner6.jpg',
-              'banner7.jpg',
-              'banner8.jpg',
-              'banner9.jpg',
-              'banner10.jpg',
-              'banner11.jpg',
-              'banner12.jpg',
-              'banner13.jpg',
-              'banner14.jpg',
-              'banner15.jpg',
-              'banner16.jpg',
-              'banner17.jpg',
-              'banner18.jpg',
-              'banner19.jpg',
-              'banner20.jpg'
-            ];
-
-            function getSavedBanner() {
-              return localStorage.getItem(BANNER_KEY) || null;
-            }
-
-            function saveBannerChoice(name) {
-              localStorage.setItem(BANNER_KEY, name);
-            }
-
-            function applyBanner(name) {
-              const headerEl = document.querySelector('.header');
-              if (!headerEl) return;
-              headerEl.style.backgroundImage = "url('" + BANNERS_PATH + name + "')";
-              headerEl.style.backgroundSize = 'cover';
-              headerEl.style.backgroundPosition = 'center';
-              headerEl.style.backgroundRepeat = 'no-repeat';
-            }
-
-            function clearBanner() {
-              const headerEl = document.querySelector('.header');
-              if (!headerEl) return;
-              headerEl.style.backgroundImage = '';
-              headerEl.style.backgroundSize = '';
-              headerEl.style.backgroundPosition = '';
-              headerEl.style.backgroundRepeat = '';
-            }
-
-            function createChangerBtn() {
-              if (document.getElementById('banner-changer-btn')) return;
-              const headerEl = document.querySelector('.header');
-              if (!headerEl) return;
-
-              const btn = document.createElement('button');
-              btn.id = 'banner-changer-btn';
-              btn.textContent = '🖼️';
-              btn.title = 'تغيير خلفية الهيدر';
-              btn.style.cssText = [
-                'position:absolute',
-                'top:8px',
-                'left:8px',
-                'z-index:999',
-                'background:transparent',
-                'border:none',
-                'color:#fff',
-                'padding:8px',
-                'font-size:16px',
-                'cursor:pointer',
-                'line-height:1',
-                'opacity:0.85',
-                '-webkit-tap-highlight-color:transparent',
-                'touch-action:manipulation',
-                'min-width:36px',
-                'min-height:36px',
-                'display:flex',
-                'align-items:center',
-                'justify-content:center'
-              ].join(';');
-
-              if (getComputedStyle(headerEl).position === 'static') {
-                headerEl.style.position = 'relative';
-              }
-
-              headerEl.appendChild(btn);
-              btn.onclick = function(e) { e.stopPropagation(); showBannerPicker(); };
-            }
-
-            function showBannerPicker() {
-              if (document.getElementById('banner-picker')) return;
-
-              const overlay = document.createElement('div');
-              overlay.id = 'banner-picker';
-              overlay.style.cssText = [
-                'position:fixed',
-                'inset:0',
-                'background:rgba(0,0,0,0.65)',
-                'z-index:10000',
-                'display:flex',
-                'align-items:flex-end',
-                'justify-content:center',
-                'font-family:system-ui,-apple-system,sans-serif'
-              ].join(';');
-
-              const sheet = document.createElement('div');
-              sheet.style.cssText = [
-                'background:#17181d',
-                'border-top-left-radius:20px',
-                'border-top-right-radius:20px',
-                'padding:18px 16px 28px',
-                'width:100%',
-                'max-width:480px',
-                'direction:rtl'
-              ].join(';');
-
-              const current = getSavedBanner();
-
-              sheet.innerHTML =
-                '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
-                  '<span style="color:#f5ead8;font-size:15px;font-weight:700;">اختر خلفية الهيدر</span>' +
-                  '<button id="closePicker" style="background:rgba(255,255,255,0.06);border:none;color:#b8a57a;width:28px;height:28px;border-radius:8px;font-size:15px;cursor:pointer;">✕</button>' +
-                '</div>' +
-                '<div id="bannerGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>' +
-                '<button id="resetBanner" style="margin-top:12px;width:100%;border:none;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;color:#b8a57a;background:rgba(255,255,255,0.05);">إعادة الخلفية الافتراضية</button>';
-
-              overlay.appendChild(sheet);
-              document.body.appendChild(overlay);
-
-              const grid = document.getElementById('bannerGrid');
-
-              availableBanners.forEach(function(name) {
-                const wrap = document.createElement('div');
-                wrap.style.cssText = 'border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid ' + (name === current ? '#e0bd63' : 'transparent') + ';transition:border .15s;';
-                const img = document.createElement('img');
-                img.src = BANNERS_PATH + name;
-                img.style.cssText = 'width:100%;height:70px;object-fit:cover;display:block;';
-                img.onerror = function() { wrap.style.display = 'none'; };
-                wrap.appendChild(img);
-                grid.appendChild(wrap);
-                wrap.onclick = function() {
-                  saveBannerChoice(name);
-                  applyBanner(name);
-                  overlay.remove();
-                };
-              });
-
-              document.getElementById('resetBanner').onclick = function() {
-                localStorage.removeItem(BANNER_KEY);
-                clearBanner();
-                overlay.remove();
-              };
-
-              document.getElementById('closePicker').onclick = function() { overlay.remove(); };
-              overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
-            }
-
-            function init() {
-              const saved = getSavedBanner();
-              if (saved) applyBanner(saved);
-              createChangerBtn();
-            }
-
-            function waitForHeader() {
-              if (document.querySelector('.header')) { init(); return; }
-              const observer = new MutationObserver(function() {
-                if (document.querySelector('.header')) {
-                  observer.disconnect();
-                  init();
-                }
-              });
-              observer.observe(document.body, { childList: true, subtree: true });
-            }
-
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', waitForHeader);
-            } else {
-              waitForHeader();
+              navigator.serviceWorker.register('/roster-site/sw.js?v=9');
             }
           })();
           EOF
@@ -583,27 +418,49 @@ jobs:
           for f in Path("docs").rglob("*.html"):
               html = f.read_text()
 
-              html = html.replace('/roster-site/manifest.json?v=7', '/roster-site/manifest.json?v=8')
-              html = html.replace('/roster-site/install-pwa.js?v=7', '/roster-site/install-pwa.js?v=8')
+              # تحديث الإصدارات القديمة
+              html = html.replace('/roster-site/manifest.json?v=7', '/roster-site/manifest.json?v=9')
+              html = html.replace('/roster-site/manifest.json?v=8', '/roster-site/manifest.json?v=9')
+              html = html.replace('/roster-site/install-pwa.js?v=7', '/roster-site/install-pwa.js?v=9')
+              html = html.replace('/roster-site/install-pwa.js?v=8', '/roster-site/install-pwa.js?v=9')
 
-              if "manifest.json" not in html:
+              # تحديد المسار الصحيح للـ manifest حسب موقع الملف
+              is_import = f.parts[-2] == "import" if len(f.parts) >= 2 else False
+              manifest_href = (
+                  '/roster-site/import/manifest.json?v=9'
+                  if is_import
+                  else '/roster-site/manifest.json?v=9'
+              )
+
+              # إضافة أو تحديث رابط الـ manifest
+              if 'rel="manifest"' in html:
+                  import re
+                  html = re.sub(
+                      r'<link rel="manifest" href="[^"]*">',
+                      f'<link rel="manifest" href="{manifest_href}">',
+                      html
+                  )
+              else:
                   html = html.replace(
                       "</head>",
-                      '<link rel="manifest" href="/roster-site/manifest.json?v=8"></head>'
+                      f'<link rel="manifest" href="{manifest_href}"></head>'
                   )
 
-              if "install-pwa.js?v=8" not in html:
+              # إضافة سكريبت الـ PWA
+              if "install-pwa.js?v=9" not in html:
                   html = html.replace(
                       "</body>",
-                      '<script src="/roster-site/install-pwa.js?v=8"></script><script src="/roster-site/banner-changer.js"></script></body>'
+                      '<script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>'
                   )
               elif "banner-changer.js" not in html:
                   html = html.replace(
-                      '<script src="/roster-site/install-pwa.js?v=8"></script></body>',
-                      '<script src="/roster-site/install-pwa.js?v=8"></script><script src="/roster-site/banner-changer.js"></script></body>'
+                      '<script src="/roster-site/install-pwa.js?v=9"></script></body>',
+                      '<script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>'
                   )
 
               f.write_text(html)
+
+          print("Done: manifests updated per section")
           EOF
 
       - name: Commit
