@@ -105,7 +105,6 @@
         } catch (e) {}
         return;
       }
-
       showHelp();
     };
 
