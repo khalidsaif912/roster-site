@@ -66,7 +66,7 @@ def main() -> None:
     generator_script = (repo_root / args.generator_script).resolve()
     site_output_dir = (repo_root / args.site_output_dir).resolve()
 
-    payload = download_shared_html(os.environ["ONEDRIVE_SHARE_URL"])
+    payload = download_shared_html(os.environ["TRAINING_PAGE_SOURCE_URL"])
     incoming = parse_source_html(payload.decode("utf-8", errors="replace"))
     existing = load_existing_archive(data_file)
     merged = merge_months(existing, incoming)
