@@ -1,0 +1,237 @@
+{
+  "months": [
+    {
+      "month_id": "2026-04",
+      "title_en": "Training Courses",
+      "title_ar": "دورات التدريب",
+      "courses": [
+        {
+          "date": "2026-04-13",
+          "code": "DGR",
+          "title": "DGR – Dangerous Goods Regulation",
+          "icon": "🚚",
+          "venue": "Training Center",
+          "time": "08:00 – 15:00",
+          "accent": "#2d5cef",
+          "surface": "rgba(235,241,255,.95)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82445",
+              "name": "Al Muthana Al Shamfari"
+            },
+            {
+              "no": "82548",
+              "name": "Ahmed Al Muqaini"
+            },
+            {
+              "no": "81409",
+              "name": "Qasim Al Maqbali"
+            },
+            {
+              "no": "82551",
+              "name": "Omar Al Obaidi"
+            },
+            {
+              "no": "82114",
+              "name": "Mubarak Al Nofli"
+            },
+            {
+              "no": "82437",
+              "name": "Marwan Al Difai"
+            },
+            {
+              "no": "82575",
+              "name": "Ahmed Al Kharusi"
+            }
+          ]
+        },
+        {
+          "date": "2026-04-15",
+          "code": "SMS",
+          "title": "SMS – Safety Management System",
+          "icon": "🧩",
+          "venue": "OAS HQ",
+          "time": "09:00 – 14:00",
+          "accent": "#0a9f83",
+          "surface": "rgba(230,252,244,.95)",
+          "surface2": "rgba(210,246,234,.98)",
+          "pill": "rgba(10,159,131,.18)",
+          "text_on_acc": "#0d5f4f",
+          "staff": [
+            {
+              "no": "82649",
+              "name": "Saif Al Mahrizi"
+            },
+            {
+              "no": "82283",
+              "name": "Ahmed Al Mawali"
+            },
+            {
+              "no": "82587",
+              "name": "Yousuf Al Balushi"
+            },
+            {
+              "no": "82574",
+              "name": "Ali Al Mamari"
+            },
+            {
+              "no": "80695",
+              "name": "Hosni Al Sulti"
+            }
+          ]
+        },
+        {
+          "date": "2026-04-17",
+          "code": "",
+          "title": "Human Factors Awareness",
+          "icon": "🧠",
+          "venue": "Cargo Hall",
+          "time": "07:30 – 12:30",
+          "accent": "#c47a00",
+          "surface": "rgba(255,248,230,.95)",
+          "surface2": "rgba(255,238,200,.98)",
+          "pill": "rgba(196,122,0,.16)",
+          "text_on_acc": "#8b5500",
+          "staff": [
+            {
+              "no": "82659",
+              "name": "Ammar Al Hashmi"
+            },
+            {
+              "no": "82578",
+              "name": "Raad Al Farsi"
+            },
+            {
+              "no": "82555",
+              "name": "Riyadh Al Jabri"
+            },
+            {
+              "no": "82658",
+              "name": "Mohamed Al Mazroie"
+            },
+            {
+              "no": "82671",
+              "name": "Khalil Al Hinai"
+            },
+            {
+              "no": "81393",
+              "name": "Ali Al Farsi"
+            }
+          ]
+        },
+        {
+          "date": "2026-04-21",
+          "code": "",
+          "title": "Security Awareness",
+          "icon": "🔐",
+          "venue": "E-Learning",
+          "time": "Self-paced",
+          "accent": "#7c4fcc",
+          "surface": "rgba(245,238,255,.95)",
+          "surface2": "rgba(232,218,255,.98)",
+          "pill": "rgba(124,79,204,.16)",
+          "text_on_acc": "#5b2f98",
+          "staff": [
+            {
+              "no": "82659",
+              "name": "Ammar Al Hashmi"
+            },
+            {
+              "no": "990752",
+              "name": "Ali Yousuf Al Balushi"
+            },
+            {
+              "no": "8584",
+              "name": "Adil Al Zadjali"
+            },
+            {
+              "no": "82578",
+              "name": "Raad Al Farsi"
+            }
+          ]
+        },
+        {
+          "date": "2026-04-24",
+          "code": "",
+          "title": "Forklift Operations",
+          "icon": "🏗️",
+          "venue": "Cargo Ramp",
+          "time": "06:00 – 10:00",
+          "accent": "#c0324a",
+          "surface": "rgba(255,236,240,.95)",
+          "surface2": "rgba(255,218,226,.98)",
+          "pill": "rgba(192,50,74,.16)",
+          "text_on_acc": "#8b1a30",
+          "staff": [
+            {
+              "no": "81307",
+              "name": "Badar Al Hamadani"
+            },
+            {
+              "no": "82534",
+              "name": "Muadh Al Qasimi"
+            },
+            {
+              "no": "82656",
+              "name": "Faisal Al Balushi"
+            },
+            {
+              "no": "82565",
+              "name": "Jamal Al Hadi"
+            },
+            {
+              "no": "8714",
+              "name": "Mohana Al Subhi"
+            }
+          ]
+        },
+        {
+          "date": "2026-04-05",
+          "code": "DGR",
+          "title": "DGR – Recurrent (Cat 6)",
+          "icon": "💡",
+          "venue": "Cargo Hall",
+          "time": "08:00 – 15:00",
+          "accent": "#1180b8",
+          "surface": "rgba(228,244,255,.95)",
+          "surface2": "rgba(208,236,255,.98)",
+          "pill": "rgba(17,128,184,.16)",
+          "text_on_acc": "#0d5c83",
+          "staff": [
+            {
+              "no": "82596",
+              "name": "Hamed Al Fulaiti"
+            },
+            {
+              "no": "82575",
+              "name": "Ahmed Al Kharusi"
+            },
+            {
+              "no": "81258",
+              "name": "Jaafar Al Balushi"
+            },
+            {
+              "no": "82437",
+              "name": "Marwan Al Difai"
+            },
+            {
+              "no": "81402",
+              "name": "Mohamed Al Siyabi"
+            },
+            {
+              "no": "82114",
+              "name": "Mubarak Al Nofli"
+            },
+            {
+              "no": "82441",
+              "name": "Mudathir Al Hajri"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
