@@ -28,7 +28,7 @@ jobs:
 
       - name: Sync shared HTML and regenerate training pages
         env:
-          ONEDRIVE_SHARE_URL: ${{ secrets.ONEDRIVE_SHARE_URL }}
+          TRAINING_PAGE_SOURCE_URL: ${{ secrets.TRAINING_PAGE_SOURCE_URL }}
         run: |
           python sync_onedrive_training_root.py \
             --repo-root . \
