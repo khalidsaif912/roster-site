@@ -54,11 +54,11 @@ def write_if_changed(path: Path, content: bytes) -> bool:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Sync shared HTML and rebuild pages under training/.")
+    parser = argparse.ArgumentParser(description="Sync shared HTML and rebuild pages under docs/training/.")
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--data-file", default="training_courses_data.json")
     parser.add_argument("--generator-script", default="generate_training_archive_pages.py")
-    parser.add_argument("--site-output-dir", default="training")
+    parser.add_argument("--site-output-dir", default="docs/training")
     args = parser.parse_args()
 
     repo_root = Path(args.repo_root).resolve()
@@ -66,7 +66,11 @@ def main() -> None:
     generator_script = (repo_root / args.generator_script).resolve()
     site_output_dir = (repo_root / args.site_output_dir).resolve()
 
-    payload = download_shared_html(os.environ["TRAINING_PAGE_SOURCE_URL"])
+    share_url = os.environ.get("TRAINING_PAGE_SOURCE_URL")
+    if not share_url:
+        raise RuntimeError("Missing environment variable: TRAINING_PAGE_SOURCE_URL")
+
+    payload = download_shared_html(share_url)
     incoming = parse_source_html(payload.decode("utf-8", errors="replace"))
     existing = load_existing_archive(data_file)
     merged = merge_months(existing, incoming)
