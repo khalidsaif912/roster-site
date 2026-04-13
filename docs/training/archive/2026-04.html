@@ -1,193 +1,502 @@
 <!doctype html>
-<html lang="ar"> 
+<html lang="ar">
 <head>
-  <meta charset="utf-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>دورات التدريب - أبريل 2026</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"> 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Sora:wght@400;600;700;800;900&display=swap" rel="stylesheet"> 
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Sora:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-:root{
-  --bg:#f0f4fa;--panel:#ffffff;--panel2:#f7f9fd;--text:#18243a;--muted:#6b7a96;
-  --blue:#2d5cef;--border:rgba(0,0,0,.08);--shadow:rgba(30,60,130,.10);
+:root {
+  --bg:#f0f4fa;
+  --panel:rgba(255,255,255,.97);
+  --panel2:rgba(255,255,255,.92);
+  --border:rgba(0,0,0,.07);
+  --border2:rgba(0,0,0,.11);
+  --text:#18243a;
+  --muted:#6b7a96;
+  --blue:#2d5cef;
+  --blue2:#1a3ec4;
+  --teal:#0a9f83;
+  --violet:#7c4fcc;
+  --shadow:rgba(30,60,130,.10);
+  --header-grad:linear-gradient(135deg,#1233a0 0%,#2358e8 52%,#0d72c4 100%);
+  --row-alt:rgba(0,0,0,.025);
+  --row-fav:rgba(10,159,131,.08);
+  --emp-no-bg:#eef2ff;
+  --emp-no-c:#5570aa;
+  --emp-code:#18243a;
+  --emp-name:#2a3a58;
+  --row-border:rgba(0,0,0,.06);
+  --today-badge-bg:#dce7ff;
+  --today-badge-c:#1a3ec4;
+  --search-bg:#fff;
+  --search-border:rgba(0,0,0,.13);
+  --clear-bg:#e8edf8;
+  --clear-c:#445;
+  --empty-bg:rgba(255,255,255,.8);
+  --empty-border:rgba(0,0,0,.12);
+  --footer-c:#9aa5bd;
+  --footer-strong:#7a87a0;
+  --past-opacity:.40;
+  --past-filter:saturate(.4) brightness(1.04);
 }
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;direction:rtl}
-.wrap{max-width:980px;margin:0 auto;padding:18px 14px 48px}
-.header{padding:28px 22px 24px;border-radius:24px;background:linear-gradient(135deg,#1233a0 0%,#2358e8 52%,#0d72c4 100%);color:#fff;box-shadow:0 24px 64px var(--shadow)}
-.header h1{margin:0;font-size:32px;line-height:1.1}
-.headerRow{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
-.monthPicker,.archiveBtn,.homeBtn{appearance:none;border:none;border-radius:999px;padding:10px 14px;background:rgba(255,255,255,.14);color:#fff;text-decoration:none;font-weight:700}
-.monthPicker{cursor:pointer;min-width:190px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
-.stat{background:var(--panel2);border:1px solid var(--border);border-radius:18px;padding:12px;text-align:center;box-shadow:0 6px 20px var(--shadow)}
-.stat .value{font-size:22px;font-weight:900;color:var(--blue)}
-.stat .label{font-size:12px;color:var(--muted);margin-top:4px}
-.searchBox{margin-top:14px;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 6px 20px var(--shadow)}
-.searchInput{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:14px;font:inherit}
-.cards{display:flex;flex-direction:column;gap:12px;margin-top:14px}
-.sep{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:6px 0 2px}
-.sep:before,.sep:after{content:"";flex:1;height:1px;background:var(--border)}
-.course{background:var(--panel);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 8px 24px var(--shadow)}
-.course.past{opacity:.55}
-.course summary{list-style:none;cursor:pointer;padding:12px 14px;display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;background:linear-gradient(180deg,var(--surface,#f5f8ff),var(--surface2,#e9f0ff));border-inline-start:4px solid var(--accent,#2d5cef);box-shadow:0 6px 18px rgba(0,0,0,.12)}
-.course summary::-webkit-details-marker{display:none}
-.icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-size:22px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7)}
-.title{font-size:17px;font-weight:900}
-.meta{margin-top:4px;font-size:12px;color:var(--muted)}
-.badges{display:flex;flex-direction:row;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
-.badge{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(255,255,255,.9)}
-.today{background:#dce7ff;color:#1a3ec4}
-.rows{border-top:1px solid var(--border)}
-.row{display:grid;grid-template-columns:26px 90px 1fr;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--border)}
-.row:first-child{border-top:none}
-.row:nth-child(even){background:rgba(0,0,0,.02)}
-.no{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#eef2ff;color:#5570aa;font-size:9px;font-weight:800}
-.code{font-size:12px;font-weight:800}
-.name{font-size:13px;font-weight:700}
-.archiveGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
-.archiveCard{display:block;text-decoration:none;color:var(--text);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 8px 24px var(--shadow)}
-.archiveMonth{font-size:18px;font-weight:900}
-.archiveMeta{margin-top:8px;color:var(--muted);font-size:12px}
-.archiveLatest{display:inline-flex;margin-top:10px;padding:5px 9px;border-radius:999px;background:#e8efff;color:#1a3ec4;font-size:10px;font-weight:800}
-.footer{margin-top:20px;text-align:center;color:var(--muted);font-size:11px;line-height:1.9}
-.empty{display:none;margin-top:14px;padding:24px;border-radius:18px;border:1px dashed var(--border);background:rgba(255,255,255,.8);text-align:center;color:var(--muted)}
-@media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)} .course summary{grid-template-columns:40px 1fr auto}.icon{width:40px;height:40px;font-size:20px}}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  background:var(--bg); color:var(--text);
+  font-family:'IBM Plex Sans Arabic','DM Sans',Tahoma,sans-serif;
+  min-height:100vh; direction:rtl; -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:860px; margin:0 auto; padding:18px 14px 48px; }
+
+.header {
+  position:relative; overflow:hidden;
+  padding:28px 22px 24px; border-radius:24px;
+  background:var(--header-grad);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 0 0 1px rgba(45,92,239,.18), 0 24px 64px var(--shadow);
+}
+.header::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 85% 20%,rgba(255,255,255,.15) 0%,transparent 40%),
+    radial-gradient(circle at 10% 80%,rgba(255,255,255,.08) 0%,transparent 35%);
+}
+.hCircle { position:absolute; border-radius:50%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); }
+.hCircle1 { width:220px; height:220px; right:-70px; top:-80px; }
+.hCircle2 { width:140px; height:140px; right:80px; bottom:-60px; }
+.hCircle3 { width:80px; height:80px; left:40%; top:-20px; }
+.header h1 {
+  position:relative; z-index:1; margin:0;
+  font:900 32px/1.05 'Sora',sans-serif; letter-spacing:-.04em; color:#fff;
+}
+.headerSub {
+  position:relative; z-index:1; margin-top:8px;
+  font-size:13.5px; color:rgba(255,255,255,.72);
+}
+.dateTag {
+  position:relative; z-index:1; display:inline-flex; align-items:center; gap:8px;
+  margin-top:18px; padding:8px 14px; border-radius:999px;
+  background:rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.20);
+  color:rgba(255,255,255,.95); font-size:12px; font-weight:700; backdrop-filter:blur(10px);
+}
+.headerRow {
+  position:relative; z-index:1; margin-top:16px;
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.monthPicker,.archiveBtn {
+  appearance:none; border:none; border-radius:999px; padding:10px 14px;
+  background:rgba(255,255,255,.14); color:#fff; text-decoration:none; font-weight:700;
+  border:1px solid rgba(255,255,255,.20); backdrop-filter:blur(10px);
+}
+.monthPicker { cursor:pointer; min-width:190px; }
+
+.topDock {
+  display:grid; grid-template-columns:1.3fr .72fr .72fr 1.15fr;
+  gap:10px; margin-top:14px; align-items:stretch;
+}
+.dockCard {
+  min-width:0; width:100%; padding:11px 10px; border-radius:18px;
+  background:var(--panel2); border:1px solid var(--border2);
+  box-shadow:0 6px 20px var(--shadow);
+  transition:transform .22s, box-shadow .22s, background .35s, border-color .35s;
+  text-align:center;
+}
+.dockCard:hover { transform:translateY(-2px); box-shadow:0 12px 28px var(--shadow); }
+.dockValue { font-size:20px; font-weight:900; line-height:1.1; color:var(--blue); font-family:'Sora',sans-serif; letter-spacing:-.03em; }
+.dockLabel { margin-top:4px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); white-space:nowrap; }
+.flipChip { perspective:900px; }
+.flipInner { position:relative; width:100%; height:44px; transform-style:preserve-3d; transition:transform .7s cubic-bezier(.4,0,.2,1); }
+.flipInner.flipped { transform:rotateX(180deg); }
+.flipFace { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; backface-visibility:hidden; }
+.flipBack { transform:rotateX(180deg); }
+.dockAction { cursor:pointer; border:none; font-family:inherit; }
+.savedChip {
+  display:flex; align-items:center; gap:10px; text-align:start; cursor:pointer;
+  padding-inline:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(246,249,255,.96));
+}
+.savedChip:hover { box-shadow:0 14px 30px rgba(45,92,239,.12); }
+.savedIcon {
+  width:38px; height:38px; flex:0 0 38px; border-radius:14px; display:grid; place-items:center;
+  background:linear-gradient(135deg,rgba(45,92,239,.18),rgba(10,159,131,.14));
+  font-size:18px; border:1px solid var(--border2);
+}
+.savedLines { min-width:0; flex:1; }
+.savedName {
+  font-size:14px; line-height:1.02; font-weight:900; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.savedNo {
+  margin-top:3px; font-size:10px; font-weight:700; color:var(--muted);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.savedEmpty .savedName { color:var(--blue); font-size:12px; font-weight:800; }
+
+.filters {
+  display:none; margin-top:12px; padding:12px; border-radius:18px;
+  background:var(--panel2); border:1px solid var(--border2); box-shadow:0 6px 20px var(--shadow);
+}
+.filters.active { display:block; }
+.searchRow { display:flex; align-items:center; gap:8px; }
+.searchRow input {
+  flex:1; min-width:0; padding:11px 14px; border-radius:14px;
+  border:1px solid var(--search-border); background:var(--search-bg);
+  font-size:13px; outline:none; color:var(--text); font-family:inherit;
+}
+.searchRow input::placeholder { color:var(--muted); opacity:.7; }
+.searchBtn,.clearBtn { border:none; border-radius:14px; padding:11px 14px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; }
+.searchBtn { background:linear-gradient(135deg,var(--blue2),var(--blue)); color:#fff; min-width:80px; box-shadow:0 4px 14px rgba(45,92,239,.30); }
+.clearBtn { background:var(--clear-bg); color:var(--clear-c); }
+
+.cards { margin-top:14px; display:flex; flex-direction:column; gap:12px; }
+.pastLabel {
+  display:flex; align-items:center; gap:10px;
+  margin:6px 0 2px; color:var(--muted); font-size:10px; font-weight:800;
+  text-transform:uppercase; letter-spacing:.09em;
+}
+.pastLabel::before,.pastLabel::after { content:''; flex:1; height:1px; background:var(--border2); }
+
+.courseCard {
+  background:var(--panel); border:1px solid var(--border2); border-radius:20px; overflow:hidden;
+  box-shadow:0 8px 24px var(--shadow);
+  transition:background .35s,border-color .35s,box-shadow .35s,opacity .25s,filter .25s,transform .22s;
+}
+.courseCard[open] { transform:translateY(-1px); box-shadow:0 14px 36px var(--shadow); }
+.courseCard.is-today { border-color:rgba(45,92,239,.32); box-shadow:0 0 0 1px rgba(45,92,239,.16),0 14px 40px rgba(45,92,239,.12); }
+.courseCard.is-saved { border-color:rgba(10,159,131,.30); }
+.courseCard.is-past { opacity:var(--past-opacity); filter:var(--past-filter); }
+
+.courseHead {
+  position:relative; display:grid; grid-template-columns:40px minmax(0,1fr) auto;
+  gap:10px; align-items:center; padding:11px 13px; cursor:pointer; list-style:none;
+  background:
+    radial-gradient(circle at top right,rgba(255,255,255,.88),transparent 34%),
+    linear-gradient(180deg,var(--surface,#f5f8ff),var(--surface2,#dfe8ff));
+  border-inline-start:4px solid var(--accent,var(--blue));
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+  transition:background .35s, box-shadow .35s;
+}
+.courseCard[open] .courseHead { box-shadow:0 10px 24px rgba(0,0,0,.16); }
+.courseHead::-webkit-details-marker { display:none; }
+.headGlow { position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(255,255,255,.30),transparent 36%); }
+.courseIcon {
+  position:relative; z-index:1; width:40px; height:40px; border-radius:14px; display:grid; place-items:center; font-size:19px;
+  background:linear-gradient(180deg,rgba(255,255,255,.60),var(--pill,rgba(45,92,239,.20)));
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.75), 0 8px 18px rgba(0,0,0,.07);
+}
+.courseTitleWrap { position:relative; z-index:1; min-width:0; }
+.courseTitle { font-size:16px; font-weight:900; letter-spacing:-.025em; color:var(--text-on-acc,var(--text)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:'Sora',sans-serif; }
+.courseSubRow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px; font-size:10px; color:var(--muted); }
+.miniMeta strong { color:var(--text-on-acc,var(--text)); margin-inline-end:3px; font-weight:700; opacity:.75; }
+.miniDot { color:var(--border2); font-weight:900; }
+.courseBadges {
+  position:relative; z-index:1; display:flex; flex-direction:row; gap:6px; align-items:center; justify-content:flex-end; flex-wrap:wrap;
+}
+.badge {
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  padding:5px 10px; border-radius:999px; font-size:10px; font-weight:900; letter-spacing:.03em;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.72);
+}
+.dateBadge { background:linear-gradient(180deg,rgba(255,255,255,.75),var(--pill,rgba(45,92,239,.20))); color:var(--text-on-acc,var(--blue2)); }
+.peopleBadge { background:rgba(255,255,255,.92); color:#334155; }
+.todayBadge { background:var(--today-badge-bg); color:var(--today-badge-c); }
+
+.courseBody { padding:14px 13px 13px; }
+.courseCard[open] .courseBody { padding-top:18px; }
+.rowsWrap { border:1px solid var(--border2); border-radius:12px; overflow:hidden; }
+.empRow { display:grid; grid-template-columns:22px 80px 1fr; gap:8px; align-items:center; padding:8px 10px; background:var(--panel); border-top:1px solid var(--row-border); }
+.empRow:first-child { border-top:none; }
+.empRowAlt { background:var(--row-alt); }
+.empRow.favorite { background:var(--row-fav); }
+.empNo { display:inline-flex; align-items:center; justify-content:center; min-width:18px; width:18px; height:18px; border-radius:50%; background:var(--emp-no-bg); color:var(--emp-no-c); font-size:8px; font-weight:800; }
+.empCode { font-size:11px; font-weight:800; color:var(--emp-code); letter-spacing:.01em; }
+.empName { min-width:0; font-size:12px; font-weight:700; color:var(--emp-name); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.favBadge { padding:2px 7px; border-radius:999px; font-size:8px; font-weight:800; background:rgba(10,159,131,.16); color:#097a63; }
+
+.emptyState { display:none; margin-top:14px; padding:26px; text-align:center; color:var(--muted); border-radius:18px; background:var(--empty-bg); border:1px dashed var(--empty-border); }
+.footer { margin-top:20px; padding:10px 8px; text-align:center; color:var(--footer-c); font-size:11px; line-height:1.9; }
+.footer strong { color:var(--footer-strong); }
+.archiveGrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:16px; }
+.archiveCard { display:block; text-decoration:none; color:var(--text); background:var(--panel); border:1px solid var(--border2); border-radius:20px; padding:18px; box-shadow:0 8px 24px var(--shadow); }
+.archiveMonth { font-size:18px; font-weight:900; font-family:'Sora',sans-serif; }
+.archiveMeta { margin-top:8px; color:var(--muted); font-size:12px; }
+.archiveLatest { display:inline-flex; margin-top:10px; padding:5px 9px; border-radius:999px; background:#e8efff; color:#1a3ec4; font-size:10px; font-weight:800; }
+
+@media(max-width:720px){
+  .topDock{grid-template-columns:1fr 1fr}
+  .courseHead{grid-template-columns:34px minmax(0,1fr) auto}
+  .courseIcon{width:34px;height:34px;font-size:17px}
+  .courseTitle{font-size:14px}
+}
 </style>
-<link rel="manifest" href="/roster-site/manifest.json?v=9"></head>
+</head>
 <body>
-<div class="wrap"> 
-  <div class="header"> 
-    <h1>دورات التدريب - أبريل 2026</h1>
-    <div class="headerRow"> 
+<div class="wrap">
+  <div class="header">
+    <div class="hCircle hCircle1"></div>
+    <div class="hCircle hCircle2"></div>
+    <div class="hCircle hCircle3"></div>
+    <h1>دورات التدريب</h1>
+    <div class="headerSub">الجدول الشهري للدورات التدريبية</div>
+    <div class="dateTag">📅 05 – 24 أبريل</div>
+    <div class="headerRow">
       <select id="monthPicker" class="monthPicker"><option value="2026-04.html" selected>أبريل 2026</option></select>
-      <a class="archiveBtn archiveLink" href="index.html">الأرشيف</a>
+      <a class="archiveBtn" href="index.html">الأرشيف</a>
     </div>
   </div>
 
-  <div class="stats"> 
-    <div class="stat"><div class="value">6</div><div class="label">الجلسات</div></div>
-    <div class="stat"><div class="value">6</div><div class="label">الأنواع</div></div>
-    <div class="stat"><div class="value">34</div><div class="label">الموظفون</div></div>
-    <div class="stat"><div class="value">5</div><div class="label">المواقع</div></div>
+  <div class="topDock">
+    
+<div class="dockCard flipChip">
+  <div class="flipInner" id="statsCardInner">
+    <div class="flipFace"><div class="dockValue" id="statsValue">6</div><div class="dockLabel" id="statsLabel">الجلسات</div></div>
+    <div class="flipFace flipBack"><div class="dockValue" id="statsValueBack" style="color:var(--teal);">6</div><div class="dockLabel" id="statsLabelBack">الأنواع</div></div>
+  </div>
+</div>
+
+    <button class="dockCard dockAction" id="searchToggle" type="button" aria-expanded="false"><div class="dockValue">🔎</div><div class="dockLabel">بحث</div></button>
+    <button class="dockCard dockAction" id="otherPageBtn" type="button"><div class="dockValue">➕</div><div class="dockLabel">صفحة أخرى</div></button>
+    <button class="dockCard savedChip savedEmpty" id="savedChip" type="button"><div class="savedIcon">👋</div><div class="savedLines"><div class="savedName" id="savedName">حفظ موظف</div><div class="savedNo" id="savedNo">الموظف المحفوظ</div></div></button>
   </div>
 
-  <div class="searchBox"><input id="searchInput" class="searchInput" placeholder="ابحث برقم الموظف أو الاسم أو اسم الدورة"></div>
+  <div class="filters" id="filtersBox">
+    <div class="searchRow">
+      <input id="searchInput" type="text" placeholder="ابحث برقم الموظف أو الاسم أو اسم الدورة">
+      <button id="searchBtn" class="searchBtn" type="button">بحث</button>
+      <button id="clearFilters" class="clearBtn" type="button">مسح</button>
+    </div>
+  </div>
+
   <div class="cards">
-<details class="course" data-search="dgr – dangerous goods regulation dgr training center 08:00 – 15:00 82445 al muthana al shamfari 82548 ahmed al muqaini 81409 qasim al maqbali 82551 omar al obaidi 82114 mubarak al nofli 82437 marwan al difai 82575 ahmed al kharusi" data-attendees="7" open>
-  <summary style="--accent:#2d5cef;--surface:rgba(235,241,255,.95);--surface2:rgba(218,230,255,.98)">
-    <div class="icon">🚚</div>
-    <div>
-      <div class="title">DGR – Dangerous Goods Regulation</div>
-      <div class="meta">الموقع: Training Center - الوقت: 08:00 – 15:00</div>
+<details class="courseCard" data-search="dgr – dangerous goods regulation dgr training center 08:00 – 15:00 82445 al muthana al shamfari 82548 ahmed al muqaini 81409 qasim al maqbali 82551 omar al obaidi 82114 mubarak al nofli 82437 marwan al difai 82575 ahmed al kharusi" data-attendees="7" open>
+  <summary class="courseHead" style="--accent:#2d5cef;--surface:rgba(235,241,255,.95);--surface2:rgba(218,230,255,.98);--pill:rgba(45,92,239,.20);--text-on-acc:#1a337d;">
+    <div class="headGlow"></div>
+    <div class="courseIcon">🚚</div>
+    <div class="courseTitleWrap">
+      <div class="courseTitle">DGR – Dangerous Goods Regulation</div>
+      <div class="courseSubRow"><span class="miniMeta"><strong>الموقع</strong> Training Center</span><span class="miniDot">•</span><span class="miniMeta"><strong>الوقت</strong> 08:00 – 15:00</span></div>
     </div>
-    <div class="badges">
-      <span class="badge today">اليوم</span>
-      <span class="badge">13 أبريل  👥 7</span>
+    <div class="courseBadges">
+      <span class="badge todayBadge">اليوم</span>
+      <span class="badge dateBadge">13 أبريل</span>
+      <span class="badge peopleBadge">👥 7</span>
     </div>
   </summary>
-  <div class="rows"><div class="row"><span class="no">1</span><span class="code">82445</span><span class="name">Al Muthana Al Shamfari</span></div><div class="row"><span class="no">2</span><span class="code">82548</span><span class="name">Ahmed Al Muqaini</span></div><div class="row"><span class="no">3</span><span class="code">81409</span><span class="name">Qasim Al Maqbali</span></div><div class="row"><span class="no">4</span><span class="code">82551</span><span class="name">Omar Al Obaidi</span></div><div class="row"><span class="no">5</span><span class="code">82114</span><span class="name">Mubarak Al Nofli</span></div><div class="row"><span class="no">6</span><span class="code">82437</span><span class="name">Marwan Al Difai</span></div><div class="row"><span class="no">7</span><span class="code">82575</span><span class="name">Ahmed Al Kharusi</span></div></div>
+  <div class="courseBody"><div class="rowsWrap"><div class="empRow"><span class="empNo">1</span><span class="empCode">82445</span><span class="empName">Al Muthana Al Shamfari</span></div><div class="empRow empRowAlt"><span class="empNo">2</span><span class="empCode">82548</span><span class="empName">Ahmed Al Muqaini</span></div><div class="empRow"><span class="empNo">3</span><span class="empCode">81409</span><span class="empName">Qasim Al Maqbali</span></div><div class="empRow empRowAlt"><span class="empNo">4</span><span class="empCode">82551</span><span class="empName">Omar Al Obaidi</span></div><div class="empRow"><span class="empNo">5</span><span class="empCode">82114</span><span class="empName">Mubarak Al Nofli</span></div><div class="empRow empRowAlt"><span class="empNo">6</span><span class="empCode">82437</span><span class="empName">Marwan Al Difai</span></div><div class="empRow"><span class="empNo">7</span><span class="empCode">82575</span><span class="empName">Ahmed Al Kharusi</span></div></div></div>
 </details>
 
-<details class="course" data-search="sms – safety management system sms oas hq 09:00 – 14:00 82649 saif al mahrizi 82283 ahmed al mawali 82587 yousuf al balushi 82574 ali al mamari 80695 hosni al sulti" data-attendees="5">
-  <summary style="--accent:#0a9f83;--surface:rgba(230,252,244,.95);--surface2:rgba(210,246,234,.98)">
-    <div class="icon">🧩</div>
-    <div>
-      <div class="title">SMS – Safety Management System</div>
-      <div class="meta">الموقع: OAS HQ - الوقت: 09:00 – 14:00</div>
+<details class="courseCard" data-search="sms – safety management system sms oas hq 09:00 – 14:00 82649 saif al mahrizi 82283 ahmed al mawali 82587 yousuf al balushi 82574 ali al mamari 80695 hosni al sulti" data-attendees="5">
+  <summary class="courseHead" style="--accent:#0a9f83;--surface:rgba(230,252,244,.95);--surface2:rgba(210,246,234,.98);--pill:rgba(10,159,131,.18);--text-on-acc:#0d5f4f;">
+    <div class="headGlow"></div>
+    <div class="courseIcon">🧩</div>
+    <div class="courseTitleWrap">
+      <div class="courseTitle">SMS – Safety Management System</div>
+      <div class="courseSubRow"><span class="miniMeta"><strong>الموقع</strong> OAS HQ</span><span class="miniDot">•</span><span class="miniMeta"><strong>الوقت</strong> 09:00 – 14:00</span></div>
     </div>
-    <div class="badges">
+    <div class="courseBadges">
       
-      <span class="badge">15 أبريل  👥 5</span>
+      <span class="badge dateBadge">15 أبريل</span>
+      <span class="badge peopleBadge">👥 5</span>
     </div>
   </summary>
-  <div class="rows"><div class="row"><span class="no">1</span><span class="code">82649</span><span class="name">Saif Al Mahrizi</span></div><div class="row"><span class="no">2</span><span class="code">82283</span><span class="name">Ahmed Al Mawali</span></div><div class="row"><span class="no">3</span><span class="code">82587</span><span class="name">Yousuf Al Balushi</span></div><div class="row"><span class="no">4</span><span class="code">82574</span><span class="name">Ali Al Mamari</span></div><div class="row"><span class="no">5</span><span class="code">80695</span><span class="name">Hosni Al Sulti</span></div></div>
+  <div class="courseBody"><div class="rowsWrap"><div class="empRow"><span class="empNo">1</span><span class="empCode">82649</span><span class="empName">Saif Al Mahrizi</span></div><div class="empRow empRowAlt"><span class="empNo">2</span><span class="empCode">82283</span><span class="empName">Ahmed Al Mawali</span></div><div class="empRow"><span class="empNo">3</span><span class="empCode">82587</span><span class="empName">Yousuf Al Balushi</span></div><div class="empRow empRowAlt"><span class="empNo">4</span><span class="empCode">82574</span><span class="empName">Ali Al Mamari</span></div><div class="empRow"><span class="empNo">5</span><span class="empCode">80695</span><span class="empName">Hosni Al Sulti</span></div></div></div>
 </details>
 
-<details class="course" data-search="human factors awareness  cargo hall 07:30 – 12:30 82659 ammar al hashmi 82578 raad al farsi 82555 riyadh al jabri 82658 mohamed al mazroie 82671 khalil al hinai 81393 ali al farsi" data-attendees="6">
-  <summary style="--accent:#c47a00;--surface:rgba(255,248,230,.95);--surface2:rgba(255,238,200,.98)">
-    <div class="icon">🧠</div>
-    <div>
-      <div class="title">Human Factors Awareness</div>
-      <div class="meta">الموقع: Cargo Hall - الوقت: 07:30 – 12:30</div>
+<details class="courseCard" data-search="human factors awareness  cargo hall 07:30 – 12:30 82659 ammar al hashmi 82578 raad al farsi 82555 riyadh al jabri 82658 mohamed al mazroie 82671 khalil al hinai 81393 ali al farsi" data-attendees="6">
+  <summary class="courseHead" style="--accent:#c47a00;--surface:rgba(255,248,230,.95);--surface2:rgba(255,238,200,.98);--pill:rgba(196,122,0,.16);--text-on-acc:#8b5500;">
+    <div class="headGlow"></div>
+    <div class="courseIcon">🧠</div>
+    <div class="courseTitleWrap">
+      <div class="courseTitle">Human Factors Awareness</div>
+      <div class="courseSubRow"><span class="miniMeta"><strong>الموقع</strong> Cargo Hall</span><span class="miniDot">•</span><span class="miniMeta"><strong>الوقت</strong> 07:30 – 12:30</span></div>
     </div>
-    <div class="badges">
+    <div class="courseBadges">
       
-      <span class="badge">17 أبريل  👥 6</span>
+      <span class="badge dateBadge">17 أبريل</span>
+      <span class="badge peopleBadge">👥 6</span>
     </div>
   </summary>
-  <div class="rows"><div class="row"><span class="no">1</span><span class="code">82659</span><span class="name">Ammar Al Hashmi</span></div><div class="row"><span class="no">2</span><span class="code">82578</span><span class="name">Raad Al Farsi</span></div><div class="row"><span class="no">3</span><span class="code">82555</span><span class="name">Riyadh Al Jabri</span></div><div class="row"><span class="no">4</span><span class="code">82658</span><span class="name">Mohamed Al Mazroie</span></div><div class="row"><span class="no">5</span><span class="code">82671</span><span class="name">Khalil Al Hinai</span></div><div class="row"><span class="no">6</span><span class="code">81393</span><span class="name">Ali Al Farsi</span></div></div>
+  <div class="courseBody"><div class="rowsWrap"><div class="empRow"><span class="empNo">1</span><span class="empCode">82659</span><span class="empName">Ammar Al Hashmi</span></div><div class="empRow empRowAlt"><span class="empNo">2</span><span class="empCode">82578</span><span class="empName">Raad Al Farsi</span></div><div class="empRow"><span class="empNo">3</span><span class="empCode">82555</span><span class="empName">Riyadh Al Jabri</span></div><div class="empRow empRowAlt"><span class="empNo">4</span><span class="empCode">82658</span><span class="empName">Mohamed Al Mazroie</span></div><div class="empRow"><span class="empNo">5</span><span class="empCode">82671</span><span class="empName">Khalil Al Hinai</span></div><div class="empRow empRowAlt"><span class="empNo">6</span><span class="empCode">81393</span><span class="empName">Ali Al Farsi</span></div></div></div>
 </details>
 
-<details class="course" data-search="security awareness  e-learning self-paced 82659 ammar al hashmi 990752 ali yousuf al balushi 8584 adil al zadjali 82578 raad al farsi" data-attendees="4">
-  <summary style="--accent:#7c4fcc;--surface:rgba(245,238,255,.95);--surface2:rgba(232,218,255,.98)">
-    <div class="icon">🔐</div>
-    <div>
-      <div class="title">Security Awareness</div>
-      <div class="meta">الموقع: E-Learning - الوقت: Self-paced</div>
+<details class="courseCard" data-search="security awareness  e-learning self-paced 82659 ammar al hashmi 990752 ali yousuf al balushi 8584 adil al zadjali 82578 raad al farsi" data-attendees="4">
+  <summary class="courseHead" style="--accent:#7c4fcc;--surface:rgba(245,238,255,.95);--surface2:rgba(232,218,255,.98);--pill:rgba(124,79,204,.16);--text-on-acc:#5b2f98;">
+    <div class="headGlow"></div>
+    <div class="courseIcon">🔐</div>
+    <div class="courseTitleWrap">
+      <div class="courseTitle">Security Awareness</div>
+      <div class="courseSubRow"><span class="miniMeta"><strong>الموقع</strong> E-Learning</span><span class="miniDot">•</span><span class="miniMeta"><strong>الوقت</strong> Self-paced</span></div>
     </div>
-    <div class="badges">
+    <div class="courseBadges">
       
-      <span class="badge">21 أبريل  👥 4</span>
+      <span class="badge dateBadge">21 أبريل</span>
+      <span class="badge peopleBadge">👥 4</span>
     </div>
   </summary>
-  <div class="rows"><div class="row"><span class="no">1</span><span class="code">82659</span><span class="name">Ammar Al Hashmi</span></div><div class="row"><span class="no">2</span><span class="code">990752</span><span class="name">Ali Yousuf Al Balushi</span></div><div class="row"><span class="no">3</span><span class="code">8584</span><span class="name">Adil Al Zadjali</span></div><div class="row"><span class="no">4</span><span class="code">82578</span><span class="name">Raad Al Farsi</span></div></div>
+  <div class="courseBody"><div class="rowsWrap"><div class="empRow"><span class="empNo">1</span><span class="empCode">82659</span><span class="empName">Ammar Al Hashmi</span></div><div class="empRow empRowAlt"><span class="empNo">2</span><span class="empCode">990752</span><span class="empName">Ali Yousuf Al Balushi</span></div><div class="empRow"><span class="empNo">3</span><span class="empCode">8584</span><span class="empName">Adil Al Zadjali</span></div><div class="empRow empRowAlt"><span class="empNo">4</span><span class="empCode">82578</span><span class="empName">Raad Al Farsi</span></div></div></div>
 </details>
 
-<details class="course" data-search="forklift operations  cargo ramp 06:00 – 10:00 81307 badar al hamadani 82534 muadh al qasimi 82656 faisal al balushi 82565 jamal al hadi 8714 mohana al subhi" data-attendees="5">
-  <summary style="--accent:#c0324a;--surface:rgba(255,236,240,.95);--surface2:rgba(255,218,226,.98)">
-    <div class="icon">🏗️</div>
-    <div>
-      <div class="title">Forklift Operations</div>
-      <div class="meta">الموقع: Cargo Ramp - الوقت: 06:00 – 10:00</div>
+<details class="courseCard" data-search="forklift operations  cargo ramp 06:00 – 10:00 81307 badar al hamadani 82534 muadh al qasimi 82656 faisal al balushi 82565 jamal al hadi 8714 mohana al subhi" data-attendees="5">
+  <summary class="courseHead" style="--accent:#c0324a;--surface:rgba(255,236,240,.95);--surface2:rgba(255,218,226,.98);--pill:rgba(192,50,74,.16);--text-on-acc:#8b1a30;">
+    <div class="headGlow"></div>
+    <div class="courseIcon">🏗️</div>
+    <div class="courseTitleWrap">
+      <div class="courseTitle">Forklift Operations</div>
+      <div class="courseSubRow"><span class="miniMeta"><strong>الموقع</strong> Cargo Ramp</span><span class="miniDot">•</span><span class="miniMeta"><strong>الوقت</strong> 06:00 – 10:00</span></div>
     </div>
-    <div class="badges">
+    <div class="courseBadges">
       
-      <span class="badge">24 أبريل  👥 5</span>
+      <span class="badge dateBadge">24 أبريل</span>
+      <span class="badge peopleBadge">👥 5</span>
     </div>
   </summary>
-  <div class="rows"><div class="row"><span class="no">1</span><span class="code">81307</span><span class="name">Badar Al Hamadani</span></div><div class="row"><span class="no">2</span><span class="code">82534</span><span class="name">Muadh Al Qasimi</span></div><div class="row"><span class="no">3</span><span class="code">82656</span><span class="name">Faisal Al Balushi</span></div><div class="row"><span class="no">4</span><span class="code">82565</span><span class="name">Jamal Al Hadi</span></div><div class="row"><span class="no">5</span><span class="code">8714</span><span class="name">Mohana Al Subhi</span></div></div>
+  <div class="courseBody"><div class="rowsWrap"><div class="empRow"><span class="empNo">1</span><span class="empCode">81307</span><span class="empName">Badar Al Hamadani</span></div><div class="empRow empRowAlt"><span class="empNo">2</span><span class="empCode">82534</span><span class="empName">Muadh Al Qasimi</span></div><div class="empRow"><span class="empNo">3</span><span class="empCode">82656</span><span class="empName">Faisal Al Balushi</span></div><div class="empRow empRowAlt"><span class="empNo">4</span><span class="empCode">82565</span><span class="empName">Jamal Al Hadi</span></div><div class="empRow"><span class="empNo">5</span><span class="empCode">8714</span><span class="empName">Mohana Al Subhi</span></div></div></div>
 </details>
-<div class="sep" id="pastSep">الجلسات السابقة</div>
-<details class="course past" data-search="dgr – recurrent (cat 6) dgr cargo hall 08:00 – 15:00 82596 hamed al fulaiti 82575 ahmed al kharusi 81258 jaafar al balushi 82437 marwan al difai 81402 mohamed al siyabi 82114 mubarak al nofli 82441 mudathir al hajri" data-attendees="7">
-  <summary style="--accent:#1180b8;--surface:rgba(228,244,255,.95);--surface2:rgba(208,236,255,.98)">
-    <div class="icon">💡</div>
-    <div>
-      <div class="title">DGR – Recurrent (Cat 6)</div>
-      <div class="meta">الموقع: Cargo Hall - الوقت: 08:00 – 15:00</div>
+<div class="pastLabel" id="pastSep">الجلسات السابقة</div>
+<details class="courseCard is-past" data-search="dgr – recurrent (cat 6) dgr cargo hall 08:00 – 15:00 82596 hamed al fulaiti 82575 ahmed al kharusi 81258 jaafar al balushi 82437 marwan al difai 81402 mohamed al siyabi 82114 mubarak al nofli 82441 mudathir al hajri" data-attendees="7">
+  <summary class="courseHead" style="--accent:#1180b8;--surface:rgba(228,244,255,.95);--surface2:rgba(208,236,255,.98);--pill:rgba(17,128,184,.16);--text-on-acc:#0d5c83;">
+    <div class="headGlow"></div>
+    <div class="courseIcon">💡</div>
+    <div class="courseTitleWrap">
+      <div class="courseTitle">DGR – Recurrent (Cat 6)</div>
+      <div class="courseSubRow"><span class="miniMeta"><strong>الموقع</strong> Cargo Hall</span><span class="miniDot">•</span><span class="miniMeta"><strong>الوقت</strong> 08:00 – 15:00</span></div>
     </div>
-    <div class="badges">
+    <div class="courseBadges">
       
-      <span class="badge">05 أبريل  👥 7</span>
+      <span class="badge dateBadge">05 أبريل</span>
+      <span class="badge peopleBadge">👥 7</span>
     </div>
   </summary>
-  <div class="rows"><div class="row"><span class="no">1</span><span class="code">82596</span><span class="name">Hamed Al Fulaiti</span></div><div class="row"><span class="no">2</span><span class="code">82575</span><span class="name">Ahmed Al Kharusi</span></div><div class="row"><span class="no">3</span><span class="code">81258</span><span class="name">Jaafar Al Balushi</span></div><div class="row"><span class="no">4</span><span class="code">82437</span><span class="name">Marwan Al Difai</span></div><div class="row"><span class="no">5</span><span class="code">81402</span><span class="name">Mohamed Al Siyabi</span></div><div class="row"><span class="no">6</span><span class="code">82114</span><span class="name">Mubarak Al Nofli</span></div><div class="row"><span class="no">7</span><span class="code">82441</span><span class="name">Mudathir Al Hajri</span></div></div>
+  <div class="courseBody"><div class="rowsWrap"><div class="empRow"><span class="empNo">1</span><span class="empCode">82596</span><span class="empName">Hamed Al Fulaiti</span></div><div class="empRow empRowAlt"><span class="empNo">2</span><span class="empCode">82575</span><span class="empName">Ahmed Al Kharusi</span></div><div class="empRow"><span class="empNo">3</span><span class="empCode">81258</span><span class="empName">Jaafar Al Balushi</span></div><div class="empRow empRowAlt"><span class="empNo">4</span><span class="empCode">82437</span><span class="empName">Marwan Al Difai</span></div><div class="empRow"><span class="empNo">5</span><span class="empCode">81402</span><span class="empName">Mohamed Al Siyabi</span></div><div class="empRow empRowAlt"><span class="empNo">6</span><span class="empCode">82114</span><span class="empName">Mubarak Al Nofli</span></div><div class="empRow"><span class="empNo">7</span><span class="empCode">82441</span><span class="empName">Mudathir Al Hajri</span></div></div></div>
 </details>
 </div>
-  <div class="empty" id="emptyState">لا توجد دورات مطابقة للبحث الحالي.</div>
+  <div class="emptyState" id="emptyState">لا توجد دورات مطابقة للبحث الحالي.</div>
   <div class="footer"><strong>المصدر:</strong> أرشيف GitHub الشهري<br><strong>تم الإنشاء:</strong> 2026-04-13</div>
 </div>
+<script id="statsData" type="application/json">[{"value": 6, "label": "الجلسات", "color": "var(--blue)"}, {"value": 6, "label": "الأنواع", "color": "var(--teal)"}, {"value": 34, "label": "الموظفون", "color": "var(--blue)"}, {"value": 5, "label": "المواقع", "color": "var(--violet)"}]</script>
 <script>
-const input = document.getElementById('searchInput');
-const cards = Array.from(document.querySelectorAll('.course'));
-const empty = document.getElementById('emptyState');
-const monthPicker = document.getElementById('monthPicker');
-input.addEventListener('input', () => {
-  const q = input.value.trim().toLowerCase();
-  let visible = 0;
-  cards.forEach(card => {
-    const ok = !q || (card.dataset.search || '').includes(q);
-    card.style.display = ok ? '' : 'none';
-    if (ok) visible += 1;
-  });
+(function(){
+  const SAVED_QUERY_KEY = 'trainingSavedQuery';
+  const cards = Array.from(document.querySelectorAll('.courseCard'));
+  const searchToggle = document.getElementById('searchToggle');
+  const filtersBox = document.getElementById('filtersBox');
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const clearBtn = document.getElementById('clearFilters');
+  const savedChip = document.getElementById('savedChip');
+  const savedName = document.getElementById('savedName');
+  const savedNo = document.getElementById('savedNo');
+  const emptyState = document.getElementById('emptyState');
+  const monthPicker = document.getElementById('monthPicker');
   const pastSep = document.getElementById('pastSep');
-  if (pastSep) {
-    const hasPast = cards.some(card => card.style.display !== 'none' && card.classList.contains('past'));
-    pastSep.style.display = hasPast ? '' : 'none';
+  const statsInner = document.getElementById('statsCardInner');
+  const frontValue = document.getElementById('statsValue');
+  const frontLabel = document.getElementById('statsLabel');
+  const backValue = document.getElementById('statsValueBack');
+  const backLabel = document.getElementById('statsLabelBack');
+  const statsData = JSON.parse(document.getElementById('statsData').textContent);
+
+  function norm(v){ return (v || '').toLowerCase().trim(); }
+  function firstName(name){
+    const cleaned = (name || '').replace(/^(mr|mrs|ms|dr)\.?\s+/i,'').trim();
+    return cleaned ? cleaned.split(/\s+/)[0] : '';
   }
-  empty.style.display = visible ? 'none' : 'block';
-});
-monthPicker.addEventListener('change', () => { window.location.href = monthPicker.value; });
+  function allRows(){ return Array.from(document.querySelectorAll('.empRow')); }
+  function matchSaved(raw){
+    const q = norm(raw);
+    if(!q) return null;
+    for(const row of allRows()){
+      const code = norm(row.querySelector('.empCode')?.textContent || '');
+      const name = norm(row.querySelector('.empName')?.textContent || '');
+      if(code === q || name.includes(q) || q.includes(code)){
+        return { row, code: row.querySelector('.empCode')?.textContent?.trim() || '', name: row.querySelector('.empName')?.childNodes[0]?.textContent?.trim() || row.querySelector('.empName')?.textContent?.trim() || '', card: row.closest('.courseCard') };
+      }
+    }
+    return null;
+  }
+  function refreshSaved(){
+    document.querySelectorAll('.empRow.favorite').forEach(r => r.classList.remove('favorite'));
+    document.querySelectorAll('.favBadge').forEach(b => b.remove());
+    cards.forEach(c => c.classList.remove('is-saved'));
+
+    const raw = localStorage.getItem(SAVED_QUERY_KEY) || '';
+    const match = matchSaved(raw);
+
+    if(match){
+      match.row.classList.add('favorite');
+      const nameCell = match.row.querySelector('.empName');
+      if(nameCell && !nameCell.querySelector('.favBadge')){
+        const b = document.createElement('span');
+        b.className = 'favBadge';
+        b.textContent = 'محفوظ';
+        nameCell.appendChild(b);
+      }
+      if(match.card) match.card.classList.add('is-saved');
+      savedChip.classList.remove('savedEmpty');
+      savedName.textContent = firstName(match.name) || match.name;
+      savedNo.textContent = match.code;
+    } else if(raw){
+      savedChip.classList.remove('savedEmpty');
+      savedName.textContent = raw;
+      savedNo.textContent = 'الموظف المحفوظ';
+    } else {
+      savedChip.classList.add('savedEmpty');
+      savedName.textContent = 'حفظ موظف';
+      savedNo.textContent = 'الموظف المحفوظ';
+    }
+  }
+  function applyFilters(){
+    const q = norm(searchInput.value);
+    let visible = 0;
+    let visiblePast = false;
+    cards.forEach(card => {
+      const ok = !q || (card.dataset.search || '').includes(q);
+      card.style.display = ok ? '' : 'none';
+      if(ok){ visible += 1; if(card.classList.contains('is-past')) visiblePast = true; }
+    });
+    if(pastSep) pastSep.style.display = visiblePast ? '' : 'none';
+    emptyState.style.display = visible ? 'none' : 'block';
+  }
+  searchToggle?.addEventListener('click', () => {
+    const active = filtersBox.classList.toggle('active');
+    searchToggle.setAttribute('aria-expanded', active ? 'true' : 'false');
+    if(active) searchInput.focus();
+  });
+  searchBtn?.addEventListener('click', applyFilters);
+  searchInput?.addEventListener('input', applyFilters);
+  searchInput?.addEventListener('keydown', e => { if(e.key === 'Enter') applyFilters(); });
+  clearBtn?.addEventListener('click', () => { searchInput.value = ''; applyFilters(); });
+  savedChip?.addEventListener('click', () => {
+    const current = localStorage.getItem(SAVED_QUERY_KEY) || '';
+    const value = window.prompt('اكتب رقم الموظف أو الاسم للحفظ. اتركه فارغًا للمسح.', current);
+    if(value === null) return;
+    const trimmed = value.trim();
+    if(trimmed) localStorage.setItem(SAVED_QUERY_KEY, trimmed); else localStorage.removeItem(SAVED_QUERY_KEY);
+    refreshSaved();
+    applyFilters();
+  });
+  monthPicker?.addEventListener('change', () => { window.location.href = monthPicker.value; });
+
+  let statIndex = 0;
+  function rotateStats(){
+    const front = statsData[statIndex % statsData.length];
+    const back = statsData[(statIndex + 1) % statsData.length];
+    frontValue.textContent = front.value;
+    frontLabel.textContent = front.label;
+    backValue.textContent = back.value;
+    backLabel.textContent = back.label;
+    backValue.style.color = back.color;
+    statsInner.classList.toggle('flipped');
+    statIndex = (statIndex + 1) % statsData.length;
+  }
+
+  refreshSaved();
+  applyFilters();
+  setInterval(rotateStats, 2400);
+})();
 </script>
-<script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>
+</body>
 </html>
