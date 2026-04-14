@@ -18,15 +18,67 @@ def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def onedrive_to_download_url(url: str) -> str:
+    """
+    يحوّل رابط مشاركة OneDrive إلى رابط تنزيل مباشر للملف.
+    
+    روابط OneDrive المشتركة تفتح الـ viewer وليس الملف مباشرة.
+    الحل: استبدال آخر جزء في الرابط بـ download=1
+    
+    أنواع الروابط المدعومة:
+      https://1drv.ms/u/s!Axxx
+      https://onedrive.live.com/...
+      https://<tenant>.sharepoint.com/:u:/...
+    """
+    import re
+
+    # SharePoint / OneDrive for Business
+    # مثال: https://company.sharepoint.com/:u:/g/personal/.../AbcXyz?e=token
+    # نبدّل /:u:/ أو /:x:/ إلى /download ونُبقي الـ query string
+    sp_match = re.match(r'(https://[^/]+\.sharepoint\.com/)(:[\w]+:/[^?]+)(\?.*)?', url)
+    if sp_match:
+        base = sp_match.group(1)
+        path = sp_match.group(2)
+        query = sp_match.group(3) or ''
+        # نُضيف download=1 إلى query string
+        sep = '&' if query else '?'
+        return url + sep + 'download=1'
+
+    # OneDrive personal short links (1drv.ms) أو onedrive.live.com
+    if '1drv.ms' in url or 'onedrive.live.com' in url:
+        sep = '&' if '?' in url else '?'
+        return url + sep + 'download=1'
+
+    # إذا كان الرابط يحتوي على download=1 بالفعل أو رابط مباشر
+    return url
+
+
 def download_shared_html(share_url: str) -> bytes:
+    download_url = onedrive_to_download_url(share_url)
+
     response = requests.get(
-        share_url,
+        download_url,
         headers={"Accept": "text/html, text/plain, */*", "User-Agent": "training-page-sync/training-root"},
         timeout=120,
         allow_redirects=True,
     )
     response.raise_for_status()
-    return response.content
+
+    # تحقق أن المحتوى هو HTML حقيقي وليس صفحة OneDrive
+    content = response.content
+    content_type = response.headers.get('Content-Type', '')
+    text_preview = content[:500].decode('utf-8', errors='replace').lower()
+
+    # إذا كان الـ response صفحة OneDrive وليس الملف
+    if 'onedrive' in text_preview and '<table' not in text_preview:
+        raise RuntimeError(
+            f"الرابط يُعيد صفحة OneDrive وليس الملف مباشرة.\n"
+            f"URL المستخدم: {download_url}\n"
+            f"Content-Type: {content_type}\n"
+            f"تأكد أن الرابط في TRAINING_PAGE_SOURCE_URL هو رابط تنزيل مباشر."
+        )
+
+    return content
 
 
 def load_existing_archive(path: Path) -> dict:
