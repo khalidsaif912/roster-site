@@ -259,15 +259,15 @@
       display:flex; 
       justify-content:center; 
       align-items:stretch;
-      gap:6px; 
+      gap:8px; 
       margin-top:14px;
       flex-wrap:wrap;
       padding:0 8px 2px;
       box-sizing:border-box;
       width:100%;
       max-width:100%;
-      overflow:hidden;
     }
+    .summaryBar > * { min-width:0; box-sizing:border-box; }
     .summaryBar::-webkit-scrollbar { display:none; }
     a.summaryChip:hover {
       transform:translateY(-3px);
@@ -277,6 +277,12 @@
     a.summaryChip.gamesChip:hover { box-shadow:0 8px 20px rgba(124,58,237,.18); }
     a.summaryChip.trainingChip .chipVal { color:#0ea5e9; }
     a.summaryChip.trainingChip:hover { box-shadow:0 8px 20px rgba(14,165,233,.18); }
+    .summaryChip,
+    .welcomeChip,
+    .flipChip {
+      min-width:0;
+      box-sizing:border-box;
+    }
     .summaryChip {
       background:#fff;
       border:1px solid rgba(15,23,42,.1);
@@ -285,10 +291,9 @@
       text-align:center;
       box-shadow:0 2px 8px rgba(15,23,42,.06);
       transition:all .25s ease;
-      min-width:56px;
-      flex:1 1 auto;
-      max-width:140px;
-      box-sizing:border-box;
+      min-height:56px;
+      width:84px;
+      flex:0 0 auto;
     }
     .summaryChip .chipVal { font-size:18px; font-weight:900; color:#1e40af; line-height:1.2; }
     .summaryChip .chipLabel { 
@@ -299,6 +304,7 @@
       letter-spacing:.3px; 
       margin-top:2px;
       white-space:nowrap;
+      line-height:1.15;
     }
 
     /* ═══════ SHIFT FILTER BUTTONS AS CHIPS ═══════ */
@@ -307,6 +313,7 @@
       position:relative;
       overflow:hidden;
       padding:7px 8px;
+      width:84px;
     }
     button.summaryChip.shiftFilterBtn:hover {
       transform:translateY(-3px);
@@ -342,16 +349,42 @@
     button.shiftFilterBtn.all .chipLabel { color:#1e40af; }
 
     /* الفليب شيب */
-    .flipChip { min-width:0; flex-shrink:0; }
-    .flipChipInner { height:38px; }
+    .flipChip { width:84px; min-height:56px; padding:8px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+    .flipChipInner { width:100%; height:38px; }
     .flipChipVal { font-size:18px; }
     .flipChipLabel { font-size:8px; }
-    .welcomeChip { min-width:0; flex-shrink:0; padding:7px 8px; }
+    .welcomeChip { width:84px; min-height:56px; padding:7px 8px; flex:0 0 auto; }
     .welcomeChipName { font-size:11px; max-width:60px; }
     .welcomeChipLabel { font-size:7.5px; }
 
     @media (max-width:900px){
       .summaryBar { justify-content:flex-start; }
+    }
+    @media (max-width:600px){
+      .summaryBar {
+        display:grid;
+        grid-template-columns:repeat(4, minmax(0, 1fr));
+        gap:8px;
+      }
+      .summaryBar > * { width:100%; max-width:none; }
+      .summaryChip,
+      .welcomeChip,
+      .flipChip,
+      button.summaryChip.shiftFilterBtn {
+        width:100%;
+        max-width:none;
+        min-width:0;
+      }
+      .summaryChip .chipVal,
+      .flipChipVal { font-size:16px; }
+      .summaryChip .chipLabel,
+      .welcomeChipLabel,
+      .flipChipLabel {
+        font-size:7px;
+        letter-spacing:.2px;
+        white-space:normal;
+      }
+      .welcomeChipName { font-size:10px; max-width:100%; }
     }
 
 
@@ -1710,53 +1743,92 @@ applyLang(LANG);
   function addLongPress(el, callback, ms) {
     ms = ms || 700;
     var timer = null;
-    var moved = false;
+    var startX = 0;
+    var startY = 0;
+    var pointerActive = false;
+    var longPressed = false;
+    var suppressClickUntil = 0;
+    var MOVE_THRESHOLD = 12;
 
-    function start(e) {
-      moved = false;
+    function clearPressTimer() {
+      if (timer) { clearTimeout(timer); timer = null; }
+    }
+
+    function beginPress(x, y) {
+      clearPressTimer();
+      pointerActive = true;
+      longPressed = false;
+      startX = x || 0;
+      startY = y || 0;
       timer = setTimeout(function() {
-        if (!moved) {
-          e.preventDefault && e.preventDefault();
-          callback(e);
-        }
+        if (!pointerActive) return;
+        longPressed = true;
+        suppressClickUntil = Date.now() + 900;
+        callback();
       }, ms);
     }
-    function cancel() { clearTimeout(timer); }
-    function onMove() { moved = true; clearTimeout(timer); }
 
-    var longPressed = false;
+    function movePress(x, y) {
+      if (!pointerActive) return;
+      if (Math.abs((x || 0) - startX) > MOVE_THRESHOLD || Math.abs((y || 0) - startY) > MOVE_THRESHOLD) {
+        pointerActive = false;
+        clearPressTimer();
+      }
+    }
+
+    function endPress() {
+      clearPressTimer();
+      pointerActive = false;
+    }
+
     el.addEventListener('touchstart', function(e) {
-      longPressed = false;
-      moved = false;
-      timer = setTimeout(function() {
-        if (!moved) {
-          longPressed = true;
-          callback(e);
-        }
-      }, ms);
+      if (!e.touches || !e.touches.length) return;
+      var t = e.touches[0];
+      beginPress(t.clientX, t.clientY);
     }, {passive: true});
+
+    el.addEventListener('touchmove', function(e) {
+      if (!e.touches || !e.touches.length) return;
+      var t = e.touches[0];
+      movePress(t.clientX, t.clientY);
+    }, {passive: true});
+
     el.addEventListener('touchend', function(e) {
-      if (timer) { clearTimeout(timer); timer = null; }
-      // لا نعيد تعيين longPressed هنا — ننتظر حتى يصل حدث click
-    });
-    el.addEventListener('touchmove', onMove, {passive: true});
-    el.addEventListener('click', function(e) {
-      if (longPressed) {
+      clearPressTimer();
+      pointerActive = false;
+      if (longPressed || Date.now() < suppressClickUntil) {
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
-        longPressed = false;
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      }
+      longPressed = false;
+    }, {passive: false});
+
+    el.addEventListener('touchcancel', function() {
+      endPress();
+      longPressed = false;
+    }, {passive: true});
+
+    el.addEventListener('click', function(e) {
+      if (Date.now() < suppressClickUntil) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
         return false;
       }
     }, true);
-    el.addEventListener('mousedown', start);
-    el.addEventListener('mouseup', cancel);
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    el.addEventListener('mousedown', function(e) { beginPress(e.clientX, e.clientY); });
+    el.addEventListener('mousemove', function(e) { movePress(e.clientX, e.clientY); });
+    el.addEventListener('mouseup', endPress);
+    el.addEventListener('mouseleave', endPress);
+    el.addEventListener('contextmenu', function(e) {
+      if (Date.now() < suppressClickUntil) e.preventDefault();
+    });
     el.style.webkitTouchCallout = 'none';
     el.style.webkitUserSelect = 'none';
     el.style.userSelect = 'none';
-    el.style.touchAction = 'manipulation';
+    el.style.webkitTapHighlightColor = 'transparent';
   }
 
   // ── ربط deptHead: ضغط مطوّل → التقط القسم كله ──
