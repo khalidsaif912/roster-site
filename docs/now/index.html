@@ -262,10 +262,13 @@
       gap:6px; 
       margin-top:14px;
       flex-wrap:wrap;
-      padding-bottom:2px;
+      padding:0 8px 2px;
+      box-sizing:border-box;
+      width:100%;
+      max-width:100%;
+      overflow:hidden;
     }
     .summaryBar::-webkit-scrollbar { display:none; }
-    .summaryBar > * { flex: 0 1 auto; min-width: 70px; max-width: 120px; }
     a.summaryChip:hover {
       transform:translateY(-3px);
       box-shadow:0 8px 20px rgba(15,23,42,.12);
@@ -282,8 +285,10 @@
       text-align:center;
       box-shadow:0 2px 8px rgba(15,23,42,.06);
       transition:all .25s ease;
-      min-width:0;
-      flex-shrink:0;
+      min-width:56px;
+      flex:1 1 auto;
+      max-width:140px;
+      box-sizing:border-box;
     }
     .summaryChip .chipVal { font-size:18px; font-weight:900; color:#1e40af; line-height:1.2; }
     .summaryChip .chipLabel { 
@@ -1181,7 +1186,7 @@
 
   <!-- ════ FOOTER ════ -->
   <div class="footer">
-    <strong style="color:#475569;font-size:13px;" id="lastUpdatedTrigger">Last Updated:</strong> <strong style="color:#1e40af;">15APR2026 / 11:29</strong>
+    <strong style="color:#475569;font-size:13px;" id="lastUpdatedTrigger">Last Updated:</strong> <strong style="color:#1e40af;">15APR2026 / 11:38</strong>
     <br>
     <span style="font-size:11px;color:#94a3b8;display:inline-block;margin-top:4px;">
       📄 <strong style="color:#64748b;">Export New Roster April 2026.xlsx</strong>
@@ -1721,24 +1726,22 @@ applyLang(LANG);
       timer = setTimeout(function() {
         if (!moved) {
           longPressed = true;
-          e.preventDefault();
           callback(e);
         }
       }, ms);
-    }, {passive: false});
+    }, {passive: true});
     el.addEventListener('touchend', function(e) {
       if (timer) { clearTimeout(timer); timer = null; }
-      if (longPressed) {
-        e.preventDefault();
-        longPressed = false;
-      }
+      // لا نعيد تعيين longPressed هنا — ننتظر حتى يصل حدث click
     });
     el.addEventListener('touchmove', onMove, {passive: true});
     el.addEventListener('click', function(e) {
       if (longPressed) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         longPressed = false;
+        return false;
       }
     }, true);
     el.addEventListener('mousedown', start);
