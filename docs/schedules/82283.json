@@ -1023,9 +1023,9 @@
         "day": 23,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "NN21",
-        "shift_label": "🌙 Night (NN21)",
-        "shift_group": "Night"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-04-24",

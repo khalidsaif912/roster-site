@@ -996,9 +996,9 @@
         "day": 20,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "TR",
-        "shift_label": "📚 Training",
-        "shift_group": "Training"
+        "shift_code": "NN21",
+        "shift_label": "🌙 Night (NN21)",
+        "shift_group": "Night"
       },
       {
         "date": "2026-04-21",

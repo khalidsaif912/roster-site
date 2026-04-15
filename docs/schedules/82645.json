@@ -933,9 +933,9 @@
         "day": 13,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "TR",
-        "shift_label": "📚 Training",
-        "shift_group": "Training"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-04-14",
@@ -960,9 +960,9 @@
         "day": 16,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "NN21",
-        "shift_label": "🌙 Night (NN21)",
-        "shift_group": "Night"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-04-17",
