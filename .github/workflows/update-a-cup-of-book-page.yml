@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'docs/a-cup-of-book/images/**'
+      - 'docs/training/a-cup-of-book/images/**'
       - 'generate_a_cup_of_book_page.py'
       - '.github/workflows/update-a-cup-of-book-page.yml'
 
@@ -26,7 +26,10 @@ jobs:
 
       - name: Generate A Cup of Book page
         run: |
-          python generate_a_cup_of_book_page.py             --images-dir docs/a-cup-of-book/images             --output-dir docs/a-cup-of-book             --title "A Cup of Book"
+          python generate_a_cup_of_book_page.py \
+            --images-dir docs/training/a-cup-of-book/images \
+            --output-dir docs/training/a-cup-of-book \
+            --title "A Cup of Book"
 
       - name: Commit and push if changed
         run: |
@@ -35,6 +38,11 @@ jobs:
             exit 0
           fi
 
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/training/a-cup-of-book generate_a_cup_of_book_page.py .github/workflows/update-a-cup-of-book-page.yml
+          git commit -m "Update A Cup of Book page"
+          git push
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/a-cup-of-book generate_a_cup_of_book_page.py .github/workflows/update-a-cup-of-book-page.yml
