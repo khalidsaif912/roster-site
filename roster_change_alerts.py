@@ -1,108 +1,154 @@
+#!/usr/bin/env python3
 import hashlib
-import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from zoneinfo import ZoneInfo
+
+TZ = ZoneInfo("Asia/Muscat")
 
 
-def _schedule_map(month_schedule: Optional[List[Dict[str, Any]]]) -> Dict[str, Dict[str, Any]]:
-    mapped: Dict[str, Dict[str, Any]] = {}
-    for item in month_schedule or []:
-        date_key = str(item.get("date") or "").strip()
-        if date_key:
-            mapped[date_key] = item
-    return mapped
+def _normalize_schedule(schedule):
+    if not isinstance(schedule, list):
+        return []
+    normalized = []
+    for item in schedule:
+        if not isinstance(item, dict):
+            continue
+        normalized.append({
+            "date": str(item.get("date", "")).strip(),
+            "day": item.get("day"),
+            "day_name_ar": str(item.get("day_name_ar", "")).strip(),
+            "day_name_en": str(item.get("day_name_en", "")).strip(),
+            "shift_code": str(item.get("shift_code", "")).strip(),
+            "shift_label": str(item.get("shift_label", "")).strip(),
+            "shift_group": str(item.get("shift_group", "")).strip(),
+        })
+    normalized.sort(key=lambda x: x.get("date", ""))
+    return normalized
 
 
-def _clean_shift_label(value: str) -> str:
-    text = str(value or "").strip()
-    return " ".join(text.split())
+def _schedule_map(schedule):
+    return {item["date"]: item for item in _normalize_schedule(schedule) if item.get("date")}
 
 
-def _serialize_days(days: List[Dict[str, Any]]) -> str:
-    return json.dumps(days, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+def _changed_days(old_schedule, new_schedule):
+    old_map = _schedule_map(old_schedule)
+    new_map = _schedule_map(new_schedule)
 
+    changed = []
+    all_dates = sorted(set(old_map.keys()) | set(new_map.keys()))
 
-def build_employee_change_alert(
-    emp_id: str,
-    month_key: str,
-    old_month_schedule: Optional[List[Dict[str, Any]]],
-    new_month_schedule: Optional[List[Dict[str, Any]]],
-    changed_at_iso: Optional[str] = None,
-) -> Optional[Dict[str, Any]]:
-    """
-    Build a per-employee alert payload when a roster for the same month changes.
+    for date_key in all_dates:
+        old_item = old_map.get(date_key, {})
+        new_item = new_map.get(date_key, {})
 
-    Returns None when there is no previous month snapshot or when nothing changed.
-    """
-    if not old_month_schedule or not new_month_schedule:
-        return None
+        old_code = str(old_item.get("shift_code", "")).strip().upper()
+        new_code = str(new_item.get("shift_code", "")).strip().upper()
 
-    old_by_date = _schedule_map(old_month_schedule)
-    new_by_date = _schedule_map(new_month_schedule)
+        old_label = str(old_item.get("shift_label", "")).strip()
+        new_label = str(new_item.get("shift_label", "")).strip()
 
-    changed_days: List[Dict[str, Any]] = []
-    for date_key in sorted(set(old_by_date.keys()) | set(new_by_date.keys())):
-        old_item = old_by_date.get(date_key)
-        new_item = new_by_date.get(date_key)
-        if old_item == new_item:
+        old_group = str(old_item.get("shift_group", "")).strip()
+        new_group = str(new_item.get("shift_group", "")).strip()
+
+        if (old_code, old_label, old_group) == (new_code, new_label, new_group):
             continue
 
-        old_shift_code = str((old_item or {}).get("shift_code") or "").strip().upper()
-        new_shift_code = str((new_item or {}).get("shift_code") or "").strip().upper()
-        old_shift_label = _clean_shift_label((old_item or {}).get("shift_label", ""))
-        new_shift_label = _clean_shift_label((new_item or {}).get("shift_label", ""))
-        old_shift_group = str((old_item or {}).get("shift_group") or "").strip()
-        new_shift_group = str((new_item or {}).get("shift_group") or "").strip()
+        changed.append({
+            "date": date_key,
+            "day": new_item.get("day") or old_item.get("day"),
+            "day_name_ar": new_item.get("day_name_ar") or old_item.get("day_name_ar") or "",
+            "day_name_en": new_item.get("day_name_en") or old_item.get("day_name_en") or "",
+            "old_shift_code": old_code or "",
+            "old_shift_label": old_label or old_code or "-",
+            "old_shift_group": old_group or "",
+            "new_shift_code": new_code or "",
+            "new_shift_label": new_label or new_code or "-",
+            "new_shift_group": new_group or "",
+        })
 
-        if (
-            old_shift_code == new_shift_code
-            and old_shift_label == new_shift_label
-            and old_shift_group == new_shift_group
-        ):
-            continue
+    return changed
 
-        template = new_item or old_item or {}
-        changed_days.append(
-            {
-                "date": date_key,
-                "day": template.get("day"),
-                "day_name_ar": template.get("day_name_ar", ""),
-                "day_name_en": template.get("day_name_en", ""),
-                "old_shift_code": old_shift_code,
-                "old_shift_label": old_shift_label,
-                "old_shift_group": old_shift_group,
-                "new_shift_code": new_shift_code,
-                "new_shift_label": new_shift_label,
-                "new_shift_group": new_shift_group,
-            }
+
+def _build_hash(month_key, changed_days):
+    raw_parts = [month_key]
+    for item in changed_days:
+        raw_parts.append(
+            "|".join([
+                str(item.get("date", "")),
+                str(item.get("old_shift_code", "")),
+                str(item.get("new_shift_code", "")),
+                str(item.get("old_shift_label", "")),
+                str(item.get("new_shift_label", "")),
+            ])
         )
+    raw = "||".join(raw_parts)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def _month_text(month_key):
+    try:
+        year, month = [int(x) for x in month_key.split("-")]
+        dt = datetime(year, month, 1, tzinfo=TZ)
+        month_en = dt.strftime("%B %Y")
+        month_ar_names = [
+            "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+            "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+        ]
+        month_ar = f"{month_ar_names[month - 1]} {year}"
+        return month_ar, month_en
+    except Exception:
+        return month_key, month_key
+
+
+def build_month_change_alert(month_key, old_schedule, new_schedule):
+    old_normalized = _normalize_schedule(old_schedule)
+    new_normalized = _normalize_schedule(new_schedule)
+
+    # أول إنشاء للشهر أو لا يوجد نسخة قديمة: لا نعتبره تغييرًا
+    if not old_normalized:
+        return {
+            "month": month_key,
+            "is_active": False,
+            "change_hash": "",
+            "changed_at": "",
+            "total_changed_days": 0,
+            "summary": {
+                "ar": "",
+                "en": "",
+            },
+            "days": [],
+        }
+
+    changed_days = _changed_days(old_normalized, new_normalized)
 
     if not changed_days:
-        return None
+        return {
+            "month": month_key,
+            "is_active": False,
+            "change_hash": "",
+            "changed_at": "",
+            "total_changed_days": 0,
+            "summary": {
+                "ar": "",
+                "en": "",
+            },
+            "days": [],
+        }
 
-    changed_at = changed_at_iso or datetime.now().isoformat()
-    digest_source = f"{emp_id}|{month_key}|{_serialize_days(changed_days)}"
-    change_hash = hashlib.sha256(digest_source.encode("utf-8")).hexdigest()[:16]
-
-    month_display_en = month_key
-    month_display_ar = month_key
-    try:
-        parsed_month = datetime.strptime(f"{month_key}-01", "%Y-%m-%d")
-        month_display_en = parsed_month.strftime("%B %Y")
-        month_display_ar = f"{parsed_month.month:02d}/{parsed_month.year}"
-    except Exception:
-        pass
-
+    month_ar, month_en = _month_text(month_key)
     total = len(changed_days)
+    change_hash = _build_hash(month_key, changed_days)
+    changed_at = datetime.now(TZ).isoformat()
+
     return {
         "month": month_key,
         "is_active": True,
-        "changed_at": changed_at,
         "change_hash": change_hash,
+        "changed_at": changed_at,
         "total_changed_days": total,
-        "days": changed_days,
         "summary": {
-            "en": f"Your {month_display_en} roster changed on {total} day{'s' if total != 1 else ''}.",
-            "ar": f"تم تغيير جدولك لشهر {month_display_ar} في {total} يوم{'ين' if total == 2 else ''}.",
+            "ar": f"تم تعديل {total} يوم في جدولك لشهر {month_ar}.",
+            "en": f"{total} day(s) changed in your roster for {month_en}.",
         },
+        "days": changed_days,
     }
