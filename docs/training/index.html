@@ -51,9 +51,9 @@ body{
   min-height:100vh;direction:ltr;-webkit-font-smoothing:antialiased;
 }
 .wrap{max-width:860px;margin:0 auto;padding:18px 14px 48px}
-.langBar{display:flex;justify-content:flex-end;margin-bottom:6px}
-.langToggle{width:20px;height:20px;border:none;border-radius:999px;background:rgba(18,51,160,.12);color:#1233a0;font:900 10px/1 'IBM Plex Sans Arabic',sans-serif;cursor:pointer;display:grid;place-items:center}
-.langToggle:hover{background:rgba(18,51,160,.20)}
+.langBar{position:absolute;top:12px;right:14px;z-index:3;display:flex;justify-content:flex-end}
+.langToggle{width:24px;height:24px;border:none;border-radius:999px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);font:900 11px/1 'IBM Plex Sans Arabic',sans-serif;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);transition:all .25s}
+.langToggle:hover{background:rgba(255,255,255,.28)}
 .header{
   position:relative;overflow:hidden;
   padding:28px 22px 24px;border-radius:24px;
@@ -89,15 +89,32 @@ body{
 .dateTagSelect{
   position:absolute;inset:0;opacity:0;cursor:pointer;border:none;appearance:none
 }
-.topDock{display:grid;grid-template-columns:1.12fr .74fr .58fr .82fr .96fr;gap:10px;margin-top:14px;align-items:stretch}
+.topDock{display:grid;grid-template-columns:1.12fr .74fr .58fr .82fr .96fr;gap:7px;margin-top:14px;align-items:stretch}
 .dockCard{
-  min-width:0;width:100%;padding:11px 10px;border-radius:18px;background:var(--panel2);
-  border:1px solid var(--border2);box-shadow:0 6px 20px var(--shadow);
-  transition:transform .22s,box-shadow .22s,background .35s,border-color .35s;text-align:center
+  min-width:0;width:100%;padding:6px 4px;border-radius:18px;
+  background:linear-gradient(165deg,rgba(255,255,255,.98) 0%,rgba(240,245,255,.92) 100%);
+  border:1px solid rgba(45,92,239,.10);
+  box-shadow:0 4px 16px rgba(30,60,130,.07),0 1px 3px rgba(30,60,130,.05);
+  transition:all .32s cubic-bezier(.22,.7,.2,1);text-align:center;
+  position:relative;overflow:visible;isolation:isolate
 }
-.dockCard:hover{transform:translateY(-2px);box-shadow:0 12px 28px var(--shadow)}
+.dockCard::before{content:none}
+@keyframes neonPulse{
+  0%{box-shadow:0 0 6px rgba(45,92,239,.35),0 0 18px rgba(45,92,239,.18),0 0 38px rgba(45,92,239,.08);border-color:rgba(45,92,239,.50)}
+  33%{box-shadow:0 0 6px rgba(10,159,131,.35),0 0 18px rgba(10,159,131,.18),0 0 38px rgba(10,159,131,.08);border-color:rgba(10,159,131,.50)}
+  66%{box-shadow:0 0 6px rgba(124,79,204,.35),0 0 18px rgba(124,79,204,.18),0 0 38px rgba(124,79,204,.08);border-color:rgba(124,79,204,.50)}
+  100%{box-shadow:0 0 6px rgba(45,92,239,.35),0 0 18px rgba(45,92,239,.18),0 0 38px rgba(45,92,239,.08);border-color:rgba(45,92,239,.50)}
+}
+.dockCard.neon-active{animation:neonPulse 2.5s ease-in-out infinite;border-width:1.5px}
+.dockCard:hover{
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:0 12px 32px rgba(30,60,130,.12),0 4px 12px rgba(45,92,239,.08);
+  border-color:rgba(45,92,239,.22)
+}
+.dockCard:active{transform:translateY(0) scale(.98);transition-duration:.1s}
+
 .dockAction{cursor:pointer;border:none;font-family:inherit}
-.statsCard{display:flex;align-items:center;justify-content:center;padding:6px 6px}
+.statsCard{display:flex;align-items:center;justify-content:center;padding:4px 3px;background:linear-gradient(165deg,rgba(255,255,255,.99) 0%,rgba(235,242,255,.95) 100%);border-color:rgba(45,92,239,.14)}
 .statsTicker{position:relative;width:100%;height:44px;overflow:hidden;isolation:isolate}
 .statsFace{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -109,25 +126,28 @@ body{
 .statsFace.prev{opacity:0;transform:translateY(-110%);z-index:1}
 .statsIcon{display:none}
 .statsText{min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:5px;text-align:center;white-space:nowrap}
-.statsValue{font-size:22px;font-weight:900;line-height:1;color:var(--blue);font-family:'Sora',sans-serif}
+.statsValue{font-size:22px;font-weight:900;line-height:1;background:linear-gradient(135deg,#2d5cef 0%,#0a9f83 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:'Sora',sans-serif}
 .statsLabel{margin-top:0;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:0}
-.otherPageInner{position:relative;display:flex;align-items:center;justify-content:center;min-height:58px;width:100%;padding-inline:4px}
+.otherPageInner{position:relative;display:flex;align-items:center;justify-content:center;min-height:52px;width:100%;padding-inline:2px}
 .rosterCard{display:block;text-decoration:none;color:inherit}
-.rosterInner{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:58px;width:100%}
-.rosterIcon{font-size:24px;line-height:1;display:block;transform:translateY(1px)}
+.rosterInner{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;width:100%}
+.rosterIcon{font-size:28px;line-height:1;display:block;transform:translateY(1px);transition:transform .3s cubic-bezier(.22,.7,.2,1)}
+.rosterCard:hover .rosterIcon{transform:translateY(-2px) scale(1.15)}
 .rosterLabel{color:var(--blue2);overflow:hidden;text-overflow:ellipsis}
-.bookCupIcon{width:76px;height:76px;display:block;object-fit:contain;position:absolute;left:50%;top:50%;transform:translate(-50%,-56%)}
-.otherPageLabel{position:absolute;left:50%;bottom:11px;transform:translateX(-50%);color:#5b3517;padding-inline:2px;text-shadow:-1px -1px 0 rgba(255,255,255,.96),1px -1px 0 rgba(255,255,255,.96),-1px 1px 0 rgba(255,255,255,.96),1px 1px 0 rgba(255,255,255,.96),0 2px 4px rgba(255,255,255,.85)}
-.dockValue{font-size:20px;font-weight:900;line-height:1.1;color:var(--blue);font-family:'Sora',sans-serif;letter-spacing:-.03em}
-.searchGlyph{font-size:32px;line-height:1;display:inline-block;transform:translateY(-1px)}
+.bookCupIcon{width:68px;height:68px;display:block;object-fit:contain;position:absolute;left:50%;top:46%;transform:translate(-50%,-50%)}
+.otherPageLabel{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);color:#5b3517;padding-inline:2px;font-size:11px !important;font-weight:900 !important;text-shadow:-1px -1px 0 rgba(255,255,255,.96),1px -1px 0 rgba(255,255,255,.96),-1px 1px 0 rgba(255,255,255,.96),1px 1px 0 rgba(255,255,255,.96),0 2px 4px rgba(255,255,255,.85)}
+.dockValue{font-size:20px;font-weight:900;line-height:1.1;color:var(--blue);font-family:'Sora',sans-serif;letter-spacing:-.03em;position:relative;z-index:1}
+.searchGlyph{font-size:32px;line-height:1;display:inline-block;transform:translateY(-1px);transition:transform .3s cubic-bezier(.22,.7,.2,1)}
+#searchToggle:hover .searchGlyph{transform:translateY(-3px) scale(1.12) rotate(-8deg)}
 .dockLabel,.rosterLabel,.savedName,.otherPageLabel{margin-top:4px;font-size:9px;font-weight:800;line-height:1.12;letter-spacing:0;color:var(--muted);white-space:nowrap;text-align:center;font-family:'IBM Plex Sans Arabic','DM Sans',Tahoma,sans-serif}
 .savedChip{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-  text-align:center;cursor:pointer;padding:8px 6px;
-  background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(245,249,255,.96));
+  text-align:center;cursor:pointer;padding:5px 4px;
+  background:linear-gradient(165deg,rgba(255,255,255,.99) 0%,rgba(240,248,255,.94) 100%);
 }
 .savedChip:hover{box-shadow:0 14px 30px rgba(45,92,239,.12)}
-.savedIcon{width:34px;height:34px;flex:0 0 auto;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(45,92,239,.18),rgba(10,159,131,.14));font-size:17px;border:1px solid var(--border2)}
+.savedIcon{width:34px;height:34px;flex:0 0 auto;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(45,92,239,.15),rgba(10,159,131,.12));font-size:17px;border:1px solid rgba(45,92,239,.12);box-shadow:0 2px 8px rgba(45,92,239,.10);transition:all .3s ease}
+.savedChip:hover .savedIcon{background:linear-gradient(135deg,rgba(45,92,239,.22),rgba(10,159,131,.18));transform:scale(1.08)}
 .savedLines{min-width:0;flex:0 0 auto;width:100%}
 .savedName{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .savedNo{display:none}
@@ -223,7 +243,7 @@ body{
   .heroSub{font-size:11px}
   .dateTag{min-height:34px;padding:0 34px 0 14px;font-size:11px}
   .topDock{grid-template-columns:.80fr 62px 54px 66px 70px;gap:6px;margin-top:12px}
-  .dockCard{padding:8px 6px;border-radius:15px}
+  .dockCard{padding:5px 4px;border-radius:15px}
   .statsCard{padding:3px 4px}
   .statsTicker{height:36px}
   .statsValue{font-size:18px}
@@ -231,7 +251,7 @@ body{
   .savedChip{padding:7px 5px;gap:4px}
   .savedIcon{width:31px;height:31px;font-size:15px;border-radius:11px}
     .otherPageInner{min-height:50px}
-  .bookCupIcon{width:64px;height:64px}
+  .bookCupIcon{width:58px;height:58px}
   .otherPageLabel{bottom:8px}
 .rosterIcon{font-size:22px}
   .courseHead{grid-template-columns:34px minmax(0,1fr) auto}
@@ -246,13 +266,13 @@ body{
   .header{padding:16px 12px 12px;border-radius:18px}
   .heroTitle{font-size:21px}
   .topDock{grid-template-columns:.76fr 56px 48px 62px 64px;gap:5px}
-  .dockCard{padding:7px 5px;border-radius:13px}
+  .dockCard{padding:4px 3px;border-radius:13px}
   .statsCard{padding:2px 3px}
   .statsTicker{height:34px}
   .statsValue{font-size:18px}
   .statsLabel{font-size:10px}
   .searchGlyph{font-size:28px}
-  .bookCupIcon{width:60px;height:60px}
+  .bookCupIcon{width:54px;height:54px}
   .rosterIcon{font-size:20px}
   .savedIcon{width:28px;height:28px;font-size:14px}
     .miniMeta{font-size:9px}
@@ -262,8 +282,8 @@ body{
 </head>
 <body>
 <div class="wrap">
-  <div class="langBar"><button id="langToggle" class="langToggle" type="button" title="Translate to Arabic">ع</button></div>
   <div class="header">
+    <div class="langBar"><button id="langToggle" class="langToggle" type="button" title="Translate to Arabic">ع</button></div>
     <div class="hCircle hCircle1"></div>
     <div class="hCircle hCircle2"></div>
     <div class="hCircle hCircle3"></div>
@@ -284,7 +304,7 @@ body{
   </div>
   <a class="dockCard rosterCard" href="https://khalidsaif912.github.io/roster-site/" target="_blank" rel="noopener" aria-label="Roster site">
     <div class="rosterInner">
-      <span class="rosterIcon">🏠</span>
+      <span class="rosterIcon">📋</span>
       <span class="rosterLabel">Roster</span>
     </div>
   </a>
@@ -730,6 +750,19 @@ body{
   }
   refreshSaved();
   applyFilters();
+  // Neon glow randomly activating on dock cards
+  const dockCards = Array.from(document.querySelectorAll('.dockCard'));
+  let prevNeon = null;
+  function activateNeon(){
+    if(prevNeon) prevNeon.classList.remove('neon-active');
+    const idx = Math.floor(Math.random()*dockCards.length);
+    const card = dockCards[idx];
+    card.classList.add('neon-active');
+    prevNeon = card;
+    setTimeout(()=>card.classList.remove('neon-active'), 3200);
+  }
+  setInterval(activateNeon, 2600);
+  setTimeout(activateNeon, 300);
 })();
 </script>
 </body>
