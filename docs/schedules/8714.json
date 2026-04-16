@@ -1091,5 +1091,19 @@
         "shift_group": "Night"
       }
     ]
+  },
+  "change_alerts": {
+    "2026-04": {
+      "month": "2026-04",
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
+      "summary": {
+        "ar": "",
+        "en": ""
+      },
+      "days": []
+    }
   }
 }
