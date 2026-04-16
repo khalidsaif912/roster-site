@@ -21,6 +21,20 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Prepare change-alert files
+        run: |
+          mkdir -p docs
+
+          # اسمح بوضع change-alert.js إما في الجذر أو داخل docs
+          if [ -f change-alert.js ] && [ ! -f docs/change-alert.js ]; then
+            cp change-alert.js docs/change-alert.js
+          fi
+
+          test -f roster_change_alerts.py
+          test -f inject_employee_change_logic.py
+          test -f inject_change_alerts_html.py
+          test -f docs/change-alert.js
+
       - name: Check if roster changed
         id: check_changes
         env:
@@ -73,6 +87,9 @@ jobs:
           SUBSCRIBE_TOKEN: ${{ secrets.SUBSCRIBE_TOKEN }}
           SEND_EMAIL: "false"
         run: python generate_and_send.py
+
+      - name: Inject employee change logic
+        run: python inject_employee_change_logic.py
 
       - name: Generate employee schedules
         env:
@@ -474,10 +491,13 @@ jobs:
           print("Done: manifests updated per section")
           EOF2
 
+      - name: Inject change-alert script into pages
+        run: python inject_change_alerts_html.py
+
       - name: Commit
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add docs last_filename.txt
-          git commit -m "Update roster site + employee schedules + PWA UX" || echo "No changes"
+          git commit -m "Update roster site + employee schedules + change alerts + PWA UX" || echo "No changes"
           git push
