@@ -259,52 +259,48 @@
       display:flex; 
       justify-content:center; 
       align-items:stretch;
-      gap:8px; 
-      margin-top:14px;
-      flex-wrap:wrap;
-      padding:0 8px 2px;
-      box-sizing:border-box;
-      width:100%;
-      max-width:100%;
+      gap:4px; 
+      margin-top:12px;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      padding-bottom:2px;
+      padding-left:2px;
+      padding-right:2px;
     }
-    .summaryBar > * { min-width:0; box-sizing:border-box; }
     .summaryBar::-webkit-scrollbar { display:none; }
     a.summaryChip:hover {
-      transform:translateY(-3px);
-      box-shadow:0 8px 20px rgba(15,23,42,.12);
+      transform:translateY(-2px);
+      box-shadow:0 6px 16px rgba(15,23,42,.12);
     }
     a.summaryChip.gamesChip .chipVal { color:#7c3aed; }
-    a.summaryChip.gamesChip:hover { box-shadow:0 8px 20px rgba(124,58,237,.18); }
+    a.summaryChip.gamesChip:hover { box-shadow:0 6px 16px rgba(124,58,237,.18); }
     a.summaryChip.trainingChip .chipVal { color:#0ea5e9; }
-    a.summaryChip.trainingChip:hover { box-shadow:0 8px 20px rgba(14,165,233,.18); }
-    .summaryChip,
-    .welcomeChip,
-    .flipChip {
-      min-width:0;
-      box-sizing:border-box;
-    }
+    a.summaryChip.trainingChip:hover { box-shadow:0 6px 16px rgba(14,165,233,.18); }
     .summaryChip {
       background:#fff;
       border:1px solid rgba(15,23,42,.1);
-      border-radius:12px;
-      padding:7px 8px;
+      border-radius:10px;
+      padding:5px 6px;
       text-align:center;
-      box-shadow:0 2px 8px rgba(15,23,42,.06);
-      transition:all .25s ease;
-      min-height:56px;
-      width:84px;
-      flex:0 0 auto;
+      box-shadow:0 2px 6px rgba(15,23,42,.06);
+      transition:all .2s ease;
+      min-width:0;
+      flex:1 1 0;
+      max-width:80px;
     }
-    .summaryChip .chipVal { font-size:18px; font-weight:900; color:#1e40af; line-height:1.2; }
+    .summaryChip .chipVal { font-size:16px; font-weight:900; color:#1e40af; line-height:1.15; }
     .summaryChip .chipLabel { 
-      font-size:8px;
-      font-weight:600; 
+      font-size:7px;
+      font-weight:700; 
       color:#64748b; 
       text-transform:uppercase; 
-      letter-spacing:.3px; 
-      margin-top:2px;
+      letter-spacing:.2px; 
+      margin-top:1px;
       white-space:nowrap;
-      line-height:1.15;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     /* ═══════ SHIFT FILTER BUTTONS AS CHIPS ═══════ */
@@ -312,16 +308,15 @@
       border:2px solid transparent;
       position:relative;
       overflow:hidden;
-      padding:7px 8px;
-      width:84px;
+      padding:5px 6px;
     }
     button.summaryChip.shiftFilterBtn:hover {
-      transform:translateY(-3px);
-      box-shadow:0 8px 20px rgba(15,23,42,.12);
+      transform:translateY(-2px);
+      box-shadow:0 6px 16px rgba(15,23,42,.12);
     }
     button.summaryChip.shiftFilterBtn.active {
       border-color:currentColor;
-      box-shadow:0 6px 16px rgba(15,23,42,.18);
+      box-shadow:0 4px 12px rgba(15,23,42,.18);
     }
     button.summaryChip.shiftFilterBtn.active::before {
       content:'';
@@ -349,42 +344,17 @@
     button.shiftFilterBtn.all .chipLabel { color:#1e40af; }
 
     /* الفليب شيب */
-    .flipChip { width:84px; min-height:56px; padding:8px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
-    .flipChipInner { width:100%; height:38px; }
-    .flipChipVal { font-size:18px; }
-    .flipChipLabel { font-size:8px; }
-    .welcomeChip { width:84px; min-height:56px; padding:7px 8px; flex:0 0 auto; }
-    .welcomeChipName { font-size:11px; max-width:60px; }
-    .welcomeChipLabel { font-size:7.5px; }
+    .flipChip { min-width:0; flex:1 1 0; max-width:80px; flex-shrink:1; padding:5px 6px; border-radius:10px; }
+    .flipChipInner { height:34px; }
+    .flipChipVal { font-size:16px; }
+    .flipChipLabel { font-size:7px; letter-spacing:.2px; }
+    .welcomeChip { min-width:0; flex:1 1 0; max-width:80px; flex-shrink:1; padding:5px 6px; border-radius:10px; gap:0px; }
+    .welcomeChipIcon { font-size:16px; }
+    .welcomeChipName { font-size:9px; max-width:100%; margin-top:0px; }
+    .welcomeChipLabel { font-size:6.5px; }
 
     @media (max-width:900px){
-      .summaryBar { justify-content:flex-start; }
-    }
-    @media (max-width:600px){
-      .summaryBar {
-        display:grid;
-        grid-template-columns:repeat(4, minmax(0, 1fr));
-        gap:8px;
-      }
-      .summaryBar > * { width:100%; max-width:none; }
-      .summaryChip,
-      .welcomeChip,
-      .flipChip,
-      button.summaryChip.shiftFilterBtn {
-        width:100%;
-        max-width:none;
-        min-width:0;
-      }
-      .summaryChip .chipVal,
-      .flipChipVal { font-size:16px; }
-      .summaryChip .chipLabel,
-      .welcomeChipLabel,
-      .flipChipLabel {
-        font-size:7px;
-        letter-spacing:.2px;
-        white-space:normal;
-      }
-      .welcomeChipName { font-size:10px; max-width:100%; }
+      .summaryBar { justify-content:space-between; }
     }
 
 
@@ -403,10 +373,6 @@
       gap:12px;
       padding:14px 16px;
       background:#fff;
-      -webkit-touch-callout:none;
-      -webkit-user-select:none;
-      user-select:none;
-      touch-action:manipulation;
     }
     .deptIcon {
       width:40px; height:40px;
@@ -435,10 +401,7 @@
       list-style:none;
       -webkit-appearance:none;
       appearance:none;
-      -webkit-touch-callout:none;
-      -webkit-user-select:none;
       user-select:none;
-      touch-action:manipulation;
     }
     .shiftSummary::-webkit-details-marker { display:none; }
     .shiftSummary::marker              { display:none; }
@@ -497,15 +460,13 @@
 
     /* ═══════ MOBILE ═══════ */
     @media (max-width:480px){
-      .wrap            { padding:12px 10px 22px; }
+      .wrap            { padding:10px 8px 22px; }
       .header h1       { font-size:21px; }
       .deptTitle       { font-size:16px; }
       .empName         { font-size:14px; }
       .empStatus       { font-size:12px; }
       .shiftLabel      { font-size:14px; }
-      .summaryBar      { gap:8px; }
-      .summaryChip     { padding:8px 14px; }
-      .summaryChip .chipVal { font-size:19px; }
+      .summaryBar      { gap:3px; }
     }
 
   </style>
@@ -638,7 +599,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
       <summary class="shiftSummary" data-shift-key="Morning" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -720,7 +681,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
       <summary class="shiftSummary" data-shift-key="Morning" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -751,7 +712,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" data-shift-key="Night" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -819,7 +780,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
       <summary class="shiftSummary" data-shift-key="Morning" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -856,7 +817,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" data-shift-key="Night" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -956,7 +917,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
       <summary class="shiftSummary" data-shift-key="Morning" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -1014,7 +975,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" data-shift-key="Night" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -1145,7 +1106,7 @@
 
       <div class="shiftStack">
 
-    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7">
+    <details class="shiftCard" data-shift="Morning" style="border:1px solid #f59e0b44; background:#fef3c7" open>
       <summary class="shiftSummary" data-shift-key="Morning" style="background:#fef3c7; border-bottom:1px solid #f59e0b33;">
         <span class="shiftIcon">☀️</span>
         <span class="shiftLabel" style="color:#92400e;">Morning</span>
@@ -1188,7 +1149,7 @@
       </div>
     </details>
             
-    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe" open>
+    <details class="shiftCard" data-shift="Night" style="border:1px solid #8b5cf644; background:#ede9fe">
       <summary class="shiftSummary" data-shift-key="Night" style="background:#ede9fe; border-bottom:1px solid #8b5cf633;">
         <span class="shiftIcon">🌙</span>
         <span class="shiftLabel" style="color:#5b21b6;">Night</span>
@@ -1791,92 +1752,27 @@ applyLang(LANG);
   function addLongPress(el, callback, ms) {
     ms = ms || 700;
     var timer = null;
-    var startX = 0;
-    var startY = 0;
-    var pointerActive = false;
-    var longPressed = false;
-    var suppressClickUntil = 0;
-    var MOVE_THRESHOLD = 12;
+    var moved = false;
 
-    function clearPressTimer() {
-      if (timer) { clearTimeout(timer); timer = null; }
-    }
-
-    function beginPress(x, y) {
-      clearPressTimer();
-      pointerActive = true;
-      longPressed = false;
-      startX = x || 0;
-      startY = y || 0;
+    function start(e) {
+      moved = false;
       timer = setTimeout(function() {
-        if (!pointerActive) return;
-        longPressed = true;
-        suppressClickUntil = Date.now() + 900;
-        callback();
+        if (!moved) {
+          e.preventDefault && e.preventDefault();
+          callback(e);
+        }
       }, ms);
     }
+    function cancel() { clearTimeout(timer); }
+    function onMove() { moved = true; clearTimeout(timer); }
 
-    function movePress(x, y) {
-      if (!pointerActive) return;
-      if (Math.abs((x || 0) - startX) > MOVE_THRESHOLD || Math.abs((y || 0) - startY) > MOVE_THRESHOLD) {
-        pointerActive = false;
-        clearPressTimer();
-      }
-    }
-
-    function endPress() {
-      clearPressTimer();
-      pointerActive = false;
-    }
-
-    el.addEventListener('touchstart', function(e) {
-      if (!e.touches || !e.touches.length) return;
-      var t = e.touches[0];
-      beginPress(t.clientX, t.clientY);
-    }, {passive: true});
-
-    el.addEventListener('touchmove', function(e) {
-      if (!e.touches || !e.touches.length) return;
-      var t = e.touches[0];
-      movePress(t.clientX, t.clientY);
-    }, {passive: true});
-
-    el.addEventListener('touchend', function(e) {
-      clearPressTimer();
-      pointerActive = false;
-      if (longPressed || Date.now() < suppressClickUntil) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      }
-      longPressed = false;
-    }, {passive: false});
-
-    el.addEventListener('touchcancel', function() {
-      endPress();
-      longPressed = false;
-    }, {passive: true});
-
-    el.addEventListener('click', function(e) {
-      if (Date.now() < suppressClickUntil) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-        return false;
-      }
-    }, true);
-
-    el.addEventListener('mousedown', function(e) { beginPress(e.clientX, e.clientY); });
-    el.addEventListener('mousemove', function(e) { movePress(e.clientX, e.clientY); });
-    el.addEventListener('mouseup', endPress);
-    el.addEventListener('mouseleave', endPress);
-    el.addEventListener('contextmenu', function(e) {
-      if (Date.now() < suppressClickUntil) e.preventDefault();
-    });
-    el.style.webkitTouchCallout = 'none';
-    el.style.webkitUserSelect = 'none';
-    el.style.userSelect = 'none';
-    el.style.webkitTapHighlightColor = 'transparent';
+    el.addEventListener('touchstart', start, {passive: true});
+    el.addEventListener('touchend', cancel);
+    el.addEventListener('touchmove', onMove, {passive: true});
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', cancel);
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('contextmenu', function(e) { e.preventDefault(); });
   }
 
   // ── ربط deptHead: ضغط مطوّل → التقط القسم كله ──
