@@ -700,7 +700,7 @@ body{
   monthPicker?.addEventListener('change', () => { if(monthPicker.value) window.location.href = monthPicker.value; });
   otherPageBtn?.addEventListener('click', () => {
     const inArchive = window.location.pathname.includes('/archive/');
-    window.location.href = inArchive ? '../a-cup-of-book/' : 'a-cup-of-book/';
+    window.location.href = '/roster-site/a-cup-of-book/';
   });
   if(statsFaces.length){
     let idx = 0;
