@@ -1601,46 +1601,103 @@ applyLang(LANG);
   // ── overlay للتحميل ──
   var overlay = document.createElement('div');
   overlay.id = 'ssOverlay';
-  overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:12px;';
-  overlay.innerHTML = '<div style="width:44px;height:44px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:ssSpin .8s linear infinite;"></div><span style="color:#fff;font-size:14px;font-weight:700;">جاري الالتقاط…</span><style>@keyframes ssSpin{to{transform:rotate(360deg)}}</style>';
+  overlay.style.cssText =
+    'display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:12px;';
+  overlay.innerHTML =
+    '<div style="width:44px;height:44px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:ssSpin .8s linear infinite;"></div>' +
+    '<span style="color:#fff;font-size:14px;font-weight:700;">جاري الالتقاط…</span>' +
+    '<style>@keyframes ssSpin{to{transform:rotate(360deg)}}</style>';
   document.body.appendChild(overlay);
 
-  function showOverlay(){ overlay.style.display='flex'; }
-  function hideOverlay(){ overlay.style.display='none'; }
+  function showOverlay(){ overlay.style.display = 'flex'; }
+  function hideOverlay(){ overlay.style.display = 'none'; }
 
-  // ── مشاركة واتساب ──
-  function shareToWhatsApp(canvas, label) {
+  function downloadBlob(blob, fileName) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = fileName || 'roster.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+  }
+
+  // مشاركة عبر زر فعلي بعد الالتقاط حتى تبقى user gesture صحيحة
+  function openShareSheet(blob, label) {
+    var file = new File([blob], 'roster.png', { type: 'image/png' });
+
+    var sheet = document.createElement('div');
+    sheet.style.cssText =
+      'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100000;display:flex;align-items:flex-end;justify-content:center;';
+    sheet.innerHTML =
+      '<div style="width:100%;max-width:420px;background:#fff;border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.18);">' +
+        '<div style="width:40px;height:4px;background:#e2e8f0;border-radius:3px;margin:0 auto 14px;"></div>' +
+        '<div style="font-size:16px;font-weight:800;color:#0f172a;text-align:center;margin-bottom:14px;">تم تجهيز الصورة</div>' +
+        '<div style="display:flex;gap:10px;">' +
+          '<button id="ssShareBtn" style="flex:1;border:none;border-radius:14px;padding:14px 12px;background:#1d4ed8;color:#fff;font-weight:800;font-size:15px;">مشاركة</button>' +
+          '<button id="ssDownloadBtn" style="flex:1;border:none;border-radius:14px;padding:14px 12px;background:#e2e8f0;color:#0f172a;font-weight:800;font-size:15px;">تنزيل</button>' +
+        '</div>' +
+        '<button id="ssCloseBtn" style="margin-top:10px;width:100%;border:none;border-radius:14px;padding:12px;background:#f8fafc;color:#475569;font-weight:700;font-size:14px;">إغلاق</button>' +
+      '</div>';
+
+    function closeSheet() {
+      if (sheet && sheet.parentNode) sheet.parentNode.removeChild(sheet);
+    }
+
+    sheet.addEventListener('click', function(e){
+      if (e.target === sheet) closeSheet();
+    });
+
+    document.body.appendChild(sheet);
+
+    document.getElementById('ssCloseBtn').onclick = closeSheet;
+
+    document.getElementById('ssDownloadBtn').onclick = function() {
+      downloadBlob(blob, 'roster.png');
+      closeSheet();
+    };
+
+    document.getElementById('ssShareBtn').onclick = function() {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          title: label || 'Roster',
+          text: label || 'Roster',
+          files: [file]
+        }).catch(function() {
+          downloadBlob(blob, 'roster.png');
+        }).finally(function() {
+          closeSheet();
+        });
+      } else {
+        downloadBlob(blob, 'roster.png');
+        closeSheet();
+      }
+    };
+  }
+
+  function shareCanvas(canvas, label) {
     canvas.toBlob(function(blob) {
       hideOverlay();
-      if (!blob) { alert('فشل إنشاء الصورة'); return; }
-      // حاول Web Share API (موبايل)
-      if (navigator.canShare && navigator.canShare({ files: [new File([blob],'roster.png',{type:'image/png'})] })) {
-        navigator.share({
-          title: label,
-          text: label,
-          files: [new File([blob], 'roster.png', {type:'image/png'})]
-        }).catch(function(){});
-      } else {
-        // fallback: تنزيل الصورة
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url; a.download = 'roster.png'; a.click();
-        setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+      if (!blob) {
+        alert('فشل إنشاء الصورة');
+        return;
       }
+      openShareSheet(blob, label);
     }, 'image/png');
   }
 
-  // ── التقاط عنصر مع فتح كل الـ details أولاً ──
-  function captureElement(el, label, onlyOpenDetails) {
+  // ── التقاط عنصر مع فتح كل التفاصيل داخله ──
+  function captureElement(el, label) {
     showOverlay();
-    // احفظ حالة details الحالية وافتحها كلها
+
     var detailsEls = el.querySelectorAll('details.shiftCard');
     var wasOpen = [];
     detailsEls.forEach(function(d, i) {
       wasOpen[i] = d.hasAttribute('open');
       d.setAttribute('open', '');
     });
-    // انتظر لحظة للرسم
+
     setTimeout(function() {
       html2canvas(el, {
         scale: 2,
@@ -1649,11 +1706,10 @@ applyLang(LANG);
         logging: false,
         removeContainer: true
       }).then(function(canvas) {
-        // أعد الحالة الأصلية
         detailsEls.forEach(function(d, i) {
           if (!wasOpen[i]) d.removeAttribute('open');
         });
-        shareToWhatsApp(canvas, label);
+        shareCanvas(canvas, label);
       }).catch(function() {
         detailsEls.forEach(function(d, i) {
           if (!wasOpen[i]) d.removeAttribute('open');
@@ -1661,16 +1717,22 @@ applyLang(LANG);
         hideOverlay();
         alert('فشل الالتقاط، حاول مرة أخرى');
       });
-    }, 300);
+    }, 250);
   }
 
   // ── التقاط مناوبة واحدة ──
   function captureShift(summaryEl, shiftLabel) {
     showOverlay();
+
     var detailsEl = summaryEl.closest('details.shiftCard');
-    if (!detailsEl) { hideOverlay(); return; }
+    if (!detailsEl) {
+      hideOverlay();
+      return;
+    }
+
     var wasOpen = detailsEl.hasAttribute('open');
     detailsEl.setAttribute('open', '');
+
     setTimeout(function() {
       html2canvas(detailsEl, {
         scale: 2,
@@ -1680,7 +1742,7 @@ applyLang(LANG);
         removeContainer: true
       }).then(function(canvas) {
         if (!wasOpen) detailsEl.removeAttribute('open');
-        shareToWhatsApp(canvas, shiftLabel);
+        shareCanvas(canvas, shiftLabel);
       }).catch(function() {
         if (!wasOpen) detailsEl.removeAttribute('open');
         hideOverlay();
@@ -1689,34 +1751,78 @@ applyLang(LANG);
     }, 200);
   }
 
-  // ── long-press helper ──
+  // ── long-press helper محسّن ──
   function addLongPress(el, callback, ms) {
-    ms = ms || 700;
+    ms = ms || 650;
+
     var timer = null;
-    var moved = false;
+    var startX = 0;
+    var startY = 0;
+    var fired = false;
+
+    function getPoint(e) {
+      var t = (e.touches && e.touches[0]) ||
+              (e.changedTouches && e.changedTouches[0]) ||
+              e;
+      return {
+        x: t && t.clientX ? t.clientX : 0,
+        y: t && t.clientY ? t.clientY : 0
+      };
+    }
 
     function start(e) {
-      moved = false;
+      var p = getPoint(e);
+      startX = p.x;
+      startY = p.y;
+      fired = false;
+      clearTimeout(timer);
+
       timer = setTimeout(function() {
-        if (!moved) {
-          e.preventDefault && e.preventDefault();
-          callback(e);
-        }
+        fired = true;
+        callback(e);
       }, ms);
     }
-    function cancel() { clearTimeout(timer); }
-    function onMove() { moved = true; clearTimeout(timer); }
 
-    el.addEventListener('touchstart', start, {passive: true});
+    function move(e) {
+      var p = getPoint(e);
+      if (Math.abs(p.x - startX) > 12 || Math.abs(p.y - startY) > 12) {
+        clearTimeout(timer);
+      }
+    }
+
+    function cancel() {
+      clearTimeout(timer);
+    }
+
+    el.addEventListener('touchstart', start, { passive: true });
+    el.addEventListener('touchmove', move, { passive: true });
     el.addEventListener('touchend', cancel);
-    el.addEventListener('touchmove', onMove, {passive: true});
+    el.addEventListener('touchcancel', cancel);
+
     el.addEventListener('mousedown', start);
+    el.addEventListener('mousemove', function(e) {
+      if (Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6) {
+        clearTimeout(timer);
+      }
+    });
     el.addEventListener('mouseup', cancel);
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    el.addEventListener('mouseleave', cancel);
+
+    // منع click الافتراضي بعد نجاح الضغط المطوّل
+    el.addEventListener('click', function(e) {
+      if (fired) {
+        e.preventDefault();
+        e.stopPropagation();
+        fired = false;
+      }
+    }, true);
+
+    el.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
   }
 
-  // ── ربط deptHead: ضغط مطوّل → التقط القسم كله ──
+  // ── ضغط مطوّل على رأس القسم → صورة القسم كامل ──
   document.querySelectorAll('.deptHead').forEach(function(head) {
     var deptName = head.getAttribute('data-dept') || 'Roster';
     addLongPress(head, function() {
@@ -1725,9 +1831,9 @@ applyLang(LANG);
     });
   });
 
-  // ── ربط shiftSummary: ضغط مطوّل → التقط المناوبة فقط ──
+  // ── ضغط مطوّل على اسم الوردية → صورة الوردية فقط ──
   document.querySelectorAll('.shiftSummary').forEach(function(summary) {
-    var shiftKey = summary.getAttribute('data-shift-key') || '';
+    var shiftKey = summary.getAttribute('data-shift-key') || 'Shift';
     addLongPress(summary, function() {
       captureShift(summary, shiftKey);
     });
