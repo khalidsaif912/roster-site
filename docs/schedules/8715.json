@@ -1095,45 +1095,23 @@
   "change_alerts": {
     "2026-04": {
       "month": "2026-04",
-      "is_active": true,
-      "change_hash": "e964f9d535664cb0",
-      "changed_at": "2026-04-17T17:40:15.589640+04:00",
-      "total_changed_days": 1,
-      "title": {
-        "ar": "تحديث جدول أبريل 2026",
-        "en": "Roster updated — April 2026"
-      },
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل يوم واحد في جدولك لشهر أبريل 2026.",
-        "en": "1 day changed in your roster for April 2026."
+        "ar": "",
+        "en": ""
+      },
+      "title": {
+        "ar": "",
+        "en": ""
       },
       "lines": {
-        "ar": [
-          "الثلاثاء 21/04: 🌆 Afternoon (AN13) (AN13) ← 🌅 Morning (MN06) (MN06)"
-        ],
-        "en": [
-          "Tuesday 21/04: 🌆 Afternoon (AN13) (AN13) → 🌅 Morning (MN06) (MN06)"
-        ]
+        "ar": [],
+        "en": []
       },
-      "days": [
-        {
-          "date": "2026-04-21",
-          "short_date": "21/04",
-          "day": 21,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "AN13",
-          "old_shift_label": "🌆 Afternoon (AN13)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "MN06",
-          "new_shift_label": "🌅 Morning (MN06)",
-          "new_shift_group": "Morning",
-          "old_display": "🌆 Afternoon (AN13) (AN13)",
-          "new_display": "🌅 Morning (MN06) (MN06)",
-          "line_ar": "الثلاثاء 21/04: 🌆 Afternoon (AN13) (AN13) ← 🌅 Morning (MN06) (MN06)",
-          "line_en": "Tuesday 21/04: 🌆 Afternoon (AN13) (AN13) → 🌅 Morning (MN06) (MN06)"
-        }
-      ]
+      "days": []
     }
   }
 }
