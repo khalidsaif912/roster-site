@@ -28,291 +28,308 @@
       color:var(--text);
       min-height:100vh;
     }
-    .wrap {
-      max-width:900px;
-      margin:0 auto;
-      padding:18px 14px 40px;
-    }
+    .wrap { max-width:900px; margin:0 auto; padding:18px 14px 40px; }
+
+    /* BANNER */
     .banner {
-      position:relative;
-      overflow:hidden;
-      border-radius:26px;
-      padding:26px 22px 18px;
+      position:relative; overflow:hidden;
+      border-radius:26px; padding:26px 22px 18px;
       background:var(--header);
       box-shadow:0 18px 48px var(--shadow);
     }
     .banner::before {
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
+      content:""; position:absolute; inset:0; pointer-events:none;
       background:
         radial-gradient(circle at 84% 18%,rgba(255,255,255,.18) 0%,transparent 34%),
         radial-gradient(circle at 14% 90%,rgba(255,255,255,.10) 0%,transparent 28%);
     }
-    .bubble {
+    .bubble { position:absolute; border-radius:50%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
+    .b1{width:180px;height:180px;top:-70px;right:-50px;}
+    .b2{width:110px;height:110px;bottom:-40px;right:120px;}
+    .b3{width:72px;height:72px;top:-18px;left:38%;}
+    .hero { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .hero h1 { color:#fff; font:900 30px/1.03 'Sora',sans-serif; letter-spacing:-.03em; }
+    .hero p  { margin-top:7px; color:rgba(255,255,255,.82); font-size:13px; }
+    .cupBox  { width:82px; height:82px; border-radius:22px; display:grid; place-items:center; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(10px); flex:0 0 auto; }
+    .cupEmoji{ color:#fff; font-size:40px; line-height:1; }
+    .dock { position:relative; z-index:1; display:grid; grid-template-columns:1fr 92px 92px 92px; gap:10px; margin-top:14px; }
+    .dockCard { min-height:66px; border-radius:18px; background:rgba(255,255,255,.96); box-shadow:0 6px 20px rgba(25,65,155,.10); text-decoration:none; display:flex; align-items:center; justify-content:center; padding:10px 8px; }
+    .dockMain { font-size:13px; font-weight:800; color:#243757; text-align:center; line-height:1.2; }
+    .dockMini { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; width:100%; }
+    .dockMini span:first-child { font-size:24px; line-height:1; }
+    .dockMini span:last-child  { color:var(--blue2); font-size:10px; font-weight:800; white-space:nowrap; }
+
+    /* TRAIN STRIP */
+    .trainWrap { margin-top:16px; position:relative; }
+    .trainWrap::before,
+    .trainWrap::after {
+      content:""; position:absolute; top:0; bottom:0; width:52px; z-index:2; pointer-events:none;
+    }
+    .trainWrap::before { left:0;  background:linear-gradient(to right,var(--bg),transparent); }
+    .trainWrap::after  { right:0; background:linear-gradient(to left, var(--bg),transparent); }
+
+    .trainTrack {
+      display:flex;
+      align-items:center;
+      gap:0;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      padding:8px 52px 14px;
+      cursor:grab;
+      user-select:none;
+    }
+    .trainTrack:active { cursor:grabbing; }
+    .trainTrack::-webkit-scrollbar { height:4px; }
+    .trainTrack::-webkit-scrollbar-track { background:transparent; }
+    .trainTrack::-webkit-scrollbar-thumb { background:rgba(45,92,239,.22); border-radius:99px; }
+
+    /* connector rail between cards */
+    .trainRail {
+      flex:0 0 16px;
+      height:3px;
+      background:rgba(45,92,239,.15);
+      position:relative;
+    }
+    .trainRail::before {
+      content:"";
       position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:7px; height:7px;
       border-radius:50%;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
+      background:rgba(45,92,239,.28);
     }
-    .b1 { width:180px; height:180px; top:-70px; right:-50px; }
-    .b2 { width:110px; height:110px; bottom:-40px; right:120px; }
-    .b3 { width:72px; height:72px; top:-18px; left:38%; }
 
-    .hero {
-      position:relative;
-      z-index:1;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-    }
-    .hero h1 {
-      color:#fff;
-      font:900 30px/1.03 'Sora',sans-serif;
-      letter-spacing:-.03em;
-    }
-    .hero p {
-      margin-top:7px;
-      color:rgba(255,255,255,.82);
-      font-size:13px;
-    }
-    .cupBox {
-      width:82px;
-      height:82px;
-      border-radius:22px;
-      display:grid;
-      place-items:center;
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.18);
-      backdrop-filter:blur(10px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+    .trainCard {
       flex:0 0 auto;
-    }
-    .cupBox img {
-      width:62px;
-      height:62px;
-      object-fit:contain;
-      filter:drop-shadow(0 5px 10px rgba(0,0,0,.12));
-    }
-    .cupEmoji {
-      color:#fff;
-      font-size:40px;
-      line-height:1;
-    }
-
-    .dock {
-      position:relative;
-      z-index:1;
-      display:grid;
-      grid-template-columns:1fr 92px 92px 92px;
-      gap:10px;
-      margin-top:14px;
-    }
-    .dockCard {
-      min-height:66px;
-      border-radius:18px;
-      background:rgba(255,255,255,.96);
-      border:1px solid rgba(255,255,255,.96);
-      box-shadow:0 6px 20px rgba(25,65,155,.10);
-      text-decoration:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 8px;
-    }
-    .dockMain {
-      font-size:13px;
-      font-weight:800;
-      color:#243757;
-      text-align:center;
-      line-height:1.2;
-    }
-    .dockMini {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      text-align:center;
-      width:100%;
-    }
-    .dockMini span:first-child {
-      font-size:24px;
-      line-height:1;
-    }
-    .dockMini span:last-child {
-      color:var(--blue2);
-      font-size:10px;
-      font-weight:800;
-      line-height:1.12;
-      white-space:nowrap;
-    }
-
-    .topicBar {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:16px;
-    }
-    .topicBtn {
-      border:none;
-      cursor:pointer;
-      min-height:42px;
-      padding:0 14px;
-      border-radius:14px;
+      width:128px;
+      scroll-snap-align:center;
+      border-radius:16px;
       background:#fff;
-      border:1px solid var(--line);
-      box-shadow:0 8px 22px rgba(25,65,155,.08);
-      color:#2a3d63;
-      font:800 13px/1 'DM Sans',sans-serif;
-      transition:.18s ease;
-    }
-    .topicBtn.active {
-      background:linear-gradient(135deg,#eff4ff,#dfe9ff);
-      color:#1d4fe0;
-      border-color:rgba(45,92,239,.22);
-    }
-    .emptyTopics {
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-      padding:4px 2px;
-    }
-
-    .panel {
-      margin-top:14px;
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:22px;
-      box-shadow:0 12px 28px rgba(25,65,155,.10);
+      border:2px solid transparent;
+      box-shadow:0 4px 14px rgba(25,65,155,.08);
       overflow:hidden;
+      cursor:pointer;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .trainCard:hover { transform:translateY(-4px); box-shadow:0 10px 24px rgba(25,65,155,.15); }
+    .trainCard.active {
+      border-color:var(--blue);
+      box-shadow:0 0 0 3px rgba(45,92,239,.16), 0 8px 22px rgba(25,65,155,.14);
+      transform:translateY(-2px);
+    }
+    .trainCard img {
+      display:block; width:100%; height:86px;
+      object-fit:cover; background:#eef3fb;
+    }
+    .trainLabel {
+      padding:6px 8px 8px;
+      font-size:10px; font-weight:800;
+      color:var(--muted); text-align:center; line-height:1.2;
+    }
+    .trainCard.active .trainLabel { color:var(--blue2); }
+
+    /* MAIN PANEL */
+    .panel {
+      margin-top:14px; background:var(--panel);
+      border:1px solid var(--line); border-radius:22px;
+      box-shadow:0 12px 28px rgba(25,65,155,.10); overflow:hidden;
     }
     .panelHead {
-      padding:14px 16px;
-      border-bottom:1px solid var(--line);
-      background:#fbfdff;
+      padding:14px 16px; border-bottom:1px solid var(--line);
+      background:#fbfdff; display:flex; align-items:center;
+      justify-content:space-between; gap:12px;
     }
-    .panelTitle {
-      font:800 16px/1.1 'Sora',sans-serif;
-      color:var(--text);
+    .panelTitle { font:800 16px/1.1 'Sora',sans-serif; color:var(--text); }
+    .panelSub   { margin-top:5px; color:var(--muted); font-size:13px; }
+    .navBtns    { display:flex; gap:8px; flex-shrink:0; }
+    .navBtn {
+      width:36px; height:36px; border-radius:12px;
+      border:1px solid var(--line); background:#fff;
+      box-shadow:0 3px 10px rgba(25,65,155,.08);
+      display:grid; place-items:center;
+      cursor:pointer; font-size:16px; transition:.15s ease; color:var(--blue2);
     }
-    .panelSub {
-      margin-top:6px;
-      color:var(--muted);
-      font-size:13px;
-    }
-    .slide {
-      display:none;
-      padding:14px;
-    }
-    .slide.active {
-      display:block;
-    }
-    .figure {
-      border-radius:18px;
-      overflow:hidden;
-      border:1px solid var(--line);
-      background:#fff;
-    }
-    .figure img {
-      display:block;
-      width:100%;
-      height:auto;
-      background:#fff;
-    }
-    .emptyPanel {
-      padding:30px 18px;
-      text-align:center;
-      color:var(--muted);
-      font-size:14px;
-      font-weight:700;
-    }
+    .navBtn:hover { background:var(--blue2); color:#fff; border-color:var(--blue2); }
 
-    @media (max-width:720px) {
-      .wrap { padding:12px 10px 28px; }
-      .banner { border-radius:22px; padding:22px 16px 16px; }
-      .hero h1 { font-size:25px; }
-      .cupBox { width:70px; height:70px; border-radius:20px; }
-      .cupBox img { width:52px; height:52px; }
-      .dock { grid-template-columns:1fr 80px 80px 80px; gap:8px; }
-      .dockCard { min-height:60px; border-radius:16px; padding:8px 6px; }
-      .dockMini span:first-child { font-size:22px; }
-      .dockMini span:last-child { font-size:9px; }
-      .topicBtn { min-height:40px; padding:0 12px; font-size:12px; }
+    .slide { display:none; padding:14px; }
+    .slide.active { display:block; }
+    .figure { border-radius:18px; overflow:hidden; border:1px solid var(--line); background:#fff; }
+    .figure img { display:block; width:100%; height:auto; }
+
+    @media(max-width:720px){
+      .wrap{padding:12px 10px 28px;}
+      .banner{border-radius:22px;padding:22px 16px 16px;}
+      .hero h1{font-size:25px;}
+      .cupBox{width:70px;height:70px;}
+      .dock{grid-template-columns:1fr 80px 80px 80px;gap:8px;}
+      .dockCard{min-height:60px;border-radius:16px;}
+      .trainCard{width:108px;}
+      .trainCard img{height:72px;}
     }
-    @media (max-width:420px) {
-      .dock { grid-template-columns:1fr 72px 72px 72px; gap:6px; }
-      .dockMain { font-size:11px; }
-      .topicBar { gap:8px; }
+    @media(max-width:420px){
+      .dock{grid-template-columns:1fr 72px 72px 72px;gap:6px;}
+      .trainCard{width:94px;}
+      .trainCard img{height:62px;}
     }
   </style>
-<link rel="manifest" href="/roster-site/manifest.json?v=9"></head>
+  <link rel="manifest" href="/roster-site/manifest.json?v=9">
+</head>
 <body>
-  <div class="wrap">
-    <div class="banner">
-      <div class="bubble b1"></div>
-      <div class="bubble b2"></div>
-      <div class="bubble b3"></div>
+<div class="wrap">
 
-      <div class="hero">
-        <div>
-          <h1>A Cup of Book</h1>
-          <p>Topics and image navigation</p>
-        </div>
-        <div class="cupBox"><div class="cupEmoji">☕</div></div>
+  <div class="banner">
+    <div class="bubble b1"></div>
+    <div class="bubble b2"></div>
+    <div class="bubble b3"></div>
+    <div class="hero">
+      <div>
+        <h1>A Cup of Book</h1>
+        <p>Topics and image navigation</p>
       </div>
-
-      <div class="dock">
-        <div class="dockCard"><div class="dockMain">Browse images and topics</div></div>
-
-        <a class="dockCard" href="https://khalidsaif912.github.io/roster-site/training/">
-          <div class="dockMini"><span>📚</span><span>Training</span></div>
-        </a>
-
-        <a class="dockCard" href="https://khalidsaif912.github.io/roster-site/">
-          <div class="dockMini"><span>📤</span><span>Roster</span></div>
-        </a>
-
-        <a class="dockCard" href="https://khalidsaif912.github.io/roster-site/import/">
-          <div class="dockMini"><span>📥</span><span>Import</span></div>
-        </a>
-      </div>
+      <div class="cupBox"><div class="cupEmoji">☕</div></div>
     </div>
-
-    <div class="topicBar">
-      <button class="topicBtn active" data-target="topic-1">Cup Of Book 01</button>
-    </div>
-
-    <div class="panel">
-      <div class="panelHead">
-        <div class="panelTitle" id="topicTitle">Cup Of Book 01</div>
-        <div class="panelSub" id="topicSub">Select a topic button to switch between images.</div>
-      </div>
-
-      <div class="slide active" id="topic-1">
-  <div class="figure"><img src="images/cup_of_book_01.jpg" alt="Cup Of Book 01"></div>
-</div>
+    <div class="dock">
+      <div class="dockCard"><div class="dockMain">Browse images and topics</div></div>
+      <a class="dockCard" href="https://khalidsaif912.github.io/roster-site/training/">
+        <div class="dockMini"><span>📚</span><span>Training</span></div>
+      </a>
+      <a class="dockCard" href="https://khalidsaif912.github.io/roster-site/">
+        <div class="dockMini"><span>📤</span><span>Roster</span></div>
+      </a>
+      <a class="dockCard" href="https://khalidsaif912.github.io/roster-site/import/">
+        <div class="dockMini"><span>📥</span><span>Import</span></div>
+      </a>
     </div>
   </div>
 
-  <script>
-    const btns = Array.from(document.querySelectorAll('.topicBtn'));
-    const slides = Array.from(document.querySelectorAll('.slide'));
-    const title = document.getElementById('topicTitle');
-    const sub = document.getElementById('topicSub');
+  <!-- TRAIN STRIP -->
+  <div class="trainWrap">
+    <div class="trainTrack" id="trainTrack">
+      <div class="trainCard active" data-index="0"><img src="images/cup_of_book_01.jpg" alt=""><div class="trainLabel">Book 01</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="1"><img src="images/cup_of_book_02.jpg" alt=""><div class="trainLabel">Book 02</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="2"><img src="images/cup_of_book_03.jpg" alt=""><div class="trainLabel">Book 03</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="3"><img src="images/cup_of_book_04.jpg" alt=""><div class="trainLabel">Book 04</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="4"><img src="images/cup_of_book_05.jpg" alt=""><div class="trainLabel">Book 05</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="5"><img src="images/cup_of_book_06.jpg" alt=""><div class="trainLabel">Book 06</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="6"><img src="images/cup_of_book_07.jpg" alt=""><div class="trainLabel">Book 07</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="7"><img src="images/cup_of_book_08.jpg" alt=""><div class="trainLabel">Book 08</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="8"><img src="images/cup_of_book_09.jpg" alt=""><div class="trainLabel">Book 09</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="9"><img src="images/cup_of_book_10.jpg" alt=""><div class="trainLabel">Book 10</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="10"><img src="images/cup_of_book_11.jpg" alt=""><div class="trainLabel">Book 11</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="11"><img src="images/cup_of_book_12.jpg" alt=""><div class="trainLabel">Book 12</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="12"><img src="images/cup_of_book_13.jpg" alt=""><div class="trainLabel">Book 13</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="13"><img src="images/cup_of_book_14.jpg" alt=""><div class="trainLabel">Book 14</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="14"><img src="images/cup_of_book_15.jpg" alt=""><div class="trainLabel">Book 15</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="15"><img src="images/cup_of_book_16.jpg" alt=""><div class="trainLabel">Book 16</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="16"><img src="images/cup_of_book_17.jpg" alt=""><div class="trainLabel">Book 17</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="17"><img src="images/cup_of_book_18.jpg" alt=""><div class="trainLabel">Book 18</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="18"><img src="images/cup_of_book_19.jpg" alt=""><div class="trainLabel">Book 19</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="19"><img src="images/cup_of_book_20.jpg" alt=""><div class="trainLabel">Book 20</div></div>
+      <div class="trainRail"></div>
+      <div class="trainCard" data-index="20"><img src="images/cup_of_book_21.jpg" alt=""><div class="trainLabel">Book 21</div></div>
+    </div>
+  </div>
 
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.dataset.target;
-        const label = btn.textContent.trim();
-        btns.forEach(b => b.classList.toggle('active', b === btn));
-        slides.forEach(s => s.classList.toggle('active', s.id === target));
-        title.textContent = label;
-        sub.textContent = "Selected topic image.";
-      });
-    });
-  </script>
-<script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>
+  <!-- MAIN VIEW -->
+  <div class="panel">
+    <div class="panelHead">
+      <div>
+        <div class="panelTitle" id="topicTitle">Cup Of Book 01</div>
+        <div class="panelSub" id="topicSub">Image 1 of 21 — drag the strip or use arrows</div>
+      </div>
+      <div class="navBtns">
+        <button class="navBtn" id="prevBtn">&#8592;</button>
+        <button class="navBtn" id="nextBtn">&#8594;</button>
+      </div>
+    </div>
+    <div class="slide active" id="slide-0"><div class="figure"><img src="images/cup_of_book_01.jpg" alt="Cup Of Book 01"></div></div>
+    <div class="slide" id="slide-1"><div class="figure"><img src="images/cup_of_book_02.jpg" alt="Cup Of Book 02"></div></div>
+    <div class="slide" id="slide-2"><div class="figure"><img src="images/cup_of_book_03.jpg" alt="Cup Of Book 03"></div></div>
+    <div class="slide" id="slide-3"><div class="figure"><img src="images/cup_of_book_04.jpg" alt="Cup Of Book 04"></div></div>
+    <div class="slide" id="slide-4"><div class="figure"><img src="images/cup_of_book_05.jpg" alt="Cup Of Book 05"></div></div>
+    <div class="slide" id="slide-5"><div class="figure"><img src="images/cup_of_book_06.jpg" alt="Cup Of Book 06"></div></div>
+    <div class="slide" id="slide-6"><div class="figure"><img src="images/cup_of_book_07.jpg" alt="Cup Of Book 07"></div></div>
+    <div class="slide" id="slide-7"><div class="figure"><img src="images/cup_of_book_08.jpg" alt="Cup Of Book 08"></div></div>
+    <div class="slide" id="slide-8"><div class="figure"><img src="images/cup_of_book_09.jpg" alt="Cup Of Book 09"></div></div>
+    <div class="slide" id="slide-9"><div class="figure"><img src="images/cup_of_book_10.jpg" alt="Cup Of Book 10"></div></div>
+    <div class="slide" id="slide-10"><div class="figure"><img src="images/cup_of_book_11.jpg" alt="Cup Of Book 11"></div></div>
+    <div class="slide" id="slide-11"><div class="figure"><img src="images/cup_of_book_12.jpg" alt="Cup Of Book 12"></div></div>
+    <div class="slide" id="slide-12"><div class="figure"><img src="images/cup_of_book_13.jpg" alt="Cup Of Book 13"></div></div>
+    <div class="slide" id="slide-13"><div class="figure"><img src="images/cup_of_book_14.jpg" alt="Cup Of Book 14"></div></div>
+    <div class="slide" id="slide-14"><div class="figure"><img src="images/cup_of_book_15.jpg" alt="Cup Of Book 15"></div></div>
+    <div class="slide" id="slide-15"><div class="figure"><img src="images/cup_of_book_16.jpg" alt="Cup Of Book 16"></div></div>
+    <div class="slide" id="slide-16"><div class="figure"><img src="images/cup_of_book_17.jpg" alt="Cup Of Book 17"></div></div>
+    <div class="slide" id="slide-17"><div class="figure"><img src="images/cup_of_book_18.jpg" alt="Cup Of Book 18"></div></div>
+    <div class="slide" id="slide-18"><div class="figure"><img src="images/cup_of_book_19.jpg" alt="Cup Of Book 19"></div></div>
+    <div class="slide" id="slide-19"><div class="figure"><img src="images/cup_of_book_20.jpg" alt="Cup Of Book 20"></div></div>
+    <div class="slide" id="slide-20"><div class="figure"><img src="images/cup_of_book_21.jpg" alt="Cup Of Book 21"></div></div>
+  </div>
+
+</div>
+<script>
+  const TOTAL = 21;
+  let current = 0;
+  const cards  = Array.from(document.querySelectorAll('.trainCard'));
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const track  = document.getElementById('trainTrack');
+  const title  = document.getElementById('topicTitle');
+  const sub    = document.getElementById('topicSub');
+
+  function goTo(idx) {
+    current = (idx + TOTAL) % TOTAL;
+    cards.forEach((c,i)  => c.classList.toggle('active', i === current));
+    slides.forEach((s,i) => s.classList.toggle('active', i === current));
+    const num = String(current + 1).padStart(2,'0');
+    title.textContent = `Cup Of Book ${num}`;
+    sub.textContent   = `Image ${current + 1} of ${TOTAL} — drag the strip or use arrows`;
+    cards[current].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  }
+
+  cards.forEach(c => c.addEventListener('click', () => goTo(+c.dataset.index)));
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  // drag scroll desktop
+  let drag = false, startX = 0, scrollLeft = 0;
+  track.addEventListener('mousedown', e => { drag=true; startX=e.pageX-track.offsetLeft; scrollLeft=track.scrollLeft; });
+  track.addEventListener('mouseleave', () => drag=false);
+  track.addEventListener('mouseup',    () => drag=false);
+  track.addEventListener('mousemove',  e => {
+    if (!drag) return;
+    e.preventDefault();
+    track.scrollLeft = scrollLeft - (e.pageX - track.offsetLeft - startX) * 1.4;
+  });
+
+  // keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowLeft')  goTo(current-1);
+    if (e.key==='ArrowRight') goTo(current+1);
+  });
+
+  goTo(0);
+</script>
+<script src="/roster-site/install-pwa.js?v=9"></script>
+<script src="/roster-site/banner-changer.js"></script>
+</body>
 </html>
