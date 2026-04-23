@@ -511,44 +511,60 @@
     });
   }
 
-  function renderForEmployee(empId) {
-    if (!empId) return;
+var lastRenderedEmpId = '';
+var lastRenderedHash = '';
 
-    var lang = getLang();
-    var url = getBase() + 'schedules/' + encodeURIComponent(empId) + '.json';
+function renderForEmployee(empId) {
+  if (!empId) return;
 
-    fetchJson(url)
-      .then(function (data) {
-        var alert = activeAlert(data);
+  var lang = getLang();
+  var url = getBase() + 'schedules/' + encodeURIComponent(empId) + '.json';
 
-        if (!alert || !alert.is_active) {
+  fetchJson(url)
+    .then(function (data) {
+      var currentEmpId = getEmployeeId();
+      if (!currentEmpId || currentEmpId !== empId) return;
+
+      var alert = activeAlert(data);
+
+      if (!alert || !alert.is_active) {
+        if (currentEmpId === empId) {
           clearHomeUI();
-          return;
         }
+        return;
+      }
 
-        if (isDismissed(empId, alert)) {
-          clearHomeUI();
-        } else if (onHomePage()) {
-          ensureHomeUI(empId, alert, lang);
-        }
+      lastRenderedEmpId = empId;
+      lastRenderedHash = alert.change_hash || '';
 
-        if (onMySchedulePage()) {
-          ensurePageBanner(alert, lang);
-          setTimeout(function () { highlightChangedDays(alert); }, 300);
-          setTimeout(function () { highlightChangedDays(alert); }, 1200);
-          setTimeout(function () { highlightChangedDays(alert); }, 2500);
-        }
-      })
-      .catch(function () {
+      if (isDismissed(empId, alert)) {
         clearHomeUI();
-      });
-  }
+        return;
+      }
 
-  function boot() {
-    injectStyles();
-    var empId = getEmployeeId();
-    if (empId) renderForEmployee(empId);
-  }
+      if (onHomePage()) {
+        ensureHomeUI(empId, alert, lang);
+      }
+
+      if (onMySchedulePage()) {
+        ensurePageBanner(alert, lang);
+        setTimeout(function () { highlightChangedDays(alert); }, 300);
+        setTimeout(function () { highlightChangedDays(alert); }, 1200);
+        setTimeout(function () { highlightChangedDays(alert); }, 2500);
+      }
+    })
+    .catch(function (err) {
+      console.warn('change-alert fetch failed:', err);
+      // لا تمسح الواجهة هنا حتى لا يختفي التنبيه بعد ظهوره
+    });
+}
+
+function boot() {
+  injectStyles();
+  var empId = getEmployeeId();
+  if (!empId) return;
+  renderForEmployee(empId);
+}
 
   document.addEventListener('DOMContentLoaded', function () {
     boot();
