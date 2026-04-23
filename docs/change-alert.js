@@ -1,245 +1,430 @@
 (function () {
-  var BASE_PATH = '/roster-site';
-  var ACK_PREFIX = 'rosterChangeAck:';
-  var STYLE_ID = 'roster-change-alert-style';
-  var initializedFor = null;
+  'use strict';
 
-  function injectStyles() {
-    if (document.getElementById(STYLE_ID)) return;
-    var style = document.createElement('style');
-    style.id = STYLE_ID;
-    style.textContent = '' +
-      '.rca-home-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 6px;border-radius:999px;background:#dc2626;color:#fff;font-size:10px;font-weight:800;line-height:1;position:absolute;top:-6px;right:-6px;box-shadow:0 4px 12px rgba(220,38,38,.35)}' +
-      '.rca-home-chip{position:relative}' +
-      '.rca-banner{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 12px);z-index:99998;background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;border-radius:18px;box-shadow:0 12px 30px rgba(15,23,42,.28);overflow:hidden}' +
-      '.rca-banner-inner{padding:14px 14px 12px}' +
-      '.rca-banner-title{font-size:15px;font-weight:900;letter-spacing:-.2px;margin:0 0 6px}' +
-      '.rca-banner-text{font-size:13px;line-height:1.55;opacity:.96;margin:0}' +
-      '.rca-banner-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}' +
-      '.rca-btn{appearance:none;border:none;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:800;cursor:pointer}' +
-      '.rca-btn-primary{background:#fff;color:#991b1b}' +
-      '.rca-btn-secondary{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.2)}' +
-      '.rca-list{display:none;margin-top:10px;padding:0;list-style:none;max-height:240px;overflow:auto}' +
-      '.rca-list.open{display:block}' +
-      '.rca-item{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 11px;margin-top:8px}' +
-      '.rca-item-date{font-size:12px;font-weight:900;opacity:.92;margin-bottom:4px}' +
-      '.rca-item-shift{font-size:13px;font-weight:700}' +
-      '.rca-item-arrow{opacity:.85;padding:0 5px}' +
-      '.rca-page-spacer{height:104px}' +
-      '@media (max-width:600px){.rca-banner{left:10px;right:10px}.rca-home-badge{top:-4px;right:-4px}}';
-    document.head.appendChild(style);
+  var HOME_ICON_ID = 'chg-dot';
+  var HOME_CARD_ID = 'chg-card';
+  var HOME_BADGE_ID = 'chg-badge';
+  var PAGE_BANNER_ID = 'chg-page-banner';
+
+  function lang() {
+    return localStorage.getItem('rosterLang') || 'en';
   }
 
-  function qs(selector) {
-    return document.querySelector(selector);
-  }
-
-  function getLang() {
-    if (document.body && document.body.classList.contains('ar')) return 'ar';
-    var lang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
-    return lang.indexOf('ar') === 0 ? 'ar' : 'en';
-  }
-
-  function t(key, lang) {
-    var dict = {
-      ar: {
-        changed: 'يوجد تغيير في جدولك',
-        details: 'عرض التغييرات',
-        hide: 'إخفاء التفاصيل',
-        ack: 'تم الاطلاع',
-        go: 'اذهب إلى جدولي',
-        badge: 'جديد',
-        homeText: 'تم اكتشاف تغيير جديد في جدولك. افتح صفحة جدولي لرؤية الأيام المتغيرة.',
-        noEmp: 'احفظ رقمك الوظيفي أولاً لإظهار التنبيه الشخصي.',
-      },
-      en: {
-        changed: 'Your roster changed',
-        details: 'Show changes',
-        hide: 'Hide details',
-        ack: 'Mark as seen',
-        go: 'Open My Schedule',
-        badge: 'New',
-        homeText: 'A new change was detected in your roster. Open My Schedule to review the affected days.',
-        noEmp: 'Save your employee ID first to enable personal alerts.',
-      }
+  function t(key, l) {
+    var ar = {
+      changed: 'تم تعديل جدولك',
+      details: 'عرض التفاصيل',
+      dismiss: 'إخفاء',
+      close: 'إغلاق',
+      changedDays: 'أيام متغيرة',
+      viewSchedule: 'فتح جدولي',
+      noDetails: 'يوجد تحديث في جدولك.',
+      updated: 'تحديث'
     };
-    return (dict[lang] && dict[lang][key]) || dict.en[key] || key;
+    var en = {
+      changed: 'Your schedule changed',
+      details: 'View details',
+      dismiss: 'Dismiss',
+      close: 'Close',
+      changedDays: 'changed days',
+      viewSchedule: 'Open My Schedule',
+      noDetails: 'Your roster has been updated.',
+      updated: 'Update'
+    };
+    var dict = l === 'ar' ? ar : en;
+    return dict[key] || key;
   }
 
   function getEmployeeId() {
     var fromUrl = new URLSearchParams(window.location.search).get('emp');
     if (fromUrl) return fromUrl.trim();
+
     var saved = localStorage.getItem('savedEmpId');
     if (saved) return saved.trim();
-    var input = document.querySelector('input[name="emp"], input[name="employee"], input[type="search"], input[type="text"]');
-    if (input && input.value && /^\d+$/.test(input.value.trim())) return input.value.trim();
+
     return '';
   }
 
-  function fetchJson(url) {
-    return fetch(url, { cache: 'no-store' }).then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    });
-  }
-
-  function sortedActiveAlerts(data) {
-    var alerts = Object.values((data && data.change_alerts) || {}).filter(function (item) {
-      return item && item.is_active && item.change_hash && item.total_changed_days > 0;
-    });
-    alerts.sort(function (a, b) {
-      return String(b.changed_at || '').localeCompare(String(a.changed_at || ''));
-    });
-    return alerts;
-  }
-
-  function getAckKey(empId, month) {
-    return ACK_PREFIX + empId + ':' + month;
-  }
-
-  function isAcked(empId, alert) {
-    return localStorage.getItem(getAckKey(empId, alert.month)) === alert.change_hash;
-  }
-
-  function markAcked(empId, alert) {
-    localStorage.setItem(getAckKey(empId, alert.month), alert.change_hash);
-  }
-
-  function normalizeLabel(value) {
-    return String(value || '').replace(/\s+/g, ' ').trim();
-  }
-
-  function formatDate(dateValue, lang) {
-    try {
-      var d = new Date(dateValue + 'T00:00:00');
-      return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-OM' : 'en-GB', {
-        day: 'numeric', month: 'short'
-      }).format(d);
-    } catch (e) {
-      return dateValue;
-    }
-  }
-
-  function ensureHomeBadge(button, lang) {
-    if (!button) return;
-    button.classList.add('rca-home-chip');
-    if (button.querySelector('.rca-home-badge')) return;
-    var badge = document.createElement('span');
-    badge.className = 'rca-home-badge';
-    badge.textContent = t('badge', lang);
-    button.appendChild(badge);
-  }
-
-  function removeHomeBadge() {
-    document.querySelectorAll('.rca-home-badge').forEach(function (el) { el.remove(); });
-  }
-
-  function createBanner(empId, alert, lang, options) {
-    if (document.getElementById('rosterChangeBanner')) return;
-
-    var isHome = options && options.home;
-    var banner = document.createElement('div');
-    banner.id = 'rosterChangeBanner';
-    banner.className = 'rca-banner';
-
-    var summaryText = isHome ? t('homeText', lang) : ((alert.summary && (lang === 'ar' ? alert.summary.ar : alert.summary.en)) || t('changed', lang));
-
-    var detailsHtml = (alert.days || []).map(function (item) {
-      var dateText = formatDate(item.date, lang);
-      var oldLabel = normalizeLabel(item.old_shift_label || item.old_shift_code || '—');
-      var newLabel = normalizeLabel(item.new_shift_label || item.new_shift_code || '—');
-      return '<li class="rca-item">' +
-        '<div class="rca-item-date">' + dateText + '</div>' +
-        '<div class="rca-item-shift">' + oldLabel + '<span class="rca-item-arrow">→</span>' + newLabel + '</div>' +
-      '</li>';
-    }).join('');
-
-    banner.innerHTML = '' +
-      '<div class="rca-banner-inner">' +
-        '<div class="rca-banner-title">⚠️ ' + t('changed', lang) + '</div>' +
-        '<p class="rca-banner-text">' + summaryText + '</p>' +
-        '<div class="rca-banner-actions">' +
-          (isHome
-            ? '<button class="rca-btn rca-btn-primary" type="button" data-action="go">' + t('go', lang) + '</button>'
-            : '<button class="rca-btn rca-btn-primary" type="button" data-action="details">' + t('details', lang) + '</button><button class="rca-btn rca-btn-secondary" type="button" data-action="ack">' + t('ack', lang) + '</button>') +
-        '</div>' +
-        (isHome ? '' : '<ul class="rca-list" id="rosterChangeList">' + detailsHtml + '</ul>') +
-      '</div>';
-
-    document.body.appendChild(banner);
-
-    var spacer = document.createElement('div');
-    spacer.id = 'rosterChangeSpacer';
-    spacer.className = 'rca-page-spacer';
-    var first = document.body.firstElementChild;
-    if (first) {
-      document.body.insertBefore(spacer, first);
-    }
-
-    banner.addEventListener('click', function (event) {
-      var action = event.target && event.target.getAttribute('data-action');
-      if (!action) return;
-      if (action === 'go') {
-        var url = BASE_PATH + '/my-schedules/index.html?emp=' + encodeURIComponent(empId);
-        window.location.href = url;
-        return;
-      }
-      if (action === 'ack') {
-        markAcked(empId, alert);
-        removeBanner();
-        removeHomeBadge();
-        return;
-      }
-      if (action === 'details') {
-        var list = document.getElementById('rosterChangeList');
-        if (!list) return;
-        list.classList.toggle('open');
-        event.target.textContent = list.classList.contains('open') ? t('hide', lang) : t('details', lang);
-      }
-    });
-  }
-
-  function removeBanner() {
-    var banner = document.getElementById('rosterChangeBanner');
-    if (banner) banner.remove();
-    var spacer = document.getElementById('rosterChangeSpacer');
-    if (spacer) spacer.remove();
-  }
-
   function onHomePage() {
-    return /\/roster-site\/(now\/)?$/.test(window.location.pathname) || /\/roster-site\/date\//.test(window.location.pathname);
+    var p = window.location.pathname || '';
+    return /\/roster-site\/?$/.test(p) || /\/roster-site\/date\//.test(p);
   }
 
   function onMySchedulePage() {
-    return /\/roster-site\/my-schedules\//.test(window.location.pathname);
+    var p = window.location.pathname || '';
+    return /\/roster-site\/my-schedules\/index\.html$/.test(p) || /\/roster-site\/my-schedules\/?$/.test(p);
+  }
+
+  function getBase() {
+    return '/roster-site/';
+  }
+
+  function injectStyles() {
+    if (document.getElementById('chg-styles')) return;
+
+    var css = `
+      #${HOME_ICON_ID}{
+        position:fixed;
+        left:12px;
+        bottom:96px; /* أعلى من أيقونة الغياب */
+        width:46px;
+        height:46px;
+        border-radius:14px;
+        background:linear-gradient(135deg,#f59e0b,#ef4444);
+        color:#fff;
+        box-shadow:0 8px 24px rgba(0,0,0,.22);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:9997;
+        cursor:pointer;
+        border:2px solid rgba(255,255,255,.9);
+        -webkit-tap-highlight-color:transparent;
+      }
+
+      #${HOME_ICON_ID}[hidden]{ display:none !important; }
+
+      #${HOME_ICON_ID} .chg-dot-icon{
+        font-size:20px;
+        line-height:1;
+      }
+
+      #${HOME_BADGE_ID}{
+        position:absolute;
+        right:-8px;
+        top:-8px;
+        min-width:22px;
+        height:22px;
+        padding:0 6px;
+        border-radius:999px;
+        background:#7f1d1d;
+        color:#fff;
+        font-size:11px;
+        font-weight:800;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border:2px solid #fff;
+        box-shadow:0 4px 10px rgba(0,0,0,.18);
+      }
+
+      #${HOME_CARD_ID}{
+        position:fixed;
+        left:12px;
+        bottom:150px;
+        width:min(320px, calc(100vw - 24px));
+        background:#fff;
+        border:1px solid rgba(15,23,42,.08);
+        border-radius:18px;
+        box-shadow:0 18px 40px rgba(15,23,42,.18);
+        z-index:9998;
+        overflow:hidden;
+      }
+
+      #${HOME_CARD_ID}[hidden]{ display:none !important; }
+
+      .chg-card-head{
+        padding:14px 14px 10px;
+        background:linear-gradient(135deg,#fff7ed,#fef2f2);
+        border-bottom:1px solid rgba(15,23,42,.06);
+      }
+
+      .chg-card-title{
+        font-size:15px;
+        font-weight:900;
+        color:#7c2d12;
+        margin:0 0 4px 0;
+      }
+
+      .chg-card-text{
+        margin:0;
+        font-size:13px;
+        line-height:1.6;
+        color:#475569;
+      }
+
+      .chg-card-body{
+        padding:12px 14px;
+      }
+
+      .chg-days{
+        margin:0;
+        padding:0;
+        list-style:none;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+      }
+
+      .chg-day{
+        background:#f8fafc;
+        border:1px solid rgba(15,23,42,.06);
+        border-radius:12px;
+        padding:9px 10px;
+      }
+
+      .chg-day-date{
+        font-size:12px;
+        font-weight:800;
+        color:#0f172a;
+        margin-bottom:4px;
+      }
+
+      .chg-day-shifts{
+        font-size:12px;
+        color:#475569;
+      }
+
+      .chg-card-actions{
+        display:flex;
+        gap:8px;
+        padding:0 14px 14px;
+      }
+
+      .chg-btn{
+        flex:1;
+        border:none;
+        border-radius:12px;
+        padding:11px 12px;
+        font-size:13px;
+        font-weight:800;
+        cursor:pointer;
+      }
+
+      .chg-btn-primary{
+        background:#1d4ed8;
+        color:#fff;
+      }
+
+      .chg-btn-muted{
+        background:#e2e8f0;
+        color:#0f172a;
+      }
+
+      #${PAGE_BANNER_ID}{
+        margin:14px 0;
+        background:linear-gradient(135deg,#fff7ed,#fef2f2);
+        border:1px solid #fdba74;
+        border-radius:18px;
+        padding:14px;
+        box-shadow:0 8px 24px rgba(15,23,42,.08);
+      }
+
+      .chg-page-title{
+        font-size:16px;
+        font-weight:900;
+        color:#9a3412;
+        margin:0 0 6px 0;
+      }
+
+      .chg-page-text{
+        margin:0 0 10px 0;
+        color:#475569;
+        font-size:13px;
+        line-height:1.7;
+      }
+
+      .chg-page-list{
+        margin:0;
+        padding-left:18px;
+        color:#334155;
+        font-size:13px;
+      }
+
+      body.ar #${HOME_CARD_ID},
+      body.ar #${PAGE_BANNER_ID}{
+        direction:rtl;
+      }
+
+      body.ar .chg-card-actions{
+        flex-direction:row-reverse;
+      }
+    `;
+
+    var style = document.createElement('style');
+    style.id = 'chg-styles';
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
+  function fetchJson(url) {
+    return fetch(url, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  function activeAlert(data) {
+    var alerts = (data && data.change_alerts) || {};
+    var keys = Object.keys(alerts).sort().reverse();
+    for (var i = 0; i < keys.length; i++) {
+      var a = alerts[keys[i]];
+      if (a && a.is_active) return a;
+    }
+    return null;
+  }
+
+  function dismissKey(empId, hash) {
+    return 'chgDismissed_' + empId + '_' + (hash || 'none');
+  }
+
+  function isDismissed(empId, alert) {
+    if (!alert) return true;
+    return localStorage.getItem(dismissKey(empId, alert.change_hash)) === '1';
+  }
+
+  function markDismissed(empId, alert) {
+    if (!alert) return;
+    localStorage.setItem(dismissKey(empId, alert.change_hash), '1');
+  }
+
+  function myScheduleUrl(empId) {
+    var base = getBase() + 'my-schedules/index.html';
+    return empId ? base + '?emp=' + encodeURIComponent(empId) : base;
+  }
+
+  function shortDaysHtml(alert) {
+    var days = (alert.days || []).slice(0, 3);
+    if (!days.length) return '';
+
+    return '<ul class="chg-days">' + days.map(function (d) {
+      return (
+        '<li class="chg-day">' +
+          '<div class="chg-day-date">' + escapeHtml(d.date || '') + '</div>' +
+          '<div class="chg-day-shifts">' +
+            escapeHtml((d.old_shift_code || '-') + ' → ' + (d.new_shift_code || '-')) +
+          '</div>' +
+        '</li>'
+      );
+    }).join('') + '</ul>';
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function ensureHomeUI(empId, alert, l) {
+    var icon = document.getElementById(HOME_ICON_ID);
+    if (!icon) {
+      icon = document.createElement('button');
+      icon.id = HOME_ICON_ID;
+      icon.type = 'button';
+      icon.innerHTML =
+        '<span class="chg-dot-icon">🔄</span>' +
+        '<span id="' + HOME_BADGE_ID + '">' + escapeHtml(String(alert.total_changed_days || 0)) + '</span>';
+      document.body.appendChild(icon);
+    } else {
+      var badge = icon.querySelector('#' + HOME_BADGE_ID);
+      if (badge) badge.textContent = String(alert.total_changed_days || 0);
+    }
+
+    var card = document.getElementById(HOME_CARD_ID);
+    if (!card) {
+      card = document.createElement('div');
+      card.id = HOME_CARD_ID;
+      document.body.appendChild(card);
+    }
+
+    var summaryText = (alert.summary && (l === 'ar' ? alert.summary.ar : alert.summary.en)) || t('noDetails', l);
+
+    card.innerHTML =
+      '<div class="chg-card-head">' +
+        '<div class="chg-card-title">⚠️ ' + t('changed', l) + '</div>' +
+        '<p class="chg-card-text">' + escapeHtml(summaryText) + '</p>' +
+      '</div>' +
+      '<div class="chg-card-body">' +
+        shortDaysHtml(alert) +
+      '</div>' +
+      '<div class="chg-card-actions">' +
+        '<button class="chg-btn chg-btn-primary" data-act="open">' + t('viewSchedule', l) + '</button>' +
+        '<button class="chg-btn chg-btn-muted" data-act="dismiss">' + t('dismiss', l) + '</button>' +
+      '</div>';
+
+    icon.hidden = false;
+    card.hidden = false;
+
+    icon.onclick = function () {
+      card.hidden = !card.hidden;
+    };
+
+    card.onclick = function (e) {
+      var act = e.target && e.target.getAttribute('data-act');
+      if (!act) return;
+
+      if (act === 'open') {
+        window.location.href = myScheduleUrl(empId);
+      }
+
+      if (act === 'dismiss') {
+        markDismissed(empId, alert);
+        card.hidden = true;
+        icon.hidden = true;
+      }
+    };
+  }
+
+  function ensurePageBanner(empId, alert, l) {
+    var holder =
+      document.querySelector('.wrap') ||
+      document.querySelector('main') ||
+      document.body;
+
+    var old = document.getElementById(PAGE_BANNER_ID);
+    if (old) old.remove();
+
+    var summaryText = (alert.summary && (l === 'ar' ? alert.summary.ar : alert.summary.en)) || t('noDetails', l);
+    var box = document.createElement('div');
+    box.id = PAGE_BANNER_ID;
+
+    box.innerHTML =
+      '<div class="chg-page-title">⚠️ ' + t('changed', l) + '</div>' +
+      '<p class="chg-page-text">' + escapeHtml(summaryText) + '</p>' +
+      (
+        (alert.days || []).length
+          ? '<ul class="chg-page-list">' + alert.days.slice(0, 6).map(function (d) {
+              return '<li>' + escapeHtml((d.date || '') + ' — ' + (d.old_shift_code || '-') + ' → ' + (d.new_shift_code || '-')) + '</li>';
+            }).join('') + '</ul>'
+          : ''
+      );
+
+    holder.insertBefore(box, holder.firstChild);
+  }
+
+  function clearHomeUI() {
+    var icon = document.getElementById(HOME_ICON_ID);
+    var card = document.getElementById(HOME_CARD_ID);
+    if (icon) icon.hidden = true;
+    if (card) card.hidden = true;
   }
 
   function renderForEmployee(empId) {
-    if (!empId || initializedFor === empId) return;
-    initializedFor = empId;
-    var lang = getLang();
-    fetchJson(BASE_PATH + '/schedules/' + encodeURIComponent(empId) + '.json')
+    if (!empId) return;
+
+    var l = lang();
+    fetchJson(getBase() + 'schedules/' + encodeURIComponent(empId) + '.json')
       .then(function (data) {
-        var alert = sortedActiveAlerts(data).filter(function (item) {
-          return !isAcked(empId, item);
-        })[0];
-        if (!alert) {
-          removeHomeBadge();
-          removeBanner();
+        var alert = activeAlert(data);
+
+        if (!alert || isDismissed(empId, alert)) {
+          clearHomeUI();
           return;
         }
 
         if (onHomePage()) {
-          ensureHomeBadge(document.getElementById('myScheduleBtn'), lang);
+          ensureHomeUI(empId, alert, l);
         }
+
         if (onMySchedulePage()) {
-          createBanner(empId, alert, lang, { home: false });
-        } else if (onHomePage()) {
-          createBanner(empId, alert, lang, { home: true });
+          ensurePageBanner(empId, alert, l);
         }
       })
       .catch(function () {
-        initializedFor = null;
+        clearHomeUI();
       });
   }
 
