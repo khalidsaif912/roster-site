@@ -1095,7 +1095,7 @@
   "change_alerts": {
     "2026-04": {
       "month": "2026-04",
-      "is_active": false,
+      "is_active": true,
       "change_hash": "",
       "changed_at": "",
       "total_changed_days": 0,
