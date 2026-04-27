@@ -1041,27 +1041,27 @@
         "day": 25,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "SL",
+        "shift_label": "🤒 Sick Leave",
+        "shift_group": "Sick Leave"
       },
       {
         "date": "2026-04-26",
         "day": 26,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "SL",
+        "shift_label": "🤒 Sick Leave",
+        "shift_group": "Sick Leave"
       },
       {
         "date": "2026-04-27",
         "day": 27,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "SL",
+        "shift_label": "🤒 Sick Leave",
+        "shift_group": "Sick Leave"
       },
       {
         "date": "2026-04-28",
@@ -1095,15 +1095,52 @@
   "change_alerts": {
     "2026-04": {
       "month": "2026-04",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "1be2a013cf0af176",
+      "changed_at": "2026-04-27T10:28:44.948069+04:00",
+      "total_changed_days": 3,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 3 يوم في جدولك لشهر أبريل 2026.",
+        "en": "3 day(s) changed in your roster for April 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-04-25",
+          "day": 25,
+          "day_name_ar": "السبت",
+          "day_name_en": "Saturday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "SL",
+          "new_shift_label": "🤒 Sick Leave",
+          "new_shift_group": "Sick Leave"
+        },
+        {
+          "date": "2026-04-26",
+          "day": 26,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "AN13",
+          "old_shift_label": "🌆 Afternoon (AN13)",
+          "old_shift_group": "Afternoon",
+          "new_shift_code": "SL",
+          "new_shift_label": "🤒 Sick Leave",
+          "new_shift_group": "Sick Leave"
+        },
+        {
+          "date": "2026-04-27",
+          "day": 27,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "AN13",
+          "old_shift_label": "🌆 Afternoon (AN13)",
+          "old_shift_group": "Afternoon",
+          "new_shift_code": "SL",
+          "new_shift_label": "🤒 Sick Leave",
+          "new_shift_group": "Sick Leave"
+        }
+      ]
     }
   }
 }
