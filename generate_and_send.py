@@ -2585,6 +2585,15 @@ def main():
 
     # قراءة اسم الملف واستخراج الشهر
     source_name = get_source_name()
+    name_lower = source_name.lower()
+
+    if "export roster" not in name_lower:
+        print(f"⏭️ Skipping non-roster file: {source_name}")
+        return
+
+    if "export staff roster changes" in name_lower:
+        print(f"⏭️ Skipping changes file: {source_name}")
+        return
     incoming_key = month_key_from_filename(source_name) if source_name else None
     print(f"📄 Source file: {source_name}")
     print(f"📅 Detected month: {incoming_key or 'unknown'}")
