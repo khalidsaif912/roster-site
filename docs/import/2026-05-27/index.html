@@ -290,7 +290,7 @@ body:not(.light) .emp-code{filter:brightness(1.4)}
       'page_date': '2026-05-27'
     });
   </script>
-<link rel="manifest" href="/roster-site/import/manifest.json?v=9"></head>
+</head>
 <body>
 <div class="wrap">
   <div class="header">
@@ -303,7 +303,7 @@ body:not(.light) .emp-code{filter:brightness(1.4)}
           <button class="date-btn" onclick="openDatePicker()" type="button">
             <span>📅</span><span>27 May 2026</span>
           </button>
-          <input id="datePicker" type="date" value="2026-05-27" min="2026-03-01" max="2026-05-31" tabindex="-1" aria-hidden="true" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px"/>
+          <input id="datePicker" type="date" value="2026-05-27" min="2026-04-01" max="2026-05-31" tabindex="-1" aria-hidden="true" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px"/>
         </div>
       </div>
     </div>
@@ -727,14 +727,14 @@ body:not(.light) .emp-code{filter:brightness(1.4)}
   </div>
   
   <div class="page-footer">
-    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">30 APR 2026 / 18:13</strong>
+    <strong>Last Updated:</strong> <strong style="color:#4f8eff;">02 MAY 2026 / 03:42</strong>
     &nbsp;&middot;&nbsp; 74 employees &nbsp;&middot;&nbsp; IMPORT OPS MAY 2026 REVISED.xlsx
   </div>
 
 </div>
 <script>
 function _importBase(){var o=location.origin,r=location.pathname.includes('/roster-site/')?o+'/roster-site':o;return r+'/import';}
-var _avail=["2026-03", "2026-04", "2026-05"];
+var _avail=["2026-04", "2026-05"];
 function openDatePicker(){var p=document.getElementById('datePicker');if(!p)return;try{p.showPicker()}catch(e){p.click()}p.onchange=function(){if(!p.value)return;sessionStorage.setItem('manualNav','1');location.href=_importBase()+'/'+p.value+'/';}; }
 function goToMySchedule(e){if(e)e.preventDefault();var id=localStorage.getItem('importSavedEmpId');location.href=_importBase()+'/my-schedules/index.html'+(id?'?emp='+encodeURIComponent(id):'');}
 function toggleTheme(){var isLight=document.body.classList.toggle('light');localStorage.setItem('importTheme',isLight?'light':'dark');var btn=document.getElementById('themeBtn');if(btn)btn.textContent=isLight?'☀️':'🌙';}
@@ -780,5 +780,5 @@ function _wave(){var h=document.getElementById('waveHand');if(!h)return;h.classL
 })();
 </script>
 <script src="/roster-site/absence-alert.js"></script>
-<script src="/roster-site/eid-overlay.js"></script><script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>
+<script src="/roster-site/eid-overlay.js"></script></body>
 </html>
