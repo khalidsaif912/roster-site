@@ -1388,88 +1388,15 @@
     },
     "2026-05": {
       "month": "2026-05",
-      "is_active": true,
-      "change_hash": "6fe9b2323334edb1",
-      "changed_at": "2026-05-03T12:22:16.823282+04:00",
-      "total_changed_days": 6,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 6 يوم في جدولك لشهر مايو 2026.",
-        "en": "6 day(s) changed in your roster for May 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-05-05",
-          "day": 5,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "LV",
-          "old_shift_label": "✈️ Annual Leave",
-          "old_shift_group": "Annual Leave",
-          "new_shift_code": "AN13",
-          "new_shift_label": "🌆 Afternoon (AN13)",
-          "new_shift_group": "Afternoon"
-        },
-        {
-          "date": "2026-05-06",
-          "day": 6,
-          "day_name_ar": "الأربعاء",
-          "day_name_en": "Wednesday",
-          "old_shift_code": "LV",
-          "old_shift_label": "✈️ Annual Leave",
-          "old_shift_group": "Annual Leave",
-          "new_shift_code": "NN21",
-          "new_shift_label": "🌙 Night (NN21)",
-          "new_shift_group": "Night"
-        },
-        {
-          "date": "2026-05-07",
-          "day": 7,
-          "day_name_ar": "الخميس",
-          "day_name_en": "Thursday",
-          "old_shift_code": "LV",
-          "old_shift_label": "✈️ Annual Leave",
-          "old_shift_group": "Annual Leave",
-          "new_shift_code": "OFF",
-          "new_shift_label": "🛌 Off Day",
-          "new_shift_group": "Off Day"
-        },
-        {
-          "date": "2026-05-08",
-          "day": 8,
-          "day_name_ar": "الجمعة",
-          "day_name_en": "Friday",
-          "old_shift_code": "LV",
-          "old_shift_label": "✈️ Annual Leave",
-          "old_shift_group": "Annual Leave",
-          "new_shift_code": "OFF",
-          "new_shift_label": "🛌 Off Day",
-          "new_shift_group": "Off Day"
-        },
-        {
-          "date": "2026-05-11",
-          "day": 11,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "NN21",
-          "old_shift_label": "🌙 Night (NN21)",
-          "old_shift_group": "Night",
-          "new_shift_code": "AN13",
-          "new_shift_label": "🌆 Afternoon (AN13)",
-          "new_shift_group": "Afternoon"
-        },
-        {
-          "date": "2026-05-25",
-          "day": 25,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "NN21",
-          "old_shift_label": "🌙 Night (NN21)",
-          "old_shift_group": "Night",
-          "new_shift_code": "AN13",
-          "new_shift_label": "🌆 Afternoon (AN13)",
-          "new_shift_group": "Afternoon"
-        }
-      ]
+      "days": []
     }
   }
 }
