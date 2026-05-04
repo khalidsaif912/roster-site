@@ -1124,9 +1124,9 @@
         "day": 4,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-05-05",
@@ -1187,18 +1187,18 @@
         "day": 11,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-05-12",
         "day": 12,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "TR",
+        "shift_label": "📚 Training",
+        "shift_group": "Training"
       },
       {
         "date": "2026-05-13",
@@ -1388,15 +1388,52 @@
     },
     "2026-05": {
       "month": "2026-05",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "f93e83dc1aefc537",
+      "changed_at": "2026-05-04T10:08:35.104687+04:00",
+      "total_changed_days": 3,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 3 يوم في جدولك لشهر مايو 2026.",
+        "en": "3 day(s) changed in your roster for May 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-05-04",
+          "day": 4,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AN13",
+          "new_shift_label": "🌆 Afternoon (AN13)",
+          "new_shift_group": "Afternoon"
+        },
+        {
+          "date": "2026-05-11",
+          "day": 11,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AN13",
+          "new_shift_label": "🌆 Afternoon (AN13)",
+          "new_shift_group": "Afternoon"
+        },
+        {
+          "date": "2026-05-12",
+          "day": 12,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "AN13",
+          "old_shift_label": "🌆 Afternoon (AN13)",
+          "old_shift_group": "Afternoon",
+          "new_shift_code": "TR",
+          "new_shift_label": "📚 Training",
+          "new_shift_group": "Training"
+        }
+      ]
     }
   }
 }
