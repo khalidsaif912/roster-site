@@ -1388,28 +1388,15 @@
     },
     "2026-05": {
       "month": "2026-05",
-      "is_active": true,
-      "change_hash": "3dfc9879665c1653",
-      "changed_at": "2026-05-04T10:08:35.092105+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر مايو 2026.",
-        "en": "1 day(s) changed in your roster for May 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-05-12",
-          "day": 12,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "MN06",
-          "old_shift_label": "🌅 Morning (MN06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "TR",
-          "new_shift_label": "📚 Training",
-          "new_shift_group": "Training"
-        }
-      ]
+      "days": []
     }
   }
 }
