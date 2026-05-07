@@ -1388,28 +1388,15 @@
     },
     "2026-05": {
       "month": "2026-05",
-      "is_active": true,
-      "change_hash": "84f49d605f98c401",
-      "changed_at": "2026-05-07T16:02:33.472932+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر مايو 2026.",
-        "en": "1 day(s) changed in your roster for May 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-05-28",
-          "day": 28,
-          "day_name_ar": "الخميس",
-          "day_name_en": "Thursday",
-          "old_shift_code": "AN13",
-          "old_shift_label": "🌆 Afternoon (AN13)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "MN06",
-          "new_shift_label": "🌅 Morning (MN06)",
-          "new_shift_group": "Morning"
-        }
-      ]
+      "days": []
     }
   }
 }

@@ -1388,52 +1388,15 @@
     },
     "2026-05": {
       "month": "2026-05",
-      "is_active": true,
-      "change_hash": "6ede9db1375bde38",
-      "changed_at": "2026-05-07T16:02:33.387028+04:00",
-      "total_changed_days": 3,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 3 يوم في جدولك لشهر مايو 2026.",
-        "en": "3 day(s) changed in your roster for May 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-05-13",
-          "day": 13,
-          "day_name_ar": "الأربعاء",
-          "day_name_en": "Wednesday",
-          "old_shift_code": "AN13",
-          "old_shift_label": "🌆 Afternoon (AN13)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "MN06",
-          "new_shift_label": "🌅 Morning (MN06)",
-          "new_shift_group": "Morning"
-        },
-        {
-          "date": "2026-05-19",
-          "day": 19,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "AN13",
-          "old_shift_label": "🌆 Afternoon (AN13)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "MN06",
-          "new_shift_label": "🌅 Morning (MN06)",
-          "new_shift_group": "Morning"
-        },
-        {
-          "date": "2026-05-26",
-          "day": 26,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "AN13",
-          "old_shift_label": "🌆 Afternoon (AN13)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "MN06",
-          "new_shift_label": "🌅 Morning (MN06)",
-          "new_shift_group": "Morning"
-        }
-      ]
+      "days": []
     }
   }
 }
