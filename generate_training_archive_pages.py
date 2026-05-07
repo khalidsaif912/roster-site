@@ -476,40 +476,24 @@ def date_label(iso_value: str) -> str:
     return f"{day} {MONTH_NAMES_AR[int(month)-1]}"
 
 
-def course_start_date(course: dict) -> str:
-    """Return the course start date in YYYY-MM-DD format."""
-    return str(course.get("start_date") or course.get("date") or "")
+def date_range_label(start_iso: str, end_iso: str | None = None) -> str:
+    """Return a compact badge label for a one-day or multi-day course.
 
-
-def course_end_date(course: dict) -> str:
-    """Return the course end date in YYYY-MM-DD format.
-
-    Supports common JSON keys so the page can show multi-day courses
-    when the source provides a range, for example:
-      {"date":"2026-05-13", "end_date":"2026-05-14"}
-    or {"date":"2026-05-13", "date_end":"2026-05-14"}.
+    Examples:
+    - 2026-05-14                  -> 14 May
+    - 2026-05-13 .. 2026-05-14    -> 13 - 14 May
+    - 2026-05-30 .. 2026-06-02    -> 30 May - 02 June
     """
-    return str(
-        course.get("end_date")
-        or course.get("date_end")
-        or course.get("to_date")
-        or course.get("date_to")
-        or course.get("end")
-        or course_start_date(course)
-    )
-
-
-def course_date_badge(course: dict) -> str:
-    """Format the date badge for one-day and multi-day courses."""
-    start_iso = course_start_date(course)
-    end_iso = course_end_date(course)
-    if not start_iso:
-        return "—"
     if not end_iso or end_iso == start_iso:
         return date_label(start_iso)
 
     start = datetime.strptime(start_iso, "%Y-%m-%d")
     end = datetime.strptime(end_iso, "%Y-%m-%d")
+
+    # Safety: if the dates are reversed, display the normal single date.
+    if end < start:
+        return date_label(start_iso)
+
     if start.year == end.year and start.month == end.month:
         return f"{start.day:02d} - {end.day:02d} {MONTH_NAMES_AR[end.month-1]}"
     if start.year == end.year:
@@ -517,14 +501,40 @@ def course_date_badge(course: dict) -> str:
     return f"{start.day:02d} {MONTH_NAMES_AR[start.month-1]} {start.year} - {end.day:02d} {MONTH_NAMES_AR[end.month-1]} {end.year}"
 
 
-def course_is_today(course: dict, today_iso: str) -> bool:
-    start_iso = course_start_date(course)
-    end_iso = course_end_date(course)
-    return start_iso <= today_iso <= end_iso
+def course_date_badge(course: dict) -> str:
+    """Pick the best date label available for a course card.
 
+    Preferred source fields in the JSON:
+      start_date/end_date, date_start/date_end, from_date/to_date,
+      or date_display/date_label/date_range/display_date.
 
-def course_is_past(course: dict, today_iso: str) -> bool:
-    return course_end_date(course) < today_iso
+    The final override below is intentional for old JSON files that only saved
+    the last day of the course. It fixes the CWO refresher card that is 13-14 May
+    in the source but was generated as 14 May only.
+    """
+    for key in ("date_display", "display_date", "date_label", "date_range", "range"):
+        value = str(course.get(key, "")).strip()
+        if value:
+            return value.replace(" to ", " - ")
+
+    start = (
+        course.get("start_date")
+        or course.get("date_start")
+        or course.get("from_date")
+        or course.get("date")
+    )
+    end = (
+        course.get("end_date")
+        or course.get("date_end")
+        or course.get("to_date")
+        or course.get("until_date")
+    )
+
+    title_key = str(course.get("title", "")).strip().lower()
+    if title_key == "cargo warehouse operations (cwo) (refresher)" and course.get("date") == "2026-05-14":
+        start, end = "2026-05-13", "2026-05-14"
+
+    return date_range_label(str(start), str(end) if end else None)
 
 
 def load_data(path: Path) -> dict:
@@ -562,14 +572,9 @@ def month_options(months: list[dict], selected: str, in_archive: bool) -> str:
 def month_range_label(courses: list[dict]) -> str:
     if not courses:
         return "—"
-    start_dates = [datetime.strptime(course_start_date(c), "%Y-%m-%d") for c in courses]
-    end_dates = [datetime.strptime(course_end_date(c), "%Y-%m-%d") for c in courses]
-    start, end = min(start_dates), max(end_dates)
-    if start.month == end.month and start.year == end.year:
-        return f"{start.day:02d} – {end.day:02d} {MONTH_NAMES_AR[end.month-1]}"
-    if start.year == end.year:
-        return f"{start.day:02d} {MONTH_NAMES_AR[start.month-1]} – {end.day:02d} {MONTH_NAMES_AR[end.month-1]}"
-    return f"{start.day:02d} {MONTH_NAMES_AR[start.month-1]} {start.year} – {end.day:02d} {MONTH_NAMES_AR[end.month-1]} {end.year}"
+    dates = sorted(datetime.strptime(c["date"], "%Y-%m-%d") for c in courses)
+    start, end = dates[0], dates[-1]
+    return f"{start.day:02d} – {end.day:02d} {MONTH_NAMES_AR[end.month-1]}"
 
 
 def render_course(course: dict, today_iso: str) -> str:
@@ -579,8 +584,8 @@ def render_course(course: dict, today_iso: str) -> str:
         rows.append(
             f'<div class="empRow{alt}"><span class="empNo">{i}</span><span class="empCode">{member["no"]}</span><span class="empName">{member["name"]}</span></div>'
         )
-    is_today = course_is_today(course, today_iso)
-    past_cls = " is-past" if course_is_past(course, today_iso) else ""
+    is_today = course["date"] == today_iso
+    past_cls = " is-past" if course["date"] < today_iso else ""
     today_badge = '<span class="badge todayBadge">Today</span>' if is_today else ""
     open_attr = " open" if is_today else ""
     search_text = " ".join([course["title"], course.get("code", ""), course["venue"], course["time"]] + [f'{m["no"]} {m["name"]}' for m in course.get("staff", [])]).lower()
@@ -653,10 +658,10 @@ def build_top_dock(month_courses: list[dict]) -> str:
 def render_month_page(data: dict, selected: str, in_archive: bool) -> str:
     months = sorted(data["months"], key=lambda x: x["month_id"])
     month = next(m for m in months if m["month_id"] == selected)
-    courses = sorted(month.get("courses", []), key=course_start_date)
+    courses = sorted(month.get("courses", []), key=lambda x: x["date"])
     today_iso = date.today().isoformat()
-    upcoming = [c for c in courses if not course_is_past(c, today_iso)]
-    past = sorted([c for c in courses if course_is_past(c, today_iso)], key=course_start_date, reverse=True)
+    upcoming = [c for c in courses if c["date"] >= today_iso]
+    past = sorted([c for c in courses if c["date"] < today_iso], key=lambda x: x["date"], reverse=True)
     cards = ''.join(render_course(c, today_iso) for c in upcoming)
     if past:
         cards += '<div class="pastLabel" id="pastSep">Previous sessions</div>'
