@@ -402,9 +402,73 @@ def load_export_ui_template(repo_root: Path) -> Tuple[str, str]:
     return style, script
 
 
+
+
+def _format_event_date_range_label(text: str, fallback_date: dt.date) -> str | None:
+    """Return a display label like '13 - 14 May 2026' when text contains a date range.
+
+    Supports examples:
+    - 13 to 14 May 2026
+    - 13-14 May 2026
+    - 13 / 14 May 2026
+
+    If no range is found, returns None so callers can fall back to the single day.
+    """
+    if not text:
+        return None
+
+    month_re = (
+        r"January|February|March|April|May|June|July|August|September|October|November|December|"
+        r"Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec"
+    )
+    m = re.search(
+        rf"\b(\d{{1,2}})\s*(?:to|TO|\-|–|—|/)\s*(\d{{1,2}})\s+({month_re})\s+(\d{{4}})\b",
+        str(text),
+        flags=re.IGNORECASE,
+    )
+    if not m:
+        return None
+
+    start_day = int(m.group(1))
+    end_day = int(m.group(2))
+    month_raw = m.group(3).lower()
+    year = int(m.group(4))
+    month_num = MONTH_NAME_TO_NUM.get(month_raw)
+    if not month_num:
+        return None
+
+    month_name = ["January","February","March","April","May","June","July","August","September","October","November","December"][month_num - 1]
+
+    # Only use the range if the currently generated page is inside that range.
+    if fallback_date.year == year and fallback_date.month == month_num and start_day <= fallback_date.day <= end_day:
+        return f"{start_day} - {end_day} {month_name} {year}"
+    return None
+
+
+def display_date_label(date_obj: dt.date, parsed: Dict[str, Any]) -> str:
+    """Build the date shown in the site header.
+
+    Priority:
+    1) Explicit labels/ranges stored in parsed metadata.
+    2) Date range found in source filename or sheet name.
+    3) Single-page date.
+    """
+    for key in ("date_range_label", "course_date_range", "event_date_range"):
+        label = str(parsed.get(key, "")).strip()
+        if label:
+            return label
+
+    for key in ("source_filename", "sheet"):
+        label = _format_event_date_range_label(str(parsed.get(key, "")), date_obj)
+        if label:
+            return label
+
+    return date_obj.strftime("%d %B %Y")
+
+
 def build_duty_html(style: str, script: str, parsed: Dict[str, Any], date_obj: dt.date, repo_base_path: str, available_months: List[str] | None = None) -> str:
     day = date_obj.day
-    date_label = date_obj.strftime("%d %B %Y")
+    date_label = display_date_label(date_obj, parsed)
     date_iso = date_obj.strftime("%Y-%m-%d")
     _month_first = dt.date(parsed["year"], parsed["month"], 1)
 
