@@ -1205,18 +1205,18 @@
         "day": 13,
         "day_name_ar": "الأربعاء",
         "day_name_en": "Wednesday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "TR",
+        "shift_label": "📚 Training",
+        "shift_group": "Training"
       },
       {
         "date": "2026-05-14",
         "day": 14,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "TR",
+        "shift_label": "📚 Training",
+        "shift_group": "Training"
       },
       {
         "date": "2026-05-15",
@@ -1388,15 +1388,40 @@
     },
     "2026-05": {
       "month": "2026-05",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "339e3034ea61611b",
+      "changed_at": "2026-05-13T14:59:31.358961+04:00",
+      "total_changed_days": 2,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 2 يوم في جدولك لشهر مايو 2026.",
+        "en": "2 day(s) changed in your roster for May 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-05-13",
+          "day": 13,
+          "day_name_ar": "الأربعاء",
+          "day_name_en": "Wednesday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "TR",
+          "new_shift_label": "📚 Training",
+          "new_shift_group": "Training"
+        },
+        {
+          "date": "2026-05-14",
+          "day": 14,
+          "day_name_ar": "الخميس",
+          "day_name_en": "Thursday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "TR",
+          "new_shift_label": "📚 Training",
+          "new_shift_group": "Training"
+        }
+      ]
     }
   }
 }
