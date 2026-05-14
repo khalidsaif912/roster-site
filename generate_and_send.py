@@ -32,6 +32,13 @@ MAIL_FROM = os.environ.get("MAIL_FROM", "").strip()
 MAIL_TO = os.environ.get("MAIL_TO", "").strip()
 
 PAGES_BASE_URL = os.environ.get("PAGES_BASE_URL", "").strip()  # optional
+
+# Site migration settings
+OLD_SITE_BASE_URL = "https://khalidsaif912.github.io/roster-site"
+NEW_SITE_BASE_URL = "https://khalidsaif912.github.io/new"
+# Set LEGACY_REDIRECT_ONLY=true in the OLD repository to publish redirect pages only
+LEGACY_REDIRECT_ONLY = os.environ.get("LEGACY_REDIRECT_ONLY", "false").strip().lower() == "true"
+
 TZ = ZoneInfo("Asia/Muscat")
 AUTO_OPEN_ACTIVE_SHIFT_IN_FULL = True
 
@@ -236,7 +243,7 @@ def get_source_name() -> str:
     return SOURCE_NAME_FALLBACK or "latest.xlsx"
 
 def infer_pages_base_url():
-    return "https://khalidsaif912.github.io/new"
+    return NEW_SITE_BASE_URL
 
 
 
@@ -2540,16 +2547,9 @@ def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_
 
 
 # =========================
-# Legacy site redirect
+# Legacy redirect pages
 # =========================
-LEGACY_REDIRECT_URL = os.environ.get(
-    "LEGACY_REDIRECT_URL",
-    "https://khalidsaif912.github.io/new/"
-).strip()
-
-def build_redirect_html(target_url: str = LEGACY_REDIRECT_URL) -> str:
-    """HTML redirect page for the old GitHub Pages site."""
-    target_url = (target_url or "https://khalidsaif912.github.io/new/").strip()
+def redirect_page_html(target_url: str) -> str:
     return f"""<!doctype html>
 <html lang="ar">
 <head>
@@ -2558,34 +2558,11 @@ def build_redirect_html(target_url: str = LEGACY_REDIRECT_URL) -> str:
   <meta http-equiv="refresh" content="0; url={target_url}">
   <link rel="canonical" href="{target_url}">
   <title>تم نقل الموقع</title>
-  <script>
-    window.location.replace("{target_url}");
-  </script>
+  <script>window.location.replace({target_url!r});</script>
   <style>
-    body {{
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
-      background:#eef1f7;
-      color:#0f172a;
-      text-align:center;
-      padding:20px;
-    }}
-    .card {{
-      background:#fff;
-      border-radius:18px;
-      padding:24px;
-      max-width:420px;
-      box-shadow:0 8px 28px rgba(15,23,42,.10);
-      border:1px solid rgba(15,23,42,.08);
-    }}
-    a {{
-      color:#1e40af;
-      font-weight:800;
-    }}
+    body{{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:#eef1f7;margin:0;display:grid;place-items:center;min-height:100vh;color:#0f172a}}
+    .card{{background:#fff;border-radius:18px;padding:22px;max-width:420px;text-align:center;box-shadow:0 8px 28px rgba(15,23,42,.10)}}
+    a{{color:#1e40af;font-weight:800}}
   </style>
 </head>
 <body>
@@ -2597,29 +2574,28 @@ def build_redirect_html(target_url: str = LEGACY_REDIRECT_URL) -> str:
 </body>
 </html>"""
 
-def write_legacy_redirect_pages(target_url: str = LEGACY_REDIRECT_URL):
-    """Write redirect pages when this repo is used only as the old/legacy GitHub Pages site.
 
-    To enable it in GitHub Actions, set:
-      LEGACY_REDIRECT_ONLY=true
-    """
-    html = build_redirect_html(target_url)
-    paths = [
-        "docs/index.html",
-        "docs/now/index.html",
-        "docs/404.html",
-    ]
-    for path in paths:
+def write_legacy_redirect_pages():
+    """Generate redirect pages for the old GitHub Pages repository."""
+    targets = {
+        "docs/index.html": NEW_SITE_BASE_URL + "/",
+        "docs/now/index.html": NEW_SITE_BASE_URL + "/now/",
+        "docs/my-schedules/index.html": NEW_SITE_BASE_URL + "/my-schedules/",
+        "docs/training/index.html": NEW_SITE_BASE_URL + "/training/",
+        "docs/subscribe/index.html": NEW_SITE_BASE_URL + "/subscribe/",
+    }
+    for path, url in targets.items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
-            f.write(html)
-    print(f"✅ Legacy redirect pages written → {target_url}")
+            f.write(redirect_page_html(url))
+    print(f"✅ Legacy redirect pages generated: {OLD_SITE_BASE_URL} → {NEW_SITE_BASE_URL}")
+
 
 # =========================
 # Main
 # =========================
 def main():
-    if os.environ.get("LEGACY_REDIRECT_ONLY", "").strip().lower() == "true":
+    if LEGACY_REDIRECT_ONLY:
         write_legacy_redirect_pages()
         return
 
