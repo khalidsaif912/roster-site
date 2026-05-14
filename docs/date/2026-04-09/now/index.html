@@ -543,7 +543,7 @@
       </div>
     </div>
 
-    <a href="https://khalidsaif912.github.io/roster-site/my-schedules/index.html" id="myScheduleBtn" class="summaryChip" style="cursor:pointer;text-decoration:none;" onclick="goToMySchedule(event)">
+    <a href="https://khalidsaif912.github.io/new/my-schedules/index.html" id="myScheduleBtn" class="summaryChip" style="cursor:pointer;text-decoration:none;" onclick="goToMySchedule(event)">
       <div class="chipVal">🗓️</div>
       <div class="chipLabel" data-key="mySchedule">My Schedule</div>
     </a>
@@ -551,7 +551,7 @@
       <div class="chipVal">🎮</div>
       <div class="chipLabel" data-key="games">Games</div>
     </a>
-    <a href="https://khalidsaif912.github.io/roster-site/training/" class="summaryChip trainingChip" style="cursor:pointer;text-decoration:none;">
+    <a href="https://khalidsaif912.github.io/new/training/" class="summaryChip trainingChip" style="cursor:pointer;text-decoration:none;">
       <div class="chipVal">📚</div>
       <div class="chipLabel" data-key="training">Training</div>
     </a>
@@ -1193,11 +1193,11 @@
 
   <!-- ════ CTA ════ -->
   <div class="btnWrap">
-    <a class="btn" id="ctaBtn" href="https://khalidsaif912.github.io/roster-site/">📋 View Full Duty Roster</a>
+    <a class="btn" id="ctaBtn" href="https://khalidsaif912.github.io/new/">📋 View Full Duty Roster</a>
   </div>
 
 <div class="btnWrap">
-  <a href="https://khalidsaif912.github.io/roster-site/subscribe/" class="btn" id="subscribeBtn">📩 Subscribe</a>
+  <a href="https://khalidsaif912.github.io/new/subscribe/" class="btn" id="subscribeBtn">📩 Subscribe</a>
 </div>
 
   <!-- ════ FOOTER ════ -->
@@ -1281,7 +1281,7 @@
 function goToMySchedule(e) {
   if (e && e.preventDefault) e.preventDefault();
   var id = localStorage.getItem('savedEmpId');
-  var base = 'https://khalidsaif912.github.io/roster-site/my-schedules/index.html';
+  var base = 'https://khalidsaif912.github.io/new/my-schedules/index.html';
   location.href = id ? base + '?emp=' + encodeURIComponent(id) : base;
 }
 // ═══════════════════════════════════════════════════
@@ -1487,7 +1487,7 @@ applyLang(LANG);
   var empId = localStorage.getItem('savedEmpId');
   if (empId) {
     var origin = location.origin;
-    var base = location.pathname.includes('/roster-site/') ? origin+'/roster-site/' : origin+'/';
+    var base = location.pathname.includes('/new/') ? origin+'/new/' : origin+'/';
     fetch(base+'schedules/'+empId+'.json')
       .then(function(r){ return r.ok?r.json():null; })
       .then(function(d){
@@ -1870,7 +1870,7 @@ applyLang(LANG);
 })();
 </script>
 
-<script src="/roster-site/eid-overlay.js"></script>
-<script src="/roster-site/absence-alert.js"></script>
+<script src="/new/eid-overlay.js"></script>
+<script src="/new/absence-alert.js"></script>
 <script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>
 </html>
