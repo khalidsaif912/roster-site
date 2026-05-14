@@ -331,6 +331,10 @@ jobs:
               exit(1)
           EOF
 
+      - name: Redirect legacy import Pages to new site
+        if: steps.check_import_changes.outputs.should_process == 'true'
+        run: python write_public_redirect_landing.py import
+
       - name: Commit updated Import docs
         if: steps.check_import_changes.outputs.should_process == 'true'
         run: |

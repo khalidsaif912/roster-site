@@ -494,6 +494,9 @@ jobs:
       - name: Inject change-alert script into pages
         run: python inject_change_alerts_html.py
 
+      - name: Redirect legacy export Pages to new site
+        run: python write_public_redirect_landing.py export
+
       - name: Commit
         run: |
           git config user.name "github-actions"
