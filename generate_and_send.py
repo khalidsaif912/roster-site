@@ -236,7 +236,7 @@ def get_source_name() -> str:
     return SOURCE_NAME_FALLBACK or "latest.xlsx"
 
 def infer_pages_base_url():
-    return "https://khalidsaif912.github.io/roster-site"
+    return "https://khalidsaif912.github.io/new"
 
 
 
@@ -1249,7 +1249,7 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
       </div>
     </div>
 
-    <a href="https://khalidsaif912.github.io/roster-site/my-schedules/index.html" id="myScheduleBtn" class="summaryChip" style="cursor:pointer;text-decoration:none;" onclick="goToMySchedule(event)">
+    <a href="https://khalidsaif912.github.io/new/my-schedules/index.html" id="myScheduleBtn" class="summaryChip" style="cursor:pointer;text-decoration:none;" onclick="goToMySchedule(event)">
       <div class="chipVal">🗓️</div>
       <div class="chipLabel" data-key="mySchedule">My Schedule</div>
     </a>
@@ -1374,7 +1374,7 @@ def page_shell_html(date_label: str, iso_date: str, employees_total: int, depart
 function goToMySchedule(e) {{
   if (e && e.preventDefault) e.preventDefault();
   var id = localStorage.getItem('savedEmpId');
-  var base = 'https://khalidsaif912.github.io/roster-site/my-schedules/index.html';
+  var base = 'https://khalidsaif912.github.io/new/my-schedules/index.html';
   location.href = id ? base + '?emp=' + encodeURIComponent(id) : base;
 }}
 // ═══════════════════════════════════════════════════
@@ -1580,7 +1580,7 @@ applyLang(LANG);
   var empId = localStorage.getItem('savedEmpId');
   if (empId) {{
     var origin = location.origin;
-    var base = location.pathname.includes('/roster-site/') ? origin+'/roster-site/' : origin+'/';
+    var base = location.pathname.includes('/new/') ? origin+'/new/' : origin+'/';
     fetch(base+'schedules/'+empId+'.json')
       .then(function(r){{ return r.ok?r.json():null; }})
       .then(function(d){{
@@ -1963,8 +1963,8 @@ applyLang(LANG);
 }})();
 </script>
 
-<script src="/roster-site/eid-overlay.js"></script>
-<script src="/roster-site/absence-alert.js"></script>
+<script src="/new/eid-overlay.js"></script>
+<script src="/new/absence-alert.js"></script>
 </body>
 </html>"""
 
@@ -2540,9 +2540,89 @@ def build_pretty_email_html(active_shift_key: str, now: datetime, all_shifts_by_
 
 
 # =========================
+# Legacy site redirect
+# =========================
+LEGACY_REDIRECT_URL = os.environ.get(
+    "LEGACY_REDIRECT_URL",
+    "https://khalidsaif912.github.io/new/"
+).strip()
+
+def build_redirect_html(target_url: str = LEGACY_REDIRECT_URL) -> str:
+    """HTML redirect page for the old GitHub Pages site."""
+    target_url = (target_url or "https://khalidsaif912.github.io/new/").strip()
+    return f"""<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0; url={target_url}">
+  <link rel="canonical" href="{target_url}">
+  <title>تم نقل الموقع</title>
+  <script>
+    window.location.replace("{target_url}");
+  </script>
+  <style>
+    body {{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:#eef1f7;
+      color:#0f172a;
+      text-align:center;
+      padding:20px;
+    }}
+    .card {{
+      background:#fff;
+      border-radius:18px;
+      padding:24px;
+      max-width:420px;
+      box-shadow:0 8px 28px rgba(15,23,42,.10);
+      border:1px solid rgba(15,23,42,.08);
+    }}
+    a {{
+      color:#1e40af;
+      font-weight:800;
+    }}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>تم نقل الموقع</h1>
+    <p>سيتم تحويلك تلقائيًا إلى النسخة الجديدة.</p>
+    <p><a href="{target_url}">اضغط هنا إذا لم يتم التحويل</a></p>
+  </div>
+</body>
+</html>"""
+
+def write_legacy_redirect_pages(target_url: str = LEGACY_REDIRECT_URL):
+    """Write redirect pages when this repo is used only as the old/legacy GitHub Pages site.
+
+    To enable it in GitHub Actions, set:
+      LEGACY_REDIRECT_ONLY=true
+    """
+    html = build_redirect_html(target_url)
+    paths = [
+        "docs/index.html",
+        "docs/now/index.html",
+        "docs/404.html",
+    ]
+    for path in paths:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+    print(f"✅ Legacy redirect pages written → {target_url}")
+
+# =========================
 # Main
 # =========================
 def main():
+    if os.environ.get("LEGACY_REDIRECT_ONLY", "").strip().lower() == "true":
+        write_legacy_redirect_pages()
+        return
+
     if not EXCEL_URL:
         raise RuntimeError("EXCEL_URL missing")
 
