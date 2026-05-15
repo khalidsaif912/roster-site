@@ -1,42 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Import Duty Roster</title>
+  <link rel="canonical" href="https://khalidsaif912.github.io/new/docs/import/">
+  <meta http-equiv="refresh" content="0; url=https://khalidsaif912.github.io/new/docs/import/">
   <script>
-    (function() {
-      var base = location.pathname.includes('/roster-site/') ? '/roster-site/import' : '/import';
-      var today = new Date();
-      var y = today.getFullYear();
-      var m = String(today.getMonth() + 1).padStart(2, '0');
-      var d = String(today.getDate()).padStart(2, '0');
-      var todayStr = y + '-' + m + '-' + d;
-      var available = ["2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11", "2026-04-12", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18", "2026-04-19", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-09", "2026-05-10", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-23", "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-05-30", "2026-05-31"];
-
-      // إذا وُجد تاريخ اليوم مباشرة اذهب إليه
-      if (available.indexOf(todayStr) !== -1) {
-        window.location.replace(base + '/' + todayStr + '/');
-        return;
-      }
-
-      // وإلا اذهب لأقرب تاريخ متوفر (الأحدث قبل اليوم، أو الأول المتاح)
-      var best = null;
-      for (var i = available.length - 1; i >= 0; i--) {
-        if (available[i] <= todayStr) { best = available[i]; break; }
-      }
-      if (!best && available.length) best = available[available.length - 1];
-      if (best) {
-        window.location.replace(base + '/' + best + '/');
-      } else {
-        document.body.innerHTML = '<p style="font-family:sans-serif;text-align:center;padding:40px;">لا توجد بيانات متاحة بعد. يرجى الانتظار.</p>';
-      }
-    })();
+  (function () {
+    var path = location.pathname || '';
+    var base = 'https://khalidsaif912.github.io/new/docs/import/';
+    var rest = path.replace(/^.*\/roster-site\/import\/?/, '');
+    var target = base + (rest ? rest.replace(/\/?$/, '/') : '') + location.search + location.hash;
+    location.replace(target);
+  })();
   </script>
-  <noscript>
-    <meta http-equiv="refresh" content="0; url=fallback/">
-  </noscript>
-<link rel="manifest" href="/roster-site/import/manifest.json?v=9"></head>
+</head>
 <body>
   <p style="font-family:sans-serif;text-align:center;padding:40px;">جاري التوجيه...</p>
-<script src="/roster-site/eid-overlay.js"></script><script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>
+</body>
 </html>
