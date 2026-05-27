@@ -1378,18 +1378,18 @@
         "day": 1,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-06-02",
         "day": 2,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-06-03",
@@ -1672,15 +1672,40 @@
     },
     "2026-06": {
       "month": "2026-06",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "84b371c77ffb78d0",
+      "changed_at": "2026-05-27T09:56:01.669338+04:00",
+      "total_changed_days": 2,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 2 يوم في جدولك لشهر يونيو 2026.",
+        "en": "2 day(s) changed in your roster for June 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-06-01",
+          "day": 1,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-06-02",
+          "day": 2,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        }
+      ]
     }
   }
 }

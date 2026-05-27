@@ -1405,9 +1405,9 @@
         "day": 4,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "TR",
-        "shift_label": "📚 Training",
-        "shift_group": "Training"
+        "shift_code": "NE22",
+        "shift_label": "🌙 Night (NE22)",
+        "shift_group": "Night"
       },
       {
         "date": "2026-06-05",
@@ -1672,15 +1672,28 @@
     },
     "2026-06": {
       "month": "2026-06",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "a1d00c1015a35574",
+      "changed_at": "2026-05-27T09:56:01.698300+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر يونيو 2026.",
+        "en": "1 day(s) changed in your roster for June 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-06-04",
+          "day": 4,
+          "day_name_ar": "الخميس",
+          "day_name_en": "Thursday",
+          "old_shift_code": "TR",
+          "old_shift_label": "📚 Training",
+          "old_shift_group": "Training",
+          "new_shift_code": "NE22",
+          "new_shift_label": "🌙 Night (NE22)",
+          "new_shift_group": "Night"
+        }
+      ]
     }
   }
 }
