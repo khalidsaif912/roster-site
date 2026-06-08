@@ -1513,9 +1513,9 @@
         "day": 16,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "AE14",
+        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-06-17",
@@ -1531,9 +1531,9 @@
         "day": 18,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-06-19",
@@ -1672,15 +1672,40 @@
     },
     "2026-06": {
       "month": "2026-06",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "4dac07cb7bb86338",
+      "changed_at": "2026-06-08T15:59:20.692375+04:00",
+      "total_changed_days": 2,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 2 يوم في جدولك لشهر يونيو 2026.",
+        "en": "2 day(s) changed in your roster for June 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-06-16",
+          "day": 16,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "ME06",
+          "old_shift_label": "🌅 Morning (ME06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AE14",
+          "new_shift_label": "🌆 Afternoon (AE14)",
+          "new_shift_group": "Afternoon"
+        },
+        {
+          "date": "2026-06-18",
+          "day": 18,
+          "day_name_ar": "الخميس",
+          "day_name_en": "Thursday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "ME06",
+          "new_shift_label": "🌅 Morning (ME06)",
+          "new_shift_group": "Morning"
+        }
+      ]
     }
   }
 }

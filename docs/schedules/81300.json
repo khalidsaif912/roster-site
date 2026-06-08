@@ -1477,9 +1477,9 @@
         "day": 12,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "NN21",
-        "shift_label": "🌙 Night (NN21)",
-        "shift_group": "Night"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-06-13",
@@ -1672,15 +1672,28 @@
     },
     "2026-06": {
       "month": "2026-06",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "95becd8a3e1484d8",
+      "changed_at": "2026-06-08T15:59:20.602918+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر يونيو 2026.",
+        "en": "1 day(s) changed in your roster for June 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-06-12",
+          "day": 12,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "NN21",
+          "old_shift_label": "🌙 Night (NN21)",
+          "old_shift_group": "Night",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        }
+      ]
     }
   }
 }
