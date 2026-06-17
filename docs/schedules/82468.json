@@ -1672,40 +1672,15 @@
     },
     "2026-06": {
       "month": "2026-06",
-      "is_active": true,
-      "change_hash": "6c9d7cc418e7b2b0",
-      "changed_at": "2026-06-17T16:47:06.006745+04:00",
-      "total_changed_days": 2,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 2 يوم في جدولك لشهر يونيو 2026.",
-        "en": "2 day(s) changed in your roster for June 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-06-29",
-          "day": 29,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "AE14",
-          "old_shift_label": "🌆 Afternoon (AE14)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        },
-        {
-          "date": "2026-06-30",
-          "day": 30,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "AE14",
-          "old_shift_label": "🌆 Afternoon (AE14)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        }
-      ]
+      "days": []
     }
   }
 }
