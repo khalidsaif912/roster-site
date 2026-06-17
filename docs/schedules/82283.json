@@ -1549,9 +1549,9 @@
         "day": 20,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-06-21",
@@ -1672,15 +1672,28 @@
     },
     "2026-06": {
       "month": "2026-06",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "f8117cda62a5f613",
+      "changed_at": "2026-06-17T16:47:05.937370+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر يونيو 2026.",
+        "en": "1 day(s) changed in your roster for June 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-06-20",
+          "day": 20,
+          "day_name_ar": "السبت",
+          "day_name_en": "Saturday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "ME06",
+          "new_shift_label": "🌅 Morning (ME06)",
+          "new_shift_group": "Morning"
+        }
+      ]
     }
   }
 }
