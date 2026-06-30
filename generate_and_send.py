@@ -266,14 +266,19 @@ MONTH_NAME_TO_NUM = {
 }
 
 def month_key_from_filename(name: str) -> str | None:
-    """Extract YYYY-MM from roster attachment file name (e.g., 'February 2026')."""
+    """Extract YYYY-MM from roster attachment file name (e.g., 'February 2026' or 'July2026')."""
     if not name:
         return None
     n = name.lower()
     n = re.sub(r"[\._\-]+", " ", n)
     n = re.sub(r"\s+", " ", n).strip()
+    # YYYY-MM or YYYY_MM in filename
+    m = re.search(r"\b(20\d{2})[-_ ](0[1-9]|1[0-2])\b", n)
+    if m:
+        return f"{int(m.group(1)):04d}-{int(m.group(2)):02d}"
+    # Month name + year (space optional, e.g. "July 2026" or "July2026")
     m = re.search(
-        r"\b(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sep|sept|october|oct|november|nov|december|dec)\b\s+(\d{4})\b",
+        r"\b(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sep|sept|october|oct|november|nov|december|dec)[\s_-]*(20\d{2})\b",
         n,
     )
     if not m:
@@ -2689,16 +2694,16 @@ def main():
     wb_curr = try_load_cached_workbook(curr_key)
     wb_next = try_load_cached_workbook(next_key)
 
-    # FIX #4: استخدام البيانات المحملة لتعبئة الكاش الناقص - workbook واحد فقط
+    # FIX #4: استخدام البيانات المحملة للشهر المطابق (تجاوز الكاش القديم)
     if data:
         wb_data = load_workbook(BytesIO(data), data_only=True)
-        if wb_prev is None and incoming_key == prev_key:
+        if incoming_key == prev_key:
             wb_prev = wb_data
             print(f"✅ Using downloaded data for {prev_key}")
-        elif wb_curr is None and incoming_key == curr_key:
+        if incoming_key == curr_key:
             wb_curr = wb_data
             print(f"✅ Using downloaded data for {curr_key}")
-        elif wb_next is None and incoming_key == next_key:
+        if incoming_key == next_key:
             wb_next = wb_data
             print(f"✅ Using downloaded data for {next_key}")
 
