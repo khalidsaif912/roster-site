@@ -1965,40 +1965,15 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": true,
-      "change_hash": "ee81a0501e8c2f27",
-      "changed_at": "2026-06-30T14:04:43.315173+04:00",
-      "total_changed_days": 2,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 2 يوم في جدولك لشهر يوليو 2026.",
-        "en": "2 day(s) changed in your roster for July 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-07-23",
-          "day": 23,
-          "day_name_ar": "الخميس",
-          "day_name_en": "Thursday",
-          "old_shift_code": "NE22",
-          "old_shift_label": "🌙 Night (NE22)",
-          "old_shift_group": "Night",
-          "new_shift_code": "ME06",
-          "new_shift_label": "🌅 Morning (ME06)",
-          "new_shift_group": "Morning"
-        },
-        {
-          "date": "2026-07-30",
-          "day": 30,
-          "day_name_ar": "الخميس",
-          "day_name_en": "Thursday",
-          "old_shift_code": "NE22",
-          "old_shift_label": "🌙 Night (NE22)",
-          "old_shift_group": "Night",
-          "new_shift_code": "ME06",
-          "new_shift_label": "🌅 Morning (ME06)",
-          "new_shift_group": "Morning"
-        }
-      ]
+      "days": []
     }
   }
 }

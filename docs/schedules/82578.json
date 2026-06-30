@@ -1965,64 +1965,15 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": true,
-      "change_hash": "d3fa263669d562ed",
-      "changed_at": "2026-06-30T14:04:43.276085+04:00",
-      "total_changed_days": 4,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 4 يوم في جدولك لشهر يوليو 2026.",
-        "en": "4 day(s) changed in your roster for July 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-07-01",
-          "day": 1,
-          "day_name_ar": "الأربعاء",
-          "day_name_en": "Wednesday",
-          "old_shift_code": "ME06",
-          "old_shift_label": "🌅 Morning (ME06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "NE22",
-          "new_shift_label": "🌙 Night (NE22)",
-          "new_shift_group": "Night"
-        },
-        {
-          "date": "2026-07-06",
-          "day": 6,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "AE14",
-          "old_shift_label": "🌆 Afternoon (AE14)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "ME06",
-          "new_shift_label": "🌅 Morning (ME06)",
-          "new_shift_group": "Morning"
-        },
-        {
-          "date": "2026-07-08",
-          "day": 8,
-          "day_name_ar": "الأربعاء",
-          "day_name_en": "Wednesday",
-          "old_shift_code": "ME06",
-          "old_shift_label": "🌅 Morning (ME06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "NE22",
-          "new_shift_label": "🌙 Night (NE22)",
-          "new_shift_group": "Night"
-        },
-        {
-          "date": "2026-07-14",
-          "day": 14,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "ME06",
-          "old_shift_label": "🌅 Morning (ME06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "TR",
-          "new_shift_label": "📚 Training",
-          "new_shift_group": "Training"
-        }
-      ]
+      "days": []
     }
   }
 }
