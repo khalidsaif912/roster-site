@@ -1,257 +1,38 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>الاشتراك في Duty Roster</title>
-
-  <style>
-    :root{
-      --brand-1: #4a90e2;
-      --brand-2: #2b78d2;
-
-      --btn-1: #1a73e8;
-      --btn-1-hover: #1557b0;
-
-      --muted-1: #6c757d;
-      --muted-2: #5a6268;
-
-      --card-bg: rgba(255, 255, 255, 0.55);
-      --card-border: rgba(255, 255, 255, 0.45);
-      --shadow: 0 18px 45px rgba(0,0,0,0.10);
-      --radius: 20px;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(1200px 800px at 15% 20%, rgba(74,144,226,0.35), transparent 55%),
-        radial-gradient(900px 600px at 85% 25%, rgba(43,120,210,0.25), transparent 60%),
-        radial-gradient(900px 600px at 50% 95%, rgba(26,115,232,0.18), transparent 60%),
-        #f4f7f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 22px;
-    }
-
-    .container { width: 100%; max-width: 420px; }
-
-    .stack {
-      transform: translateY(18px) scale(0.98);
-      opacity: 0;
-      animation: cardIn 0.9s cubic-bezier(.2,.9,.2,1) forwards;
-    }
-    @keyframes cardIn { to { transform: translateY(0) scale(1); opacity: 1; } }
-
-    .header {
-      background: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
-      color: white;
-      padding: 28px 26px;
-      border-radius: var(--radius) var(--radius) 0 0;
-      text-align: center;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.14);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .header h1{ margin:0; font-size: 24px; }
-    .header p{ margin: 10px 0 0; font-size: 14px; opacity: 0.92; }
-
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--card-border);
-      padding: 26px;
-      border-radius: 0 0 var(--radius) var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .form-group { margin-bottom: 18px; }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 700;
-      color: #374151;
-      font-size: 14px;
-    }
-
-    input[type="email"]{
-      width: 100%;
-      padding: 12px 14px;
-      border: 2px solid rgba(238,242,246,0.9);
-      border-radius: 14px;
-      font-size: 16px;
-      transition: 0.25s ease;
-      background: rgba(255,255,255,0.92);
-      outline: none;
-    }
-
-    input[type="email"]:focus{
-      border-color: rgba(74,144,226,0.9);
-      box-shadow: 0 0 0 4px rgba(74,144,226,0.18);
-    }
-
-    .radio-group{
-      display: flex;
-      gap: 10px;
-      background: rgba(248,250,252,0.85);
-      border: 1px solid rgba(255,255,255,0.55);
-      padding: 10px;
-      border-radius: 14px;
-    }
-
-    .radio-item{ flex: 1; text-align: center; font-size: 14px; cursor: pointer; color: #374151; }
-
-    /* ✅ أزرار موحّدة */
-    .btn{
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-
-      /* Ripple */
-      position: relative;
-      overflow: hidden;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .btn-primary{
-      background: linear-gradient(135deg, var(--btn-1) 0%, var(--brand-2) 100%);
-      color: white;
-      box-shadow: 0 10px 18px rgba(26,115,232,0.22);
-    }
-    .btn-primary:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 16px 26px rgba(26,115,232,0.26);
-      background: linear-gradient(135deg, var(--btn-1-hover) 0%, var(--brand-2) 100%);
-    }
-
-    .btn-secondary{
-      margin-top: 14px;
-      background: linear-gradient(135deg, var(--muted-1), var(--muted-2));
-      color: white;
-      box-shadow: 0 10px 18px rgba(0,0,0,0.12);
-    }
-    .btn-secondary:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 16px 26px rgba(0,0,0,0.16);
-    }
-
-    .btn:active{ transform: translateY(0) scale(0.98); }
-
-    /* ✅ Ripple */
-    .ripple-circle{
-      position: absolute;
-      border-radius: 50%;
-      transform: scale(0);
-      animation: ripple 650ms ease-out;
-      pointer-events: none;
-      background: rgba(255,255,255,0.6);
-      mix-blend-mode: overlay;
-    }
-    @keyframes ripple{
-      to{ transform: scale(3.2); opacity: 0; }
-    }
-  </style>
-
-<link rel="manifest" href="/roster-site/manifest.json?v=9">
-<meta name="theme-color" content="#1a1208">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-</head>
-
-<body>
-  <div class="container">
-    <div class="stack">
-      <div class="header">
-        <h1>📋 Duty Roster</h1>
-        <p>اشترك لتصلك التحديثات اليومية</p>
-      </div>
-
-      <div class="card">
-        <form method="POST"
-          action="https://script.google.com/macros/s/AKfycbw8yomI7dN38o7O0-caVHZ8Hd28vGLZZyfyrNhvoAUmrQnoT7qm05SJydBx5miG1M9Jyg/exec"
-          id="subscribeForm">
-
-          <div class="form-group">
-            <label>البريد الإلكتروني</label>
-            <input type="email" name="email" placeholder="example@mail.com" required>
-          </div>
-
-          <div class="form-group">
-            <label>رقم الهاتف <span style="color:#94a3b8;font-weight:400;font-size:12px;">(اختياري)</span></label>
-            <input type="tel" name="phone" placeholder="+968 XXXX XXXX" style="direction:ltr;text-align:left;">
-          </div>
-
-          <div class="form-group">
-            <label>نطاق التحديثات</label>
-            <div class="radio-group">
-              <label class="radio-item"><input type="radio" name="mode" value="ALL" checked> الكل</label>
-              <label class="radio-item"><input type="radio" name="mode" value="CURRENT"> الحالي</label>
-            </div>
-          </div>
-
-          <input type="hidden" name="lang" value="ar">
-
-          <button type="submit" class="btn btn-primary ripple">
-            تأكيد الاشتراك
-          </button>
-
-          <button type="button" class="btn btn-secondary ripple"
-            onclick="window.location.href='https://khalidsaif912.github.io/roster-site'">
-            ⬅ العودة إلى الصفحة الرئيسية
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Export Duty Roster</title>
+  <link rel="canonical" href="https://khalidsaif912.github.io/new/docs/">
+  <meta http-equiv="refresh" content="0; url=https://khalidsaif912.github.io/new/docs/">
   <script>
-    // Ripple effect
-    (function () {
-      const rippleTargets = document.querySelectorAll(".ripple");
-      rippleTargets.forEach(el => {
-        el.addEventListener("click", function (e) {
-          const rect = el.getBoundingClientRect();
-          const circle = document.createElement("span");
-          circle.className = "ripple-circle";
-
-          const size = Math.max(rect.width, rect.height);
-          circle.style.width = circle.style.height = size + "px";
-
-          const x = e.clientX - rect.left - size / 2;
-          const y = e.clientY - rect.top - size / 2;
-          circle.style.left = x + "px";
-          circle.style.top = y + "px";
-
-          const old = el.querySelector(".ripple-circle");
-          if (old) old.remove();
-
-          el.appendChild(circle);
-          circle.addEventListener("animationend", () => circle.remove());
-        });
-      });
-    })();
+  (function () {
+    var canonicalBase = "https://khalidsaif912.github.io/new/docs/";
+    var legacyPrefix = "/roster-site/";
+    var path = location.pathname || "";
+    var rest = "";
+    var idx = path.indexOf(legacyPrefix);
+    if (idx >= 0) {
+      rest = path.slice(idx + legacyPrefix.length);
+    } else if (/\/roster-site\/?$/.test(path)) {
+      rest = "";
+    } else {
+      rest = path.replace(/^\//, "");
+    }
+    rest = rest.replace(/^\//, "");
+    if (rest === "index.html") rest = "";
+    var target = canonicalBase + rest;
+    if (rest && !/\.[a-z0-9]+$/i.test(rest) && target.charAt(target.length - 1) !== "/") {
+      target += "/";
+    }
+    location.replace(target + location.search + location.hash);
+  })();
   </script>
-
-<script src="/roster-site/install-pwa.js"></script>
-
-<script src="/roster-site/eid-overlay.js"></script><script src="/roster-site/install-pwa.js?v=5"></script><script src="/roster-site/install-pwa.js?v=9"></script><script src="/roster-site/banner-changer.js"></script></body>
+</head>
+<body>
+  <p style="font-family:system-ui,sans-serif;text-align:center;margin-top:2rem">
+    جاري التحويل إلى <a href="https://khalidsaif912.github.io/new/docs/">الموقع الحالي</a>…
+  </p>
+</body>
 </html>
