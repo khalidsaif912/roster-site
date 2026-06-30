@@ -1767,9 +1767,9 @@
         "day": 14,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "ME07",
-        "shift_label": "🌅 Morning (ME07)",
-        "shift_group": "Morning"
+        "shift_code": "TR",
+        "shift_label": "📚 Training",
+        "shift_group": "Training"
       },
       {
         "date": "2026-07-15",
@@ -1965,15 +1965,28 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "4e9b0e4b494122ae",
+      "changed_at": "2026-06-30T14:04:43.167709+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر يوليو 2026.",
+        "en": "1 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-14",
+          "day": 14,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "ME07",
+          "old_shift_label": "🌅 Morning (ME07)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "TR",
+          "new_shift_label": "📚 Training",
+          "new_shift_group": "Training"
+        }
+      ]
     }
   }
 }

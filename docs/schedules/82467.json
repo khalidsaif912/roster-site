@@ -1686,9 +1686,9 @@
         "day": 5,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-06",
@@ -1749,9 +1749,9 @@
         "day": 12,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-13",
@@ -1812,9 +1812,9 @@
         "day": 19,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-20",
@@ -1875,9 +1875,9 @@
         "day": 26,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-27",
@@ -1965,15 +1965,64 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "ff6c844d0fcfebca",
+      "changed_at": "2026-06-30T14:04:43.308030+04:00",
+      "total_changed_days": 4,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 4 يوم في جدولك لشهر يوليو 2026.",
+        "en": "4 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-05",
+          "day": 5,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "ME06",
+          "new_shift_label": "🌅 Morning (ME06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-12",
+          "day": 12,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "ME06",
+          "new_shift_label": "🌅 Morning (ME06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-19",
+          "day": 19,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "ME06",
+          "new_shift_label": "🌅 Morning (ME06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-26",
+          "day": 26,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "ME06",
+          "new_shift_label": "🌅 Morning (ME06)",
+          "new_shift_group": "Morning"
+        }
+      ]
     }
   }
 }

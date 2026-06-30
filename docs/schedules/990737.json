@@ -1650,27 +1650,27 @@
         "day": 1,
         "day_name_ar": "الأربعاء",
         "day_name_en": "Wednesday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-02",
         "day": 2,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-03",
         "day": 3,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "OFF",
+        "shift_label": "🛌 Off Day",
+        "shift_group": "Off Day"
       },
       {
         "date": "2026-07-04",
@@ -1686,9 +1686,9 @@
         "day": 5,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-06",
@@ -1731,9 +1731,9 @@
         "day": 10,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "OFF",
+        "shift_label": "🛌 Off Day",
+        "shift_group": "Off Day"
       },
       {
         "date": "2026-07-11",
@@ -1749,9 +1749,9 @@
         "day": 12,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-13",
@@ -1794,9 +1794,9 @@
         "day": 17,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "OFF",
+        "shift_label": "🛌 Off Day",
+        "shift_group": "Off Day"
       },
       {
         "date": "2026-07-18",
@@ -1812,9 +1812,9 @@
         "day": 19,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-20",
@@ -1857,9 +1857,9 @@
         "day": 24,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "OFF",
+        "shift_label": "🛌 Off Day",
+        "shift_group": "Off Day"
       },
       {
         "date": "2026-07-25",
@@ -1875,9 +1875,9 @@
         "day": 26,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-27",
@@ -1920,9 +1920,9 @@
         "day": 31,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "OFF",
+        "shift_label": "🛌 Off Day",
+        "shift_group": "Off Day"
       }
     ]
   },
@@ -1965,15 +1965,148 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "e08e9f91ed0ed456",
+      "changed_at": "2026-06-30T14:04:43.188133+04:00",
+      "total_changed_days": 11,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 11 يوم في جدولك لشهر يوليو 2026.",
+        "en": "11 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-01",
+          "day": 1,
+          "day_name_ar": "الأربعاء",
+          "day_name_en": "Wednesday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-07-02",
+          "day": 2,
+          "day_name_ar": "الخميس",
+          "day_name_en": "Thursday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-07-03",
+          "day": 3,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "OFF",
+          "new_shift_label": "🛌 Off Day",
+          "new_shift_group": "Off Day"
+        },
+        {
+          "date": "2026-07-05",
+          "day": 5,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "MN06",
+          "new_shift_label": "🌅 Morning (MN06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-10",
+          "day": 10,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "OFF",
+          "new_shift_label": "🛌 Off Day",
+          "new_shift_group": "Off Day"
+        },
+        {
+          "date": "2026-07-12",
+          "day": 12,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "MN06",
+          "new_shift_label": "🌅 Morning (MN06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-17",
+          "day": 17,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "OFF",
+          "new_shift_label": "🛌 Off Day",
+          "new_shift_group": "Off Day"
+        },
+        {
+          "date": "2026-07-19",
+          "day": 19,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "MN06",
+          "new_shift_label": "🌅 Morning (MN06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-24",
+          "day": 24,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "OFF",
+          "new_shift_label": "🛌 Off Day",
+          "new_shift_group": "Off Day"
+        },
+        {
+          "date": "2026-07-26",
+          "day": 26,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "MN06",
+          "new_shift_label": "🌅 Morning (MN06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-31",
+          "day": 31,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "OFF",
+          "new_shift_label": "🛌 Off Day",
+          "new_shift_group": "Off Day"
+        }
+      ]
     }
   }
 }
