@@ -1686,45 +1686,45 @@
         "day": 5,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "ME07",
-        "shift_label": "🌅 Morning (ME07)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-06",
         "day": 6,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "ME07",
-        "shift_label": "🌅 Morning (ME07)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-07",
         "day": 7,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "ME07",
-        "shift_label": "🌅 Morning (ME07)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-08",
         "day": 8,
         "day_name_ar": "الأربعاء",
         "day_name_en": "Wednesday",
-        "shift_code": "ME07",
-        "shift_label": "🌅 Morning (ME07)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-09",
         "day": 9,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "ME07",
-        "shift_label": "🌅 Morning (ME07)",
-        "shift_group": "Morning"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-10",
@@ -1965,15 +1965,76 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "515ba689112b499d",
+      "changed_at": "2026-07-05T14:37:40.326303+04:00",
+      "total_changed_days": 5,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 5 يوم في جدولك لشهر يوليو 2026.",
+        "en": "5 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-05",
+          "day": 5,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "ME07",
+          "old_shift_label": "🌅 Morning (ME07)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-07-06",
+          "day": 6,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "ME07",
+          "old_shift_label": "🌅 Morning (ME07)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-07-07",
+          "day": 7,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "ME07",
+          "old_shift_label": "🌅 Morning (ME07)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-07-08",
+          "day": 8,
+          "day_name_ar": "الأربعاء",
+          "day_name_en": "Wednesday",
+          "old_shift_code": "ME07",
+          "old_shift_label": "🌅 Morning (ME07)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-07-09",
+          "day": 9,
+          "day_name_ar": "الخميس",
+          "day_name_en": "Thursday",
+          "old_shift_code": "ME07",
+          "old_shift_label": "🌅 Morning (ME07)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        }
+      ]
     }
   }
 }

@@ -1857,9 +1857,9 @@
         "day": 24,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-25",
@@ -1965,15 +1965,28 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "ac8c34667cffeca8",
+      "changed_at": "2026-07-05T14:37:40.335921+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر يوليو 2026.",
+        "en": "1 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-24",
+          "day": 24,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "AN13",
+          "old_shift_label": "🌆 Afternoon (AN13)",
+          "old_shift_group": "Afternoon",
+          "new_shift_code": "MN06",
+          "new_shift_label": "🌅 Morning (MN06)",
+          "new_shift_group": "Morning"
+        }
+      ]
     }
   }
 }

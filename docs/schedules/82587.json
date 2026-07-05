@@ -1731,9 +1731,9 @@
         "day": 10,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "NE22",
+        "shift_label": "🌙 Night (NE22)",
+        "shift_group": "Night"
       },
       {
         "date": "2026-07-11",
@@ -1794,9 +1794,9 @@
         "day": 17,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "NE22",
+        "shift_label": "🌙 Night (NE22)",
+        "shift_group": "Night"
       },
       {
         "date": "2026-07-18",
@@ -1965,15 +1965,40 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "1d4a68279b05ed22",
+      "changed_at": "2026-07-05T14:37:40.408500+04:00",
+      "total_changed_days": 2,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 2 يوم في جدولك لشهر يوليو 2026.",
+        "en": "2 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-10",
+          "day": 10,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "ME06",
+          "old_shift_label": "🌅 Morning (ME06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "NE22",
+          "new_shift_label": "🌙 Night (NE22)",
+          "new_shift_group": "Night"
+        },
+        {
+          "date": "2026-07-17",
+          "day": 17,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "ME06",
+          "old_shift_label": "🌅 Morning (ME06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "NE22",
+          "new_shift_label": "🌙 Night (NE22)",
+          "new_shift_group": "Night"
+        }
+      ]
     }
   }
 }
