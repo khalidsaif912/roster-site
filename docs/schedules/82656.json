@@ -1965,64 +1965,15 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": true,
-      "change_hash": "1172254b3305ce2a",
-      "changed_at": "2026-07-05T14:37:40.474111+04:00",
-      "total_changed_days": 4,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 4 يوم في جدولك لشهر يوليو 2026.",
-        "en": "4 day(s) changed in your roster for July 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-07-03",
-          "day": 3,
-          "day_name_ar": "الجمعة",
-          "day_name_en": "Friday",
-          "old_shift_code": "ME06",
-          "old_shift_label": "🌅 Morning (ME06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        },
-        {
-          "date": "2026-07-04",
-          "day": 4,
-          "day_name_ar": "السبت",
-          "day_name_en": "Saturday",
-          "old_shift_code": "ME06",
-          "old_shift_label": "🌅 Morning (ME06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        },
-        {
-          "date": "2026-07-05",
-          "day": 5,
-          "day_name_ar": "الأحد",
-          "day_name_en": "Sunday",
-          "old_shift_code": "NE22",
-          "old_shift_label": "🌙 Night (NE22)",
-          "old_shift_group": "Night",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        },
-        {
-          "date": "2026-07-06",
-          "day": 6,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "NE22",
-          "old_shift_label": "🌙 Night (NE22)",
-          "old_shift_group": "Night",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        }
-      ]
+      "days": []
     }
   }
 }
