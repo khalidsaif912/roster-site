@@ -1758,18 +1758,18 @@
         "day": 13,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-14",
         "day": 14,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "TR",
-        "shift_label": "📚 Training",
-        "shift_group": "Training"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-07-15",
@@ -1965,15 +1965,40 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "1e6fcd3756c2eeeb",
+      "changed_at": "2026-07-13T21:33:46.914827+04:00",
+      "total_changed_days": 2,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 2 يوم في جدولك لشهر يوليو 2026.",
+        "en": "2 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-13",
+          "day": 13,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "AN13",
+          "old_shift_label": "🌆 Afternoon (AN13)",
+          "old_shift_group": "Afternoon",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        },
+        {
+          "date": "2026-07-14",
+          "day": 14,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "TR",
+          "old_shift_label": "📚 Training",
+          "old_shift_group": "Training",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        }
+      ]
     }
   }
 }
