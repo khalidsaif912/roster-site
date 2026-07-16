@@ -4,7 +4,7 @@
     "2026-06",
     "2026-07"
   ],
-  "employees_total_unique": 73,
+  "employees_total_unique": 74,
   "source_file": "{\"error\":{\"code\":\"generalException\",\"message\":\"User migrated.\",\"innererror\":{\"code\":\"userContentMigrated\"}}}",
   "incoming_month": null
 }
