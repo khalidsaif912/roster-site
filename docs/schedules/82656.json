@@ -1857,27 +1857,27 @@
         "day": 24,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "AE14",
+        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-07-25",
         "day": 25,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "AE14",
+        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-07-26",
         "day": 26,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "NE22",
-        "shift_label": "🌙 Night (NE22)",
-        "shift_group": "Night"
+        "shift_code": "ME06",
+        "shift_label": "🌅 Morning (ME06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-07-27",
@@ -1920,9 +1920,9 @@
         "day": 31,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "ME06",
-        "shift_label": "🌅 Morning (ME06)",
-        "shift_group": "Morning"
+        "shift_code": "AE14",
+        "shift_label": "🌆 Afternoon (AE14)",
+        "shift_group": "Afternoon"
       }
     ]
   },
@@ -1965,15 +1965,64 @@
     },
     "2026-07": {
       "month": "2026-07",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "f80f3c0a7bebc2a2",
+      "changed_at": "2026-07-19T16:31:52.648016+04:00",
+      "total_changed_days": 4,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 4 يوم في جدولك لشهر يوليو 2026.",
+        "en": "4 day(s) changed in your roster for July 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-07-24",
+          "day": 24,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "ME06",
+          "old_shift_label": "🌅 Morning (ME06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AE14",
+          "new_shift_label": "🌆 Afternoon (AE14)",
+          "new_shift_group": "Afternoon"
+        },
+        {
+          "date": "2026-07-25",
+          "day": 25,
+          "day_name_ar": "السبت",
+          "day_name_en": "Saturday",
+          "old_shift_code": "ME06",
+          "old_shift_label": "🌅 Morning (ME06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AE14",
+          "new_shift_label": "🌆 Afternoon (AE14)",
+          "new_shift_group": "Afternoon"
+        },
+        {
+          "date": "2026-07-26",
+          "day": 26,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "NE22",
+          "old_shift_label": "🌙 Night (NE22)",
+          "old_shift_group": "Night",
+          "new_shift_code": "ME06",
+          "new_shift_label": "🌅 Morning (ME06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-07-31",
+          "day": 31,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "ME06",
+          "old_shift_label": "🌅 Morning (ME06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AE14",
+          "new_shift_label": "🌆 Afternoon (AE14)",
+          "new_shift_group": "Afternoon"
+        }
+      ]
     }
   }
 }
