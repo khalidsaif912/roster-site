@@ -1,10 +1,11 @@
 {
-  "generated_for": "2026-07-29",
+  "generated_for": "2026-07-30",
   "months_generated": [
     "2026-06",
-    "2026-07"
+    "2026-07",
+    "2026-08"
   ],
-  "employees_total_unique": 74,
+  "employees_total_unique": 75,
   "source_file": "{\"error\":{\"code\":\"generalException\",\"message\":\"User migrated.\",\"innererror\":{\"code\":\"userContentMigrated\"}}}",
   "incoming_month": null
 }
