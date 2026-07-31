@@ -2258,28 +2258,15 @@
     },
     "2026-08": {
       "month": "2026-08",
-      "is_active": true,
-      "change_hash": "5215a71ae40d6f0b",
-      "changed_at": "2026-07-31T20:19:16.441944+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر أغسطس 2026.",
-        "en": "1 day(s) changed in your roster for August 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-08-16",
-          "day": 16,
-          "day_name_ar": "الأحد",
-          "day_name_en": "Sunday",
-          "old_shift_code": "ME06",
-          "old_shift_label": "🌅 Morning (ME06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "AE14",
-          "new_shift_label": "🌆 Afternoon (AE14)",
-          "new_shift_group": "Afternoon"
-        }
-      ]
+      "days": []
     }
   }
 }
