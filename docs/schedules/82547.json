@@ -2257,9 +2257,9 @@
         "day": 6,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-09-07",
@@ -2437,9 +2437,9 @@
         "day": 26,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "OTN",
+        "shift_label": "⏱️ OTN",
+        "shift_group": "Standby"
       },
       {
         "date": "2026-09-27",
@@ -2542,15 +2542,40 @@
     },
     "2026-09": {
       "month": "2026-09",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "cc7e1c701cf7e8ad",
+      "changed_at": "2026-09-01T14:11:42.026259+04:00",
+      "total_changed_days": 2,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 2 يوم في جدولك لشهر سبتمبر 2026.",
+        "en": "2 day(s) changed in your roster for September 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-09-06",
+          "day": 6,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AN13",
+          "new_shift_label": "🌆 Afternoon (AN13)",
+          "new_shift_group": "Afternoon"
+        },
+        {
+          "date": "2026-09-26",
+          "day": 26,
+          "day_name_ar": "السبت",
+          "day_name_en": "Saturday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "OTN",
+          "new_shift_label": "⏱️ OTN",
+          "new_shift_group": "Standby"
+        }
+      ]
     }
   }
 }
