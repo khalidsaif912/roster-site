@@ -2542,28 +2542,15 @@
     },
     "2026-09": {
       "month": "2026-09",
-      "is_active": true,
-      "change_hash": "1827fcac41485188",
-      "changed_at": "2026-09-01T14:11:42.057215+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر سبتمبر 2026.",
-        "en": "1 day(s) changed in your roster for September 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-09-05",
-          "day": 5,
-          "day_name_ar": "السبت",
-          "day_name_en": "Saturday",
-          "old_shift_code": "OFF",
-          "old_shift_label": "🛌 Off Day",
-          "old_shift_group": "Off Day",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        }
-      ]
+      "days": []
     }
   }
 }

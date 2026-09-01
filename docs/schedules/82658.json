@@ -2542,28 +2542,15 @@
     },
     "2026-09": {
       "month": "2026-09",
-      "is_active": true,
-      "change_hash": "97612afce144d29a",
-      "changed_at": "2026-09-01T14:11:41.981235+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر سبتمبر 2026.",
-        "en": "1 day(s) changed in your roster for September 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-09-10",
-          "day": 10,
-          "day_name_ar": "الخميس",
-          "day_name_en": "Thursday",
-          "old_shift_code": "AN13",
-          "old_shift_label": "🌆 Afternoon (AN13)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "NN21",
-          "new_shift_label": "🌙 Night (NN21)",
-          "new_shift_group": "Night"
-        }
-      ]
+      "days": []
     }
   }
 }
