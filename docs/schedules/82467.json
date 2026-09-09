@@ -2338,9 +2338,9 @@
         "day": 15,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "NN21",
-        "shift_label": "🌙 Night (NN21)",
-        "shift_group": "Night"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-09-16",
@@ -2542,15 +2542,28 @@
     },
     "2026-09": {
       "month": "2026-09",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "5f44ec3e11b5277f",
+      "changed_at": "2026-09-09T13:40:45.771009+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر سبتمبر 2026.",
+        "en": "1 day(s) changed in your roster for September 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-09-15",
+          "day": 15,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "NN21",
+          "old_shift_label": "🌙 Night (NN21)",
+          "old_shift_group": "Night",
+          "new_shift_code": "AN13",
+          "new_shift_label": "🌆 Afternoon (AN13)",
+          "new_shift_group": "Afternoon"
+        }
+      ]
     }
   }
 }

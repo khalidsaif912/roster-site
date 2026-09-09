@@ -2374,9 +2374,9 @@
         "day": 19,
         "day_name_ar": "السبت",
         "day_name_en": "Saturday",
-        "shift_code": "MN06",
-        "shift_label": "🌅 Morning (MN06)",
-        "shift_group": "Morning"
+        "shift_code": "AN13",
+        "shift_label": "🌆 Afternoon (AN13)",
+        "shift_group": "Afternoon"
       },
       {
         "date": "2026-09-20",
@@ -2542,15 +2542,28 @@
     },
     "2026-09": {
       "month": "2026-09",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "6ccbb747ca33073e",
+      "changed_at": "2026-09-09T13:40:45.774723+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر سبتمبر 2026.",
+        "en": "1 day(s) changed in your roster for September 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-09-19",
+          "day": 19,
+          "day_name_ar": "السبت",
+          "day_name_en": "Saturday",
+          "old_shift_code": "MN06",
+          "old_shift_label": "🌅 Morning (MN06)",
+          "old_shift_group": "Morning",
+          "new_shift_code": "AN13",
+          "new_shift_label": "🌆 Afternoon (AN13)",
+          "new_shift_group": "Afternoon"
+        }
+      ]
     }
   }
 }

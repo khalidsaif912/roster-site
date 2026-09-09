@@ -2356,9 +2356,9 @@
         "day": 17,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "OTN",
+        "shift_label": "⏱️ OTN",
+        "shift_group": "Standby"
       },
       {
         "date": "2026-09-18",
@@ -2542,15 +2542,28 @@
     },
     "2026-09": {
       "month": "2026-09",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "23de0bf96677ea51",
+      "changed_at": "2026-09-09T13:40:45.780381+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر سبتمبر 2026.",
+        "en": "1 day(s) changed in your roster for September 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-09-17",
+          "day": 17,
+          "day_name_ar": "الخميس",
+          "day_name_en": "Thursday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "OTN",
+          "new_shift_label": "⏱️ OTN",
+          "new_shift_group": "Standby"
+        }
+      ]
     }
   }
 }
