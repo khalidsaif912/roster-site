@@ -2598,6 +2598,678 @@
           ]
         }
       ]
+    },
+    {
+      "month_id": "2026-10",
+      "title_en": "Training Courses",
+      "title_ar": "دورات التدريب",
+      "courses": [
+        {
+          "date": "2026-10-04",
+          "code": "",
+          "title": "First Aids",
+          "icon": "📘",
+          "venue": "Conference Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82414",
+              "name": "Mr. BADAR YOUSUF NASSER AL BUSAIDI"
+            },
+            {
+              "no": "80335",
+              "name": "Mr. ERICSON SAULO PUNO"
+            },
+            {
+              "no": "82583",
+              "name": "Mr. BADAR ALI ABDULLAH AL SHEHHI"
+            },
+            {
+              "no": "82469",
+              "name": "Miss. NASMA KHATAR KHAMIS AL FARSI"
+            },
+            {
+              "no": "82475",
+              "name": "MRS. ZAINAB HAMOOD ALI AL-HASHIMI"
+            },
+            {
+              "no": "82445",
+              "name": "Mr. AL MUTHANA AHMED SALIM AL SHANFARI"
+            },
+            {
+              "no": "81404",
+              "name": "Mr. MOHAMMED FARID ALI AL AMRI"
+            },
+            {
+              "no": "80235",
+              "name": "Mr. RODOLFO CRUZ MAGCALING"
+            },
+            {
+              "no": "82669",
+              "name": "Mr. QAIS FAISAL KHALFAN AL RAWAHI"
+            },
+            {
+              "no": "82450",
+              "name": "Mrs. AMAL SAID AHMED SAIF AL MUQBALI"
+            },
+            {
+              "no": "82449",
+              "name": "Mrs. SIHAM HAMOOD SALIM AL BUSAIDI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-05",
+          "code": "",
+          "title": "First Aids",
+          "icon": "📘",
+          "venue": "Conference Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82566",
+              "name": "Mr. ANWAR HAMED KHAMIS AL AMRI"
+            },
+            {
+              "no": "82676",
+              "name": "MR. TARIQ BIN IBRAHIM AL BARWANI"
+            },
+            {
+              "no": "82466",
+              "name": "Mr. WALEED SALIM ABDULLAH AL KHARUSI"
+            },
+            {
+              "no": "82579",
+              "name": "Mr. JIHAD SAMI MOHAMMED AL SARMI"
+            },
+            {
+              "no": "990737",
+              "name": "Mr. SAID HAMOOD SAID AL AMRI"
+            },
+            {
+              "no": "81392",
+              "name": "Mr. ADIL ALI MOHAMMED AL BALUSHI"
+            },
+            {
+              "no": "8941",
+              "name": "Mr. ADIL MOHAMMAD SABEET AL ORAIMI"
+            },
+            {
+              "no": "82643",
+              "name": "Mr. MOHAMED SULAIMAN HAMED AL ALAWI"
+            },
+            {
+              "no": "82430",
+              "name": "Mr. MAZIN SAIF ALI AL SIYABI"
+            },
+            {
+              "no": "990669",
+              "name": "Miss. JUMANA MANSOUR SULAIMAN AL HASNI"
+            },
+            {
+              "no": "81031",
+              "name": "Mrs. SAFIYA SALIM ABDULLAH AL OMAIRI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-06",
+          "code": "",
+          "title": "First Aids",
+          "icon": "📘",
+          "venue": "Conference Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82473",
+              "name": "Mrs. ALAA SULAIMAN HAMDAN AL WAHAIBI"
+            },
+            {
+              "no": "81399",
+              "name": "Mr. JAMAL NASSER KHAMIS AL SINANI"
+            },
+            {
+              "no": "82446",
+              "name": "Mr. SAID AMOUR SAID AL LUWAIHI"
+            },
+            {
+              "no": "8926",
+              "name": "Mr. SALIM MOHAMMAD HAMED AL MASROORI"
+            },
+            {
+              "no": "82283",
+              "name": "Mr. AHMED NASSER SAID AL-MAWALI"
+            },
+            {
+              "no": "82551",
+              "name": "Mr. OMAR MUBARAK MUSALLAM AL OBAIDI"
+            },
+            {
+              "no": "990465",
+              "name": "Mr. ABDULFATTAH MUBARAK SULAIYM AL SHEKAILI"
+            },
+            {
+              "no": "82485",
+              "name": "Mrs. MARWA MOHSIN SALEH AL ISMAILI"
+            },
+            {
+              "no": "990799",
+              "name": "Mr. MUNEER GHULAM HAIKAL Al BALUSHI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-07",
+          "code": "",
+          "title": "First Aids",
+          "icon": "📘",
+          "venue": "Conference Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "80535",
+              "name": "Mr. FROILAN DOMINGO ALVAREZ"
+            },
+            {
+              "no": "82451",
+              "name": "Mr. AHMED AMOUR SAID AL HARRASI"
+            },
+            {
+              "no": "81402",
+              "name": "Mr. MOHAMMED ALI SALIM AL SIYABI"
+            },
+            {
+              "no": "8715",
+              "name": "Mr. KHALID SAIF SAID AL RAQADI"
+            },
+            {
+              "no": "82415",
+              "name": "Mr. AHMED MOHAMMED ISSA AL BALUSHI"
+            },
+            {
+              "no": "990894",
+              "name": "Mr. SAMI SALEH ABDULRAHMAN AL ZADJALI"
+            },
+            {
+              "no": "82275",
+              "name": "Mr. QASIM ALI KHAMIS AL-AJMI"
+            },
+            {
+              "no": "82586",
+              "name": "Mr. SAUD SAIF SAID AL RUQADI"
+            },
+            {
+              "no": "81019",
+              "name": "Miss. HANAN HASSAN NASSER AL TOUQI"
+            },
+            {
+              "no": "81395",
+              "name": "Mr. FAHAD SALIM NASSER AL KHADHURI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-08",
+          "code": "",
+          "title": "First Aids",
+          "icon": "📘",
+          "venue": "Conference Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "990896",
+              "name": "Mr. SAMIR MAHMOOD ABDULSAMAD AL BALUCHI"
+            },
+            {
+              "no": "82107",
+              "name": "Mr. OMAR NASSER KHALFAN AL FUTAISI"
+            },
+            {
+              "no": "80479",
+              "name": "Mr. SAMI MOHAMMAD KHAMIS AL HADDABI"
+            },
+            {
+              "no": "82423",
+              "name": "Mr. BADAR ALI SULAIMAN AL BURTUMANI"
+            },
+            {
+              "no": "82535",
+              "name": "Mr. MOHAMED SAIF SALIM SAID AL MAAWALI"
+            },
+            {
+              "no": "81026",
+              "name": "Miss. MUNA SAUD ABDULLAH AL AMRI"
+            },
+            {
+              "no": "81393",
+              "name": "Mr. ALI SULEIMAN ALI AL FARSI"
+            },
+            {
+              "no": "82464",
+              "name": "Mr. WISAM ABDULRAHMAN SULAIMAN AL KHAROUSI"
+            },
+            {
+              "no": "81034",
+              "name": "Mr. ABID YAHYA RAMADHAN AL ZADJALI"
+            },
+            {
+              "no": "82592",
+              "name": "Mr. MOHAMMED JUMA SALIM AL SUBHI"
+            },
+            {
+              "no": "990346",
+              "name": "Mr. ABDULLA ADAM IBRAHIM AL BALUSHI"
+            },
+            {
+              "no": "82563",
+              "name": "Mr. AMUR SULAIMAN HAMED AL MAKARSHI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-11",
+          "code": "",
+          "title": "GDP-TCR (refresher)",
+          "icon": "📘",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82479",
+              "name": "Mr. AL MUHANAD AL WALEED KHALID AL ABRI"
+            },
+            {
+              "no": "81393",
+              "name": "Mr. ALI SULEIMAN ALI AL FARSI"
+            },
+            {
+              "no": "81404",
+              "name": "Mr. MOHAMMED FARID ALI AL AMRI"
+            },
+            {
+              "no": "82548",
+              "name": "Mr. AHMED HADID RAMADHAN AL MUQAIMI"
+            },
+            {
+              "no": "82658",
+              "name": "Mr. MOHAMMED NASSER SAID AL MAZROEI"
+            },
+            {
+              "no": "82420",
+              "name": "Mr. MOHAMED RASHID MABIWA AL SAADI"
+            },
+            {
+              "no": "82470",
+              "name": "Mr. WAHEB ABDALLAH HAMED AL BARAIDAI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-12",
+          "code": "",
+          "title": "SMS (refresher)",
+          "icon": "🛡️",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "80276",
+              "name": "Mr. ALLAN VIANZON TAJONERA"
+            },
+            {
+              "no": "82456",
+              "name": "Mr. AHMED DARWISH ABDULLAH AL FARSI"
+            },
+            {
+              "no": "82600",
+              "name": "Mr. HABIB MOHAMMED JANJAN AL BALUSHI"
+            },
+            {
+              "no": "80478",
+              "name": "Mr. FARIS YOUSUF MOHAMMAD AL BALUCHI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-15",
+          "code": "",
+          "title": "Basic Cargo (refresher)",
+          "icon": "✈️",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82651",
+              "name": "Mr. MAZIN MURAD ALI AL HOUTI"
+            },
+            {
+              "no": "82550",
+              "name": "Mr. SALEH GHUWAINIM MOHSIN SAID AL AUFI"
+            },
+            {
+              "no": "82547",
+              "name": "Mr. MAZIN MOHAMMED AMUR AL HAJRI"
+            },
+            {
+              "no": "82645",
+              "name": "Mr. ABDULLAH JUMA HASHIL AL SHEKAILI"
+            },
+            {
+              "no": "82593",
+              "name": "Mr. MOHAMMED SULAIYAM ABDULLAH AL KALBANI"
+            },
+            {
+              "no": "82616",
+              "name": "Mr. AHMED SHAFI HUMAID AL HASHEMI"
+            },
+            {
+              "no": "81034",
+              "name": "Mr. ABID YAHYA RAMADHAN AL ZADJALI"
+            },
+            {
+              "no": "80235",
+              "name": "Mr. RODOLFO CRUZ MAGCALING"
+            },
+            {
+              "no": "82460",
+              "name": "Mr. MOHAMMED MARHOON SAID AL MAHARBI"
+            },
+            {
+              "no": "80535",
+              "name": "Mr. FROILAN DOMINGO ALVAREZ"
+            },
+            {
+              "no": "82643",
+              "name": "Mr. MOHAMED SULAIMAN HAMED AL ALAWI"
+            },
+            {
+              "no": "80712",
+              "name": "Mr. KHALID KARIM JAN JAN AL BALUCHI"
+            },
+            {
+              "no": "80539",
+              "name": "Mr. JEFFREY PANOPIO LOPEZ"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-19",
+          "code": "",
+          "title": "Airside Safety (refresher)",
+          "icon": "🦺",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82565",
+              "name": "Mr. JAMAL SALIM ALI AL HADI"
+            },
+            {
+              "no": "82578",
+              "name": "Mr. RAAD HASSAN MOHAMED AL FARSI"
+            },
+            {
+              "no": "990347",
+              "name": "Mr. MAQBOOL HUSSIAN HAJI AL BALISHI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-20",
+          "code": "",
+          "title": "Airside Safety (refresher)",
+          "icon": "🦺",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "8926",
+              "name": "Mr. SALIM MOHAMMAD HAMED AL MASROORI"
+            },
+            {
+              "no": "81259",
+              "name": "Mr. MOHAMMED LAUH MURAD AL ZADJALI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-22",
+          "code": "",
+          "title": "PCR (refresher)",
+          "icon": "📘",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82579",
+              "name": "Mr. JIHAD SAMI MOHAMMED AL SARMI"
+            },
+            {
+              "no": "82616",
+              "name": "Mr. AHMED SHAFI HUMAID AL HASHEMI"
+            },
+            {
+              "no": "8860",
+              "name": "Mr. HAMED BADAR RASHID AL MAANY"
+            },
+            {
+              "no": "82677",
+              "name": "MR. RASHID ALI RASHID SAIF AL SHAYAI"
+            },
+            {
+              "no": "82597",
+              "name": "Miss. MUZDALIFA HAMED OBAID AL NAAMAANI"
+            },
+            {
+              "no": "82675",
+              "name": "MR. TARIQ IBRAHIM AL BARWANI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-26",
+          "code": "",
+          "title": "Forklift (refresher)",
+          "icon": "🚜",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "80480",
+              "name": "Mr. YUNIS MOHAMMAD NASSER AL SIYABI"
+            },
+            {
+              "no": "82409",
+              "name": "Mr. QAIS SALMEEN SUWEILEM AL RASHDI"
+            },
+            {
+              "no": "82547",
+              "name": "Mr. MAZIN MOHAMMED AMUR AL HAJRI"
+            },
+            {
+              "no": "82660",
+              "name": "Mr. SULAIMAN RASHID SULAIMAN AL HATMI"
+            },
+            {
+              "no": "990894",
+              "name": "Mr. SAMI SALEH ABDULRAHMAN AL ZADJALI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-27",
+          "code": "",
+          "title": "Forklift (refresher)",
+          "icon": "🚜",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "80712",
+              "name": "Mr. KHALID KARIM JAN JAN AL BALUCHI"
+            },
+            {
+              "no": "80831",
+              "name": "Mr. JAFFER A REDHA MOHAMMED AL AJMI"
+            },
+            {
+              "no": "81403",
+              "name": "Mr. MOHAMMED ANIS MOHAMMAD AL KHARUSI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-28",
+          "code": "",
+          "title": "DGR-OPS (refresher)",
+          "icon": "📦",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "82575",
+              "name": "Mr. AHMED MAJID SUWAID MAJID AL KHARUSI"
+            },
+            {
+              "no": "82100",
+              "name": "Mr. YOUSUF YAQOOB ANAD AL-WAHEEDI"
+            },
+            {
+              "no": "82049",
+              "name": "Mr. MAJID SAID SALIM AL-GHAFRI"
+            },
+            {
+              "no": "82275",
+              "name": "Mr. QASIM ALI KHAMIS AL-AJMI"
+            },
+            {
+              "no": "80482",
+              "name": "Mr. WALEED KHALIFA KHAMIS AL HADDABI"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-29",
+          "code": "",
+          "title": "LAR (refresher)",
+          "icon": "📘",
+          "venue": "Cargo Training Room",
+          "time": "08:00 to 15:00",
+          "accent": "rgba(218,230,255,.98)",
+          "surface": "rgba(218,230,255,.98)",
+          "surface2": "rgba(218,230,255,.98)",
+          "pill": "rgba(45,92,239,.20)",
+          "text_on_acc": "#1a337d",
+          "staff": [
+            {
+              "no": "81300",
+              "name": "Mr. TALAL MAHMOOD DARWHISH AL BALUSHI"
+            },
+            {
+              "no": "990465",
+              "name": "Mr. ABDULFATTAH MUBARAK SULAIYM AL SHEKAILI"
+            },
+            {
+              "no": "82677",
+              "name": "MR. RASHID ALI RASHID SAIF AL SHAYAI"
+            },
+            {
+              "no": "80269",
+              "name": "Mr. FRITZARDO CRUZ MAGCALING"
+            },
+            {
+              "no": "80712",
+              "name": "Mr. KHALID KARIM JAN JAN AL BALUCHI"
+            },
+            {
+              "no": "82597",
+              "name": "Miss. MUZDALIFA HAMED OBAID AL NAAMAANI"
+            },
+            {
+              "no": "82430",
+              "name": "Mr. MAZIN SAIF ALI AL SIYABI"
+            },
+            {
+              "no": "81983",
+              "name": "Mr. JABIR NASSER SAIF AL-JULANDANI"
+            },
+            {
+              "no": "82676",
+              "name": "MR. TARIQ BIN IBRAHIM AL BARWANI"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
