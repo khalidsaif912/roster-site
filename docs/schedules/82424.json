@@ -2484,18 +2484,18 @@
         "day": 1,
         "day_name_ar": "الخميس",
         "day_name_en": "Thursday",
-        "shift_code": "LV",
-        "shift_label": "✈️ Annual Leave",
-        "shift_group": "Annual Leave"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-10-02",
         "day": 2,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "MN06",
+        "shift_label": "🌅 Morning (MN06)",
+        "shift_group": "Morning"
       },
       {
         "date": "2026-10-03",
@@ -2529,9 +2529,9 @@
         "day": 6,
         "day_name_ar": "الثلاثاء",
         "day_name_en": "Tuesday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "OTN",
+        "shift_label": "⏱️ OTN",
+        "shift_group": "Standby"
       },
       {
         "date": "2026-10-07",
@@ -2835,15 +2835,52 @@
     },
     "2026-10": {
       "month": "2026-10",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "e48cb10d65b47a9b",
+      "changed_at": "2026-09-30T18:01:11.321448+04:00",
+      "total_changed_days": 3,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 3 يوم في جدولك لشهر أكتوبر 2026.",
+        "en": "3 day(s) changed in your roster for October 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-10-01",
+          "day": 1,
+          "day_name_ar": "الخميس",
+          "day_name_en": "Thursday",
+          "old_shift_code": "LV",
+          "old_shift_label": "✈️ Annual Leave",
+          "old_shift_group": "Annual Leave",
+          "new_shift_code": "MN06",
+          "new_shift_label": "🌅 Morning (MN06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-10-02",
+          "day": 2,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "AN13",
+          "old_shift_label": "🌆 Afternoon (AN13)",
+          "old_shift_group": "Afternoon",
+          "new_shift_code": "MN06",
+          "new_shift_label": "🌅 Morning (MN06)",
+          "new_shift_group": "Morning"
+        },
+        {
+          "date": "2026-10-06",
+          "day": 6,
+          "day_name_ar": "الثلاثاء",
+          "day_name_en": "Tuesday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "OTN",
+          "new_shift_label": "⏱️ OTN",
+          "new_shift_group": "Standby"
+        }
+      ]
     }
   }
 }

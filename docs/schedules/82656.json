@@ -2511,9 +2511,9 @@
         "day": 4,
         "day_name_ar": "الأحد",
         "day_name_en": "Sunday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "OTN",
+        "shift_label": "⏱️ OTN",
+        "shift_group": "Standby"
       },
       {
         "date": "2026-10-05",
@@ -2583,9 +2583,9 @@
         "day": 12,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "OTA",
+        "shift_label": "⏱️ OTA",
+        "shift_group": "Standby"
       },
       {
         "date": "2026-10-13",
@@ -2835,15 +2835,40 @@
     },
     "2026-10": {
       "month": "2026-10",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "d9b9623c8ce1176a",
+      "changed_at": "2026-09-30T18:01:11.350250+04:00",
+      "total_changed_days": 2,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 2 يوم في جدولك لشهر أكتوبر 2026.",
+        "en": "2 day(s) changed in your roster for October 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-10-04",
+          "day": 4,
+          "day_name_ar": "الأحد",
+          "day_name_en": "Sunday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "OTN",
+          "new_shift_label": "⏱️ OTN",
+          "new_shift_group": "Standby"
+        },
+        {
+          "date": "2026-10-12",
+          "day": 12,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "OTA",
+          "new_shift_label": "⏱️ OTA",
+          "new_shift_group": "Standby"
+        }
+      ]
     }
   }
 }
