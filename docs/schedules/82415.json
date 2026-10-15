@@ -2709,9 +2709,9 @@
         "day": 26,
         "day_name_ar": "الاثنين",
         "day_name_en": "Monday",
-        "shift_code": "AN13",
-        "shift_label": "🌆 Afternoon (AN13)",
-        "shift_group": "Afternoon"
+        "shift_code": "LV",
+        "shift_label": "✈️ Annual Leave",
+        "shift_group": "Annual Leave"
       },
       {
         "date": "2026-10-27",
@@ -2835,15 +2835,28 @@
     },
     "2026-10": {
       "month": "2026-10",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "3ff87055cb745b80",
+      "changed_at": "2026-10-15T16:02:09.312652+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر أكتوبر 2026.",
+        "en": "1 day(s) changed in your roster for October 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-10-26",
+          "day": 26,
+          "day_name_ar": "الاثنين",
+          "day_name_en": "Monday",
+          "old_shift_code": "AN13",
+          "old_shift_label": "🌆 Afternoon (AN13)",
+          "old_shift_group": "Afternoon",
+          "new_shift_code": "LV",
+          "new_shift_label": "✈️ Annual Leave",
+          "new_shift_group": "Annual Leave"
+        }
+      ]
     }
   }
 }
