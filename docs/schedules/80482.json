@@ -2835,40 +2835,15 @@
     },
     "2026-10": {
       "month": "2026-10",
-      "is_active": true,
-      "change_hash": "bfac9245df66838d",
-      "changed_at": "2026-10-15T16:02:09.251430+04:00",
-      "total_changed_days": 2,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 2 يوم في جدولك لشهر أكتوبر 2026.",
-        "en": "2 day(s) changed in your roster for October 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-10-24",
-          "day": 24,
-          "day_name_ar": "السبت",
-          "day_name_en": "Saturday",
-          "old_shift_code": "MN06",
-          "old_shift_label": "🌅 Morning (MN06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "AN13",
-          "new_shift_label": "🌆 Afternoon (AN13)",
-          "new_shift_group": "Afternoon"
-        },
-        {
-          "date": "2026-10-25",
-          "day": 25,
-          "day_name_ar": "الأحد",
-          "day_name_en": "Sunday",
-          "old_shift_code": "AN13",
-          "old_shift_label": "🌆 Afternoon (AN13)",
-          "old_shift_group": "Afternoon",
-          "new_shift_code": "NN21",
-          "new_shift_label": "🌙 Night (NN21)",
-          "new_shift_group": "Night"
-        }
-      ]
+      "days": []
     }
   }
 }

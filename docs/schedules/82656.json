@@ -2835,28 +2835,15 @@
     },
     "2026-10": {
       "month": "2026-10",
-      "is_active": true,
-      "change_hash": "7c8fec216d021db9",
-      "changed_at": "2026-10-15T16:02:09.332564+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر أكتوبر 2026.",
-        "en": "1 day(s) changed in your roster for October 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-10-13",
-          "day": 13,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "OFF",
-          "old_shift_label": "🛌 Off Day",
-          "old_shift_group": "Off Day",
-          "new_shift_code": "OTM",
-          "new_shift_label": "⏱️ OTM",
-          "new_shift_group": "Standby"
-        }
-      ]
+      "days": []
     }
   }
 }
