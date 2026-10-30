@@ -3107,40 +3107,15 @@
     },
     "2026-10": {
       "month": "2026-10",
-      "is_active": true,
-      "change_hash": "aa2e090b717f2e06",
-      "changed_at": "2026-10-30T18:30:25.889215+04:00",
-      "total_changed_days": 2,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 2 يوم في جدولك لشهر أكتوبر 2026.",
-        "en": "2 day(s) changed in your roster for October 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-10-26",
-          "day": 26,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "MN06",
-          "old_shift_label": "🌅 Morning (MN06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        },
-        {
-          "date": "2026-10-27",
-          "day": 27,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "MN06",
-          "old_shift_label": "🌅 Morning (MN06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        }
-      ]
+      "days": []
     },
     "2026-11": {
       "month": "2026-11",
