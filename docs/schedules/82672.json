@@ -2745,9 +2745,9 @@
         "day": 30,
         "day_name_ar": "الجمعة",
         "day_name_en": "Friday",
-        "shift_code": "OFF",
-        "shift_label": "🛌 Off Day",
-        "shift_group": "Off Day"
+        "shift_code": "OTM",
+        "shift_label": "⏱️ OTM",
+        "shift_group": "Standby"
       },
       {
         "date": "2026-10-31",
@@ -3107,15 +3107,28 @@
     },
     "2026-10": {
       "month": "2026-10",
-      "is_active": false,
-      "change_hash": "",
-      "changed_at": "",
-      "total_changed_days": 0,
+      "is_active": true,
+      "change_hash": "4e669938c0d08f4f",
+      "changed_at": "2026-10-30T18:30:25.920650+04:00",
+      "total_changed_days": 1,
       "summary": {
-        "ar": "",
-        "en": ""
+        "ar": "تم تعديل 1 يوم في جدولك لشهر أكتوبر 2026.",
+        "en": "1 day(s) changed in your roster for October 2026."
       },
-      "days": []
+      "days": [
+        {
+          "date": "2026-10-30",
+          "day": 30,
+          "day_name_ar": "الجمعة",
+          "day_name_en": "Friday",
+          "old_shift_code": "OFF",
+          "old_shift_label": "🛌 Off Day",
+          "old_shift_group": "Off Day",
+          "new_shift_code": "OTM",
+          "new_shift_label": "⏱️ OTM",
+          "new_shift_group": "Standby"
+        }
+      ]
     },
     "2026-11": {
       "month": "2026-11",
