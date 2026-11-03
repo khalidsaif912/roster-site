@@ -3119,28 +3119,15 @@
     },
     "2026-11": {
       "month": "2026-11",
-      "is_active": true,
-      "change_hash": "d30668e3246e23fe",
-      "changed_at": "2026-11-02T22:30:41.001258+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر نوفمبر 2026.",
-        "en": "1 day(s) changed in your roster for November 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-11-28",
-          "day": 28,
-          "day_name_ar": "السبت",
-          "day_name_en": "Saturday",
-          "old_shift_code": "OFF",
-          "old_shift_label": "🛌 Off Day",
-          "old_shift_group": "Off Day",
-          "new_shift_code": "OTA",
-          "new_shift_label": "⏱️ OTA",
-          "new_shift_group": "Standby"
-        }
-      ]
+      "days": []
     }
   }
 }
