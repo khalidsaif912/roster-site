@@ -3119,52 +3119,15 @@
     },
     "2026-11": {
       "month": "2026-11",
-      "is_active": true,
-      "change_hash": "7e6c5193cdb95a96",
-      "changed_at": "2026-11-10T15:35:38.123994+04:00",
-      "total_changed_days": 3,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 3 يوم في جدولك لشهر نوفمبر 2026.",
-        "en": "3 day(s) changed in your roster for November 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-11-22",
-          "day": 22,
-          "day_name_ar": "الأحد",
-          "day_name_en": "Sunday",
-          "old_shift_code": "ME07",
-          "old_shift_label": "🌅 Morning (ME07)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        },
-        {
-          "date": "2026-11-23",
-          "day": 23,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "ME07",
-          "old_shift_label": "🌅 Morning (ME07)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        },
-        {
-          "date": "2026-11-24",
-          "day": 24,
-          "day_name_ar": "الثلاثاء",
-          "day_name_en": "Tuesday",
-          "old_shift_code": "ME07",
-          "old_shift_label": "🌅 Morning (ME07)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        }
-      ]
+      "days": []
     }
   }
 }

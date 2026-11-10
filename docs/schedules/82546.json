@@ -3119,28 +3119,15 @@
     },
     "2026-11": {
       "month": "2026-11",
-      "is_active": true,
-      "change_hash": "0243e498f11834a6",
-      "changed_at": "2026-11-10T15:35:38.140093+04:00",
-      "total_changed_days": 1,
+      "is_active": false,
+      "change_hash": "",
+      "changed_at": "",
+      "total_changed_days": 0,
       "summary": {
-        "ar": "تم تعديل 1 يوم في جدولك لشهر نوفمبر 2026.",
-        "en": "1 day(s) changed in your roster for November 2026."
+        "ar": "",
+        "en": ""
       },
-      "days": [
-        {
-          "date": "2026-11-30",
-          "day": 30,
-          "day_name_ar": "الاثنين",
-          "day_name_en": "Monday",
-          "old_shift_code": "MN06",
-          "old_shift_label": "🌅 Morning (MN06)",
-          "old_shift_group": "Morning",
-          "new_shift_code": "LV",
-          "new_shift_label": "✈️ Annual Leave",
-          "new_shift_group": "Annual Leave"
-        }
-      ]
+      "days": []
     }
   }
 }
